@@ -1,4 +1,6 @@
 const express = require('express'); 
+const connectDB = require('./src/database');
+connectDB();
 
 
 const app = express();
@@ -17,4 +19,4 @@ app.listen(port, () => {
   console.log(`Servidor en funcionamiento en el puerto ${port}`);
 }); 
 
-module.exports = app; 
+module.exports = app;
