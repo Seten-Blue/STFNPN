@@ -34,7 +34,8 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
 
   const toggleParticipante = (usuarioId) => {
     setFormData(prev => {
-      const isSelected = prev.participantes[usuarioId] && prev.participantes[usuarioId] > 0;
+      // Verificar si el participante existe en el objeto (no si su valor es > 0)
+      const isSelected = usuarioId in prev.participantes;
       const newParticipantes = { ...prev.participantes };
       
       if (isSelected) {
@@ -376,28 +377,31 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
           <div>
             <label className="block text-sm font-bold text-slate-800 mb-2">👥 Participantes</label>
             <div className="space-y-2 bg-slate-50 p-3 rounded-lg max-h-48 overflow-y-auto">
-              {participantesDisponibles.map(p => (
-                <div key={p._id} className="flex items-center justify-between p-2 bg-white rounded hover:bg-slate-100">
+              {participantesDisponibles.map(p => {
+                const pId = p._id || p.id;
+                return (
+                <div key={pId} className="flex items-center justify-between p-2 bg-white rounded hover:bg-slate-100">
                   <label className="flex items-center flex-1">
                     <input
                       type="checkbox"
-                      checked={!!formData.participantes[p._id]}
-                      onChange={() => toggleParticipante(p._id)}
+                      checked={pId in formData.participantes}
+                      onChange={() => toggleParticipante(pId)}
                       className="w-4 h-4 text-orange-500"
                     />
                     <span className="ml-2 text-slate-700 text-sm">{p.nombre}</span>
                   </label>
-                  {formData.tipoDistribucion === 'personalizada' && formData.participantes[p._id] && (
+                  {formData.tipoDistribucion === 'personalizada' && (pId in formData.participantes) && (
                     <input
                       type="number"
-                      value={formData.participantes[p._id]}
-                      onChange={(e) => handleMontoParticipante(p._id, e.target.value)}
+                      value={formData.participantes[pId] || ''}
+                      onChange={(e) => handleMontoParticipante(pId, e.target.value)}
                       step="0.01"
                       className="w-20 px-2 py-1 border border-slate-300 rounded text-xs"
                     />
                   )}
                 </div>
-              ))}
+                );
+              })}
             </div>
             {formData.tipoDistribucion === 'personalizada' && (
               <p className="text-xs text-slate-600 mt-2">
