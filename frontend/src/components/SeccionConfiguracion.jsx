@@ -1,9 +1,17 @@
 import React, { useState } from 'react';
 import { monedasDisponibles } from '../utils/constantes';
+import { emailAPI } from '../services/api';
 
 const SeccionConfiguracion = ({ configuracion, onActualizar, transacciones }) => {
   const [moneda, setMoneda] = useState(configuracion?.moneda || 'CLP');
   const [exportando, setExportando] = useState(false);
+  const [mostrarCredenciales, setMostrarCredenciales] = useState(false);
+  const [credenciales, setCredenciales] = useState({
+    emailUsuario: '',
+    emailPassword: ''
+  });
+  const [guardandoCredenciales, setGuardandoCredenciales] = useState(false);
+  const [mensajeCredenciales, setMensajeCredenciales] = useState('');
 
   const handleCambiarMoneda = (nuevaMoneda) => {
     setMoneda(nuevaMoneda);
@@ -43,6 +51,60 @@ const SeccionConfiguracion = ({ configuracion, onActualizar, transacciones }) =>
 
   const exportarPDF = () => {
     alert('Funcionalidad de exportar a PDF próximamente');
+  };
+
+  const handleActualizarCredenciales = async (e) => {
+    e.preventDefault();
+    if (!credenciales.emailUsuario || !credenciales.emailPassword) {
+      setMensajeCredenciales('Por favor completa todos los campos');
+      return;
+    }
+
+    setGuardandoCredenciales(true);
+    setMensajeCredenciales('');
+
+    try {
+      const response = await fetch('/api/email/actualizar-credenciales', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(credenciales)
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setMensajeCredenciales('✅ Credenciales actualizadas correctamente');
+        setCredenciales({ emailUsuario: '', emailPassword: '' });
+        setTimeout(() => {
+          setMostrarCredenciales(false);
+          setMensajeCredenciales('');
+        }, 2000);
+      } else {
+        setMensajeCredenciales(`❌ ${data.error || 'Error al actualizar credenciales'}`);
+      }
+    } catch (error) {
+      setMensajeCredenciales('❌ Error de conexión');
+    } finally {
+      setGuardandoCredenciales(false);
+    }
+  };
+
+  const handleProbarEmail = async () => {
+    try {
+      const response = await fetch('/api/email/prueba', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: 'test@example.com' })
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setMensajeCredenciales('✅ Email de prueba enviado exitosamente');
+      } else {
+        setMensajeCredenciales(`❌ ${data.error || 'Error al enviar email'}`);
+      }
+    } catch (error) {
+      setMensajeCredenciales('❌ Error de conexión');
+    }
   };
 
   return (
@@ -103,6 +165,103 @@ const SeccionConfiguracion = ({ configuracion, onActualizar, transacciones }) =>
             Exportar PDF
           </button>
         </div>
+      </div>
+
+      {/* Credenciales de Email */}
+      <div className="bg-white rounded-xl p-5 shadow-sm border border-blue-100">
+        <h3 className="font-bold text-blue-600 mb-4 flex items-center gap-2">
+          <span>📧</span> Credenciales de Email
+        </h3>
+        <p className="text-sm text-gray-500 mb-4">
+          Configura tus credenciales de Gmail para enviar notificaciones
+        </p>
+        
+        {!mostrarCredenciales ? (
+          <div className="flex gap-2">
+            <button
+              onClick={() => setMostrarCredenciales(true)}
+              className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Modificar Credenciales
+            </button>
+            <button
+              onClick={handleProbarEmail}
+              className="flex items-center gap-2 bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              Probar Email
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleActualizarCredenciales} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email de Gmail
+              </label>
+              <input
+                type="email"
+                value={credenciales.emailUsuario}
+                onChange={(e) => setCredenciales({ ...credenciales, emailUsuario: e.target.value })}
+                placeholder="tu-email@gmail.com"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <p className="text-xs text-gray-500 mt-1">Ejemplo: gestioneducativa.informes.zarcos@gmail.com</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Contraseña de Aplicación
+              </label>
+              <input
+                type="password"
+                value={credenciales.emailPassword}
+                onChange={(e) => setCredenciales({ ...credenciales, emailPassword: e.target.value })}
+                placeholder="xxxx xxxx xxxx xxxx"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Genera una contraseña de aplicación en{' '}
+                <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                  Google Account
+                </a>
+              </p>
+            </div>
+
+            {mensajeCredenciales && (
+              <div className={`p-3 rounded-lg text-sm ${
+                mensajeCredenciales.includes('✅') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+              }`}>
+                {mensajeCredenciales}
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <button
+                type="submit"
+                disabled={guardandoCredenciales}
+                className="flex-1 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition disabled:opacity-50 font-medium"
+              >
+                {guardandoCredenciales ? 'Guardando...' : 'Guardar Credenciales'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMostrarCredenciales(false);
+                  setCredenciales({ emailUsuario: '', emailPassword: '' });
+                  setMensajeCredenciales('');
+                }}
+                className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition font-medium"
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
+        )}
       </div>
 
       {/* Información */}
