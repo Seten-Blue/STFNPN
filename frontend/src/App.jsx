@@ -42,28 +42,15 @@ function AppContent() {
   const [prestamos, setPrestamos] = useState([]);
   const [presupuestos, setPresupuestos] = useState([]);
 
-  // Si no hay usuario, mostrar login
-  if (authLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-[#f3f4f6]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-4"></div>
-          <p className="text-slate-600">Cargando...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!usuario || !token) {
-    return <Login />;
-  }
-
   // Cargar datos
   useEffect(() => {
-    cargarDatos();
-  }, [periodo, fecha, esGrupal, grupo, usuario]);
+    if (usuario && token) {
+      cargarDatos();
+    }
+  }, [periodo, fecha, esGrupal, grupo, usuario, token]);
 
   const cargarDatos = async () => {
+    if (!usuario) return; // Agregar validación
     setLoading(true);
     try {
       const filtros = {
@@ -332,6 +319,22 @@ function AppContent() {
         return null;
     }
   };
+
+  // Validaciones después de todos los hooks
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-[#f3f4f6]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-4"></div>
+          <p className="text-slate-600">Cargando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!usuario || !token) {
+    return <Login />;
+  }
 
   return (
     <div className="min-h-screen bg-[#f3f4f6]">
