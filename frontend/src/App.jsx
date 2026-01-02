@@ -22,7 +22,7 @@ import { transaccionesAPI, cuentasAPI, prestamosAPI, presupuestosAPI } from './s
 import './App.css';
 
 function AppContent() {
-  const { usuario, token, loading: authLoading } = useAuth();
+  const { usuario, token, loading: authLoading, cargarUsuarios, usuarios: usuariosDelContexto } = useAuth();
   const [seccionActiva, setSeccionActiva] = useState('dashboard');
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [modalNuevoVisible, setModalNuevoVisible] = useState(false);
@@ -45,12 +45,13 @@ function AppContent() {
   const [prestamos, setPrestamos] = useState([]);
   const [presupuestos, setPresupuestos] = useState([]);
 
-  // Cargar datos
+  // Cargar datos y usuarios
   useEffect(() => {
     if (usuario && token) {
       cargarDatos();
+      cargarUsuarios(); // Cargar usuarios del contexto
     }
-  }, [periodo, fecha, usuario, token]);
+  }, [periodo, fecha, usuario, token, cargarUsuarios]);
 
   const cargarDatos = async () => {
     if (!usuario) return;
@@ -363,7 +364,7 @@ function AppContent() {
         visible={modalGastoCompartidoVisible}
         onCerrar={() => setModalGastoCompartidoVisible(false)}
         cuentas={cuentas}
-        usuarios={[]}
+        usuarios={usuariosDelContexto}
         onCrear={cargarDatos}
       />
 
@@ -371,7 +372,7 @@ function AppContent() {
         visible={modalIngresoCompartidoVisible}
         onCerrar={() => setModalIngresoCompartidoVisible(false)}
         cuentas={cuentas}
-        usuarios={[]}
+        usuarios={usuariosDelContexto}
         onCrear={cargarDatos}
       />
 
