@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { categoriasPredeterminadas, coloresDisponibles, frecuenciasRecurrencia } from '../utils/constantes';
+import { notificacionesAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => {
+  const { usuario } = useAuth();
   const [tipoTransaccion, setTipoTransaccion] = useState('gasto');
   const [mostrarOpciones, setMostrarOpciones] = useState(false);
   const [formData, setFormData] = useState({
@@ -13,6 +16,8 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
     esRecurrente: false,
     frecuenciaRecurrencia: '',
     tieneRecordatorio: false,
+    esUrgente: false,
+    enviarEmailRecordatorio: false,
     cuentaOrigen: cuentaActiva,
     cuentaDestino: '',
     colorIcono: '#3B82F6',
@@ -45,7 +50,7 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     // Validación básica
     if (!formData.cantidad || isNaN(formData.cantidad) || parseFloat(formData.cantidad) <= 0) {
@@ -98,6 +103,27 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
     }
     if (formData.tieneRecordatorio) {
       datos.tieneRecordatorio = true;
+      datos.esUrgente = formData.esUrgente;
+      
+      // Crear notificación automática
+      if (usuario) {
+        try {
+          const tipoNotif = tipoTransaccion === 'gasto' ? 'alerta' : 'recordatorio';
+          const fechaRecordatorio = new Date(`${formData.fecha}T${horaValida}`);
+          
+          await notificacionesAPI.crear({
+            usuario: usuario._id || usuario.id,
+            tipo: tipoNotif,
+            titulo: `${tipoTransaccion === 'gasto' ? '💸' : '💰'} ${formData.categoria}`,
+            mensaje: `Recordatorio: ${tipoTransaccion} de $${parseFloat(formData.cantidad).toLocaleString()} - ${formData.anotaciones || formData.categoria}`,
+            fechaRecordatorio: fechaRecordatorio.toISOString(),
+            urgente: formData.esUrgente,
+            enviarEmail: formData.esUrgente && formData.enviarEmailRecordatorio
+          });
+        } catch (error) {
+          console.error('Error al crear notificación:', error);
+        }
+      }
     }
 
     onGuardar(datos);
@@ -112,6 +138,8 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
       esRecurrente: false,
       frecuenciaRecurrencia: '',
       tieneRecordatorio: false,
+      esUrgente: false,
+      enviarEmailRecordatorio: false,
       cuentaOrigen: '',
       cuentaDestino: '',
       colorIcono: '#3B82F6',
@@ -145,7 +173,7 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
                   ? tipo === 'gasto' ? 'text-slate-700 border-b-2 border-slate-700' 
                   : tipo === 'ingreso' ? 'text-teal-600 border-b-2 border-teal-600'
                   : 'text-slate-600 border-b-2 border-slate-600'
-                  : 'text-gray-500 hover:text-slate-800'
+                  : 'text-gray-500 hover:text-gray-700'
               }`}
             >
               {tipo.charAt(0).toUpperCase() + tipo.slice(1)}
@@ -172,7 +200,7 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
                     }`}
                   >
                     <span className="text-2xl">{cat.icono}</span>
-                    <span className="text-xs mt-1 text-slate-700">{cat.nombre}</span>
+                    <span className="text-xs mt-1 text-gray-600">{cat.nombre}</span>
                   </button>
                 ))}
               </div>
@@ -183,10 +211,10 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
           {tipoTransaccion === 'transferencia' && (
             <>
               <div>
-                <label className="block text-sm font-medium text-slate-800 mb-1">Cuenta Origen</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Cuenta Origen</label>
                 <select
                   name="cuentaOrigen"
-                  value={formData.cuentaOrigen}
+                  value={formData.cuentaOrigen ?? ""}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   required
@@ -198,10 +226,10 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-800 mb-1">Cuenta Destino</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Cuenta Destino</label>
                 <select
                   name="cuentaDestino"
-                  value={formData.cuentaDestino}
+                  value={formData.cuentaDestino ?? ""}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   required
@@ -218,10 +246,10 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
           {/* Cuenta para gasto/ingreso */}
           {tipoTransaccion !== 'transferencia' && (
             <div>
-              <label className="block text-sm font-medium text-slate-800 mb-1">¿De qué cuenta?</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">¿De qué cuenta?</label>
               <select
                 name="cuentaOrigen"
-                value={formData.cuentaOrigen}
+                value={formData.cuentaOrigen ?? ""}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               >
@@ -235,7 +263,7 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
 
           {/* Cantidad */}
           <div>
-            <label className="block text-sm font-medium text-slate-800 mb-1">Cantidad *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Cantidad *</label>
             <input
               type="number"
               name="cantidad"
@@ -250,7 +278,7 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
           {/* Fecha y Hora */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-slate-800 mb-1">Fecha</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
               <input
                 type="date"
                 name="fecha"
@@ -260,7 +288,7 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-800 mb-1">Hora</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Hora</label>
               <input
                 type="time"
                 name="hora"
@@ -287,7 +315,7 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
             <div className="space-y-4 border-t border-gray-200 pt-4">
               {/* Anotaciones */}
               <div>
-                <label className="block text-sm font-medium text-slate-800 mb-1">Anotaciones</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Anotaciones</label>
                 <textarea
                   name="anotaciones"
                   value={formData.anotaciones}
@@ -300,7 +328,7 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
 
               {/* Recurrencia */}
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-slate-800">¿Se repite?</span>
+                <span className="text-sm font-medium text-gray-700">¿Se repite?</span>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
                     type="checkbox"
@@ -315,10 +343,10 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
 
               {formData.esRecurrente && (
                 <div>
-                  <label className="block text-sm font-medium text-slate-800 mb-1">Frecuencia</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Frecuencia</label>
                   <select
                     name="frecuenciaRecurrencia"
-                    value={formData.frecuenciaRecurrencia}
+                    value={formData.frecuenciaRecurrencia ?? ""}
                     onChange={handleChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   >
@@ -332,7 +360,7 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
 
               {/* Recordatorio */}
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-slate-800">Recordatorio</span>
+                <span className="text-sm font-medium text-gray-700">🔔 Recordatorio</span>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
                     type="checkbox"
@@ -345,9 +373,58 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
                 </label>
               </div>
 
+              {/* Opciones adicionales de recordatorio */}
+              {formData.tieneRecordatorio && (
+                <div className="bg-blue-50 p-3 rounded-lg space-y-3">
+                  {/* Urgente */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">🚨</span>
+                      <div>
+                        <span className="text-sm font-medium text-slate-800">Urgente</span>
+                        <p className="text-xs text-slate-500">Prioridad alta</p>
+                      </div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        name="esUrgente"
+                        checked={formData.esUrgente}
+                        onChange={handleChange}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500"></div>
+                    </label>
+                  </div>
+
+                  {/* Enviar Email (solo si es urgente) */}
+                  {formData.esUrgente && (
+                    <div className="flex items-center justify-between border-t border-blue-100 pt-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">📧</span>
+                        <div>
+                          <span className="text-sm font-medium text-slate-800">Enviar Email</span>
+                          <p className="text-xs text-slate-500">Notificación por correo</p>
+                        </div>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          name="enviarEmailRecordatorio"
+                          checked={formData.enviarEmailRecordatorio}
+                          onChange={handleChange}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                      </label>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Color del icono */}
               <div>
-                <label className="block text-sm font-medium text-slate-800 mb-2">Color del icono</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Color del icono</label>
                 <div className="flex gap-2 flex-wrap">
                   {coloresDisponibles.map((color) => (
                     <button

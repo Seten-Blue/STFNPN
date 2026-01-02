@@ -176,6 +176,14 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
         participantes: participantesConMonto
       };
 
+      console.log('📤 Enviando gasto compartido:', {
+        tipo: transaccion.tipo,
+        cantidad: transaccion.cantidad,
+        usuarioCreador: transaccion.usuario,
+        participantesEnviados: transaccion.participantes,
+        anotaciones: transaccion.anotaciones.substring(0, 40) + '...'
+      });
+
       await transaccionesAPI.crear(transaccion);
       onCrear?.();
       resetForm();
