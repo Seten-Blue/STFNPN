@@ -134,7 +134,6 @@ function ModalIngresoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear 
       alert('Error al crear ingreso compartido: ' + error.message);
     }
   };
-  };
 
   const resetForm = () => {
     setFormData({
