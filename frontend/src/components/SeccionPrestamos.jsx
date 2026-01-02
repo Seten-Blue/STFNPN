@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import { formatearMoneda, formatearFecha } from '../utils/constantes';
 
-const SeccionPrestamos = ({ prestamos, cuentas, onCrear, onActualizar, onRegistrarPago, onEliminar }) => {
+const SeccionPrestamos = ({ prestamos, cuentas, onCrear, onActualizar, onRegistrarPago, onEliminar, sujetoActivo = 'Sujeto 1' }) => {
+  // Filtrar préstamos y cuentas por sujeto activo
+  const prestamosDelSujeto = prestamos.filter(p => p.sujeto === sujetoActivo);
+  const cuentasDelSujeto = cuentas.filter(c => c.sujeto === sujetoActivo);
+
   const [mostrarModal, setMostrarModal] = useState(false);
   const [editando, setEditando] = useState(null);
   const [formData, setFormData] = useState({
@@ -15,6 +19,7 @@ const SeccionPrestamos = ({ prestamos, cuentas, onCrear, onActualizar, onRegistr
     diaPago: 5,
     cuentaAsociada: '',
     grupo: 'personal',
+    sujeto: sujetoActivo,
   });
 
   const handleSubmit = (e) => {
@@ -49,6 +54,7 @@ const SeccionPrestamos = ({ prestamos, cuentas, onCrear, onActualizar, onRegistr
       diaPago: 5,
       cuentaAsociada: '',
       grupo: 'personal',
+      sujeto: sujetoActivo,
     });
   };
 
@@ -59,15 +65,15 @@ const SeccionPrestamos = ({ prestamos, cuentas, onCrear, onActualizar, onRegistr
     }
   };
 
-  const totalDeuda = prestamos.reduce((sum, p) => sum + (p.montoRestante || 0), 0);
-  const prestamosActivos = prestamos.filter(p => p.estado === 'activo').length;
+  const totalDeuda = prestamosDelSujeto.reduce((sum, p) => sum + (p.montoRestante || 0), 0);
+  const prestamosActivos = prestamosDelSujeto.filter(p => p.estado === 'activo').length;
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Préstamos</h2>
+          <h2 className="text-2xl font-bold text-gray-800">Préstamos - {sujetoActivo}</h2>
           <p className="text-gray-500">Administra tus créditos y deudas</p>
         </div>
         <button
@@ -93,13 +99,13 @@ const SeccionPrestamos = ({ prestamos, cuentas, onCrear, onActualizar, onRegistr
         </div>
         <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
           <p className="text-sm text-gray-500 mb-1">Total Préstamos</p>
-          <p className="text-2xl font-bold text-gray-800">{prestamos.length}</p>
+          <p className="text-2xl font-bold text-gray-800">{prestamosDelSujeto.length}</p>
         </div>
       </div>
 
       {/* Lista de préstamos */}
       <div className="space-y-4">
-        {prestamos.map((prestamo) => (
+        {prestamosDelSujeto.map((prestamo) => (
           <div key={prestamo._id} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               <div className="flex-1">

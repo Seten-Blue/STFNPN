@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { categoriasPredeterminadas, coloresDisponibles, frecuenciasRecurrencia } from '../utils/constantes';
 
-const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar }) => {
+const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, sujetoActivo, sujetos = [] }) => {
   const [tipoTransaccion, setTipoTransaccion] = useState('gasto');
   const [mostrarOpciones, setMostrarOpciones] = useState(false);
   const [formData, setFormData] = useState({
     categoria: '',
     cantidad: '',
     fecha: new Date().toISOString().split('T')[0],
-    hora: new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }),
+    hora: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false }),
     anotaciones: '',
     esRecurrente: false,
     frecuenciaRecurrencia: '',
@@ -18,6 +18,7 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar }) => {
     colorIcono: '#3B82F6',
     grupo: 'personal',
     esGrupal: false,
+    sujeto: sujetoActivo || 'Sujeto 1',
   });
 
   const categorias = tipoTransaccion === 'gasto' 
@@ -28,9 +29,21 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar }) => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    let newValue = type === 'checkbox' ? checked : value;
+    // Si el campo es hora, forzar formato HH:mm
+    if (name === 'hora') {
+      // Si el valor tiene segundos, recortar a HH:mm
+      if (/^\d{2}:\d{2}:\d{2}/.test(newValue)) {
+        newValue = newValue.slice(0,5);
+      }
+      // Si el valor tiene espacio (ej: 09:03 a. m.), tomar solo HH:mm
+      if (newValue.includes(' ')) {
+        newValue = newValue.split(' ')[0];
+      }
+    }
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: newValue,
     }));
   };
 
@@ -54,18 +67,52 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar }) => {
       return;
     }
 
-    onGuardar({
-      ...formData,
+    // Corregir hora si está vacía o inválida y asegurar formato HH:mm
+    let horaValida = formData.hora;
+    if (!horaValida || horaValida === '--:--') {
+      const ahora = new Date();
+      horaValida = ahora.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+    }
+    if (horaValida && horaValida.includes(' ')) {
+      horaValida = horaValida.split(' ')[0];
+    }
+    if (/^\d{2}:\d{2}:\d{2}/.test(horaValida)) {
+      horaValida = horaValida.slice(0,5);
+    }
+
+    // Limpiar campos no requeridos según tipo
+    const datos = {
       tipo: tipoTransaccion,
+      categoria: formData.categoria,
       cantidad: parseFloat(formData.cantidad),
-    });
+      fecha: formData.fecha,
+      hora: horaValida,
+      sujeto: formData.sujeto,
+      anotaciones: formData.anotaciones || undefined,
+      cuentaOrigen: formData.cuentaOrigen || undefined,
+      colorIcono: formData.colorIcono || undefined,
+      grupo: formData.grupo || 'personal',
+      esGrupal: formData.esGrupal || false,
+    };
+    if (tipoTransaccion === 'transferencia') {
+      datos.cuentaDestino = formData.cuentaDestino || undefined;
+    }
+    if (formData.esRecurrente) {
+      datos.esRecurrente = true;
+      datos.frecuenciaRecurrencia = formData.frecuenciaRecurrencia || undefined;
+    }
+    if (formData.tieneRecordatorio) {
+      datos.tieneRecordatorio = true;
+    }
+
+    onGuardar(datos);
 
     // Reset
     setFormData({
       categoria: '',
       cantidad: '',
       fecha: new Date().toISOString().split('T')[0],
-      hora: new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }),
+      hora: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false }),
       anotaciones: '',
       esRecurrente: false,
       frecuenciaRecurrencia: '',
@@ -75,6 +122,7 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar }) => {
       colorIcono: '#3B82F6',
       grupo: 'personal',
       esGrupal: false,
+      sujeto: sujetoActivo || 'Sujeto 1',
     });
     onCerrar();
   };
@@ -111,6 +159,21 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar }) => {
               {tipo.charAt(0).toUpperCase() + tipo.slice(1)}
             </button>
           ))}
+        </div>
+
+        {/* Selector de sujeto */}
+        <div className="px-4 py-3 bg-blue-50 border-b border-blue-100">
+          <label className="text-sm font-medium text-gray-700 mb-2 block">Sujeto</label>
+          <select
+            name="sujeto"
+            value={formData.sujeto}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+          >
+            {sujetos.map((s) => (
+              <option key={s.id} value={s.nombre}>{s.nombre}</option>
+            ))}
+          </select>
         </div>
 
         {/* Formulario */}

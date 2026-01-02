@@ -2,7 +2,10 @@ import React, { useState } from 'react';
 import { formatearMoneda } from '../utils/constantes';
 import { tiposCuenta, coloresDisponibles } from '../utils/constantes';
 
-const SeccionCuentas = ({ cuentas, onCrear, onActualizar, onEliminar }) => {
+const SeccionCuentas = ({ cuentas, onCrear, onActualizar, onEliminar, sujetoActivo = 'Sujeto 1' }) => {
+  // Filtrar cuentas por sujeto activo
+  const cuentasDelSujeto = cuentas.filter(c => c.sujeto === sujetoActivo);
+
   const [mostrarModal, setMostrarModal] = useState(false);
   const [editando, setEditando] = useState(null);
   const [formData, setFormData] = useState({
@@ -12,6 +15,7 @@ const SeccionCuentas = ({ cuentas, onCrear, onActualizar, onEliminar }) => {
     saldo: 0,
     color: '#3B82F6',
     grupo: 'personal',
+    sujeto: sujetoActivo,
   });
 
   const handleSubmit = (e) => {
@@ -33,6 +37,7 @@ const SeccionCuentas = ({ cuentas, onCrear, onActualizar, onEliminar }) => {
       saldo: cuenta.saldo,
       color: cuenta.color,
       grupo: cuenta.grupo,
+      sujeto: cuenta.sujeto,
     });
     setMostrarModal(true);
   };
@@ -47,17 +52,18 @@ const SeccionCuentas = ({ cuentas, onCrear, onActualizar, onEliminar }) => {
       saldo: 0,
       color: '#3B82F6',
       grupo: 'personal',
+      sujeto: sujetoActivo,
     });
   };
 
-  const saldoTotal = cuentas.reduce((sum, c) => sum + c.saldo, 0);
+  const saldoTotal = cuentasDelSujeto.reduce((sum, c) => sum + c.saldo, 0);
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Cuentas</h2>
+          <h2 className="text-2xl font-bold text-gray-800">Cuentas - {sujetoActivo}</h2>
           <p className="text-gray-500">Administra tus cuentas y ve dónde está tu dinero</p>
         </div>
         <button
@@ -75,12 +81,12 @@ const SeccionCuentas = ({ cuentas, onCrear, onActualizar, onEliminar }) => {
       <div className="bg-gradient-to-r from-slate-700 to-slate-600 rounded-xl p-6 text-white">
         <p className="text-slate-200 mb-1">Saldo Total</p>
         <p className="text-4xl font-bold">{formatearMoneda(saldoTotal)}</p>
-        <p className="text-slate-300 text-sm mt-2">{cuentas.length} cuenta(s) activa(s)</p>
+        <p className="text-slate-300 text-sm mt-2">{cuentasDelSujeto.length} cuenta(s) activa(s)</p>
       </div>
 
       {/* Lista de cuentas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {cuentas.map((cuenta) => {
+        {cuentasDelSujeto.map((cuenta) => {
           const tipoInfo = tiposCuenta.find(t => t.valor === cuenta.tipo);
           return (
             <div

@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -9,11 +11,13 @@ import SeccionCuentas from './components/SeccionCuentas';
 import SeccionPrestamos from './components/SeccionPrestamos';
 import SeccionPresupuestos from './components/SeccionPresupuestos';
 import SeccionConfiguracion from './components/SeccionConfiguracion';
+import SelectorSujetos from './components/SelectorSujetos';
+import Login from './pages/Login';
 import { transaccionesAPI, cuentasAPI, prestamosAPI, presupuestosAPI } from './services/api';
 import './App.css';
 
-function App() {
-  // Estado general
+function AppContent() {
+  const { usuario, token, loading: authLoading } = useAuth();
   const [seccionActiva, setSeccionActiva] = useState('dashboard');
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [modalNuevoVisible, setModalNuevoVisible] = useState(false);
@@ -25,16 +29,39 @@ function App() {
   const [esGrupal, setEsGrupal] = useState(false);
   const [grupo, setGrupo] = useState('personal');
 
+  // Sujetos
+  const [sujetos, setSujetos] = useState([
+    { id: '1', nombre: 'Sujeto 1' },
+    { id: '2', nombre: 'Sujeto 2' },
+  ]);
+  const [sujetoActivo, setsujetoActivo] = useState('1');
+
   // Datos
   const [transacciones, setTransacciones] = useState([]);
   const [cuentas, setCuentas] = useState([]);
   const [prestamos, setPrestamos] = useState([]);
   const [presupuestos, setPresupuestos] = useState([]);
 
+  // Si no hay usuario, mostrar login
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-[#f3f4f6]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-4"></div>
+          <p className="text-slate-600">Cargando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!usuario || !token) {
+    return <Login />;
+  }
+
   // Cargar datos
   useEffect(() => {
     cargarDatos();
-  }, [periodo, fecha, esGrupal, grupo]);
+  }, [periodo, fecha, esGrupal, grupo, usuario]);
 
   const cargarDatos = async () => {
     setLoading(true);
@@ -42,6 +69,7 @@ function App() {
       const filtros = {
         periodo,
         fecha,
+        usuarioId: usuario.id,
         ...(esGrupal && { grupo, esGrupal: 'true' }),
       };
 
@@ -66,7 +94,11 @@ function App() {
   // Handlers de transacciones
   const handleCrearTransaccion = async (data) => {
     try {
-      await transaccionesAPI.crear(data);
+      const dataConUsuario = {
+        ...data,
+        usuario: usuario.id
+      };
+      await transaccionesAPI.crear(dataConUsuario);
       cargarDatos();
     } catch (error) {
       alert('Error al crear transacción');
@@ -86,7 +118,11 @@ function App() {
   // Handlers de cuentas
   const handleCrearCuenta = async (data) => {
     try {
-      await cuentasAPI.crear(data);
+      const dataConUsuario = {
+        ...data,
+        usuario: usuario.id
+      };
+      await cuentasAPI.crear(dataConUsuario);
       cargarDatos();
     } catch (error) {
       alert('Error al crear cuenta');
@@ -111,10 +147,13 @@ function App() {
     }
   };
 
-  // Handlers de préstamos
   const handleCrearPrestamo = async (data) => {
     try {
-      await prestamosAPI.crear(data);
+      const dataConUsuario = {
+        ...data,
+        usuario: usuario.id
+      };
+      await prestamosAPI.crear(dataConUsuario);
       cargarDatos();
     } catch (error) {
       alert('Error al crear préstamo');
@@ -151,7 +190,11 @@ function App() {
   // Handlers de presupuestos
   const handleCrearPresupuesto = async (data) => {
     try {
-      await presupuestosAPI.crear(data);
+      const dataConUsuario = {
+        ...data,
+        usuario: usuario.id
+      };
+      await presupuestosAPI.crear(dataConUsuario);
       cargarDatos();
     } catch (error) {
       alert('Error al crear presupuesto');
@@ -167,7 +210,15 @@ function App() {
     }
   };
 
-  // Renderizar sección activa
+  // Handlers de sujetos
+  const handleAgregarSujeto = (nombre) => {
+    const nuevoSujeto = {
+      id: Date.now().toString(),
+      nombre: nombre,
+    };
+    setSujetos([...sujetos, nuevoSujeto]);
+    setsujetoActivo(nuevoSujeto.id);
+  };
   const renderSeccion = () => {
     if (loading) {
       return (
@@ -184,6 +235,12 @@ function App() {
       case 'dashboard':
         return (
           <>
+            <SelectorSujetos
+              sujetos={sujetos}
+              sujetoActivo={sujetoActivo}
+              onCambiarSujeto={setsujetoActivo}
+              onAgregarSujeto={handleAgregarSujeto}
+            />
             <FiltrosPeriodo
               periodo={periodo}
               setPeriodo={setPeriodo}
@@ -201,6 +258,7 @@ function App() {
               periodo={periodo}
               grupo={grupo}
               esGrupal={esGrupal}
+              sujetoActivo={sujetoActivo}
             />
           </>
         );
@@ -233,6 +291,7 @@ function App() {
             onCrear={handleCrearCuenta}
             onActualizar={handleActualizarCuenta}
             onEliminar={handleEliminarCuenta}
+            sujetoActivo={sujetoActivo}
           />
         );
 
@@ -245,6 +304,7 @@ function App() {
             onActualizar={handleActualizarPrestamo}
             onRegistrarPago={handleRegistrarPago}
             onEliminar={handleEliminarPrestamo}
+            sujetoActivo={sujetoActivo}
           />
         );
 
@@ -255,6 +315,7 @@ function App() {
             onCrear={handleCrearPresupuesto}
             onActualizar={() => {}}
             onEliminar={handleEliminarPresupuesto}
+            sujetoActivo={sujetoActivo}
           />
         );
 
@@ -299,8 +360,25 @@ function App() {
         onCerrar={() => setModalNuevoVisible(false)}
         cuentas={cuentas}
         onGuardar={handleCrearTransaccion}
+        sujetoActivo={sujetoActivo}
+        sujetos={sujetos}
       />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/registro" element={<Login />} />
+          <Route path="/" element={<AppContent />} />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </AuthProvider>
+    </Router>
   );
 }
 
