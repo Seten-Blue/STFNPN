@@ -273,3 +273,24 @@ export const ahorroCompartidoAPI = {
     return res.json();
   },
 };
+
+// Transacciones Programadas
+export const transaccionesProgramadasAPI = {
+  obtener: async (filtros = {}) => {
+    const params = new URLSearchParams(filtros);
+    const res = await fetch(`${API_URL}/transacciones-programadas?${params}`);
+    return res.json();
+  },
+  procesar: async () => {
+    const res = await fetch(`${API_URL}/transacciones-programadas/procesar`, {
+      method: 'POST',
+    });
+    return res.json();
+  },
+  cancelar: async (id) => {
+    const res = await fetch(`${API_URL}/transacciones-programadas/${id}`, {
+      method: 'DELETE',
+    });
+    return res.json();
+  },
+};
