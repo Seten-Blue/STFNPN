@@ -45,13 +45,19 @@ function AppContent() {
   const [prestamos, setPrestamos] = useState([]);
   const [presupuestos, setPresupuestos] = useState([]);
 
-  // Cargar datos y usuarios
+  // Cargar datos
   useEffect(() => {
     if (usuario && token) {
       cargarDatos();
-      cargarUsuarios(); // Cargar usuarios del contexto
     }
-  }, [periodo, fecha, usuario, token, cargarUsuarios]);
+  }, [periodo, fecha, usuario, token]);
+
+  // Cargar usuarios solo una vez al montar o cuando usuario cambia
+  useEffect(() => {
+    if (usuario && token) {
+      cargarUsuarios();
+    }
+  }, [usuario, token, cargarUsuarios]);
 
   const cargarDatos = async () => {
     if (!usuario) return;
