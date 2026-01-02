@@ -30,7 +30,7 @@ function SeccionFusion() {
     try {
       const filtros = {
         periodo: filtroFecha,
-        usuarioId: usuario.id,
+        usuarioId: usuario._id || usuario.id,
       };
 
       if (filtroFecha === 'personalizado') {

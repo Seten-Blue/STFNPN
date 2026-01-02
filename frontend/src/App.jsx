@@ -66,14 +66,14 @@ function AppContent() {
       const filtros = {
         periodo,
         fecha,
-        usuarioId: usuario.id,
+        usuarioId: usuario._id || usuario.id,  // Asegurar que se usa _id
       };
 
       const [trans, ctas, prest, presup] = await Promise.all([
         transaccionesAPI.obtener(filtros),
-        cuentasAPI.obtener({ usuarioId: usuario.id }),
-        prestamosAPI.obtener({ usuarioId: usuario.id }),
-        presupuestosAPI.estado({ usuarioId: usuario.id }),
+        cuentasAPI.obtener({ usuarioId: usuario._id || usuario.id }),
+        prestamosAPI.obtener({ usuarioId: usuario._id || usuario.id }),
+        presupuestosAPI.estado({ usuarioId: usuario._id || usuario.id }),
       ]);
 
       setTransacciones(Array.isArray(trans) ? trans : []);
@@ -98,7 +98,7 @@ function AppContent() {
     try {
       const dataConUsuario = {
         ...data,
-        usuario: usuario.id
+        usuario: usuario._id || usuario.id  // Asegurar que se usa _id
       };
       await transaccionesAPI.crear(dataConUsuario);
       cargarDatos();

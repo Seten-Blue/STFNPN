@@ -34,7 +34,7 @@ function SeccionNotificaciones() {
   const cargarNotificaciones = async () => {
     setLoading(true);
     try {
-      const filtros = { usuarioId: usuario.id };
+      const filtros = { usuarioId: usuario._id || usuario.id };
       if (filtroTipo !== 'todas') {
         filtros.tipo = filtroTipo;
       }
@@ -53,7 +53,7 @@ function SeccionNotificaciones() {
       const fechaCompleta = new Date(`${formNotificacion.fechaRecordatorio}T${formNotificacion.horaRecordatorio}`);
       
       await notificacionesAPI.crear({
-        usuario: usuario.id,
+        usuario: usuario._id || usuario.id,
         titulo: formNotificacion.titulo,
         mensaje: formNotificacion.mensaje,
         tipo: formNotificacion.tipo,
@@ -120,7 +120,7 @@ function SeccionNotificaciones() {
 
   const handleMarcarTodasLeidas = async () => {
     try {
-      await notificacionesAPI.marcarTodasLeidas(usuario.id);
+      await notificacionesAPI.marcarTodasLeidas(usuario._id || usuario.id);
       cargarNotificaciones();
     } catch (error) {
       console.error('Error al marcar todas como leídas:', error);
