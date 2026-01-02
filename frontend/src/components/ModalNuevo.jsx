@@ -36,8 +36,21 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.cantidad) {
-      alert('Por favor ingresa la cantidad');
+    // Validación básica
+    if (!formData.cantidad || isNaN(formData.cantidad) || parseFloat(formData.cantidad) <= 0) {
+      alert('Por favor ingresa una cantidad válida.');
+      return;
+    }
+    if (!formData.categoria && tipoTransaccion !== 'transferencia') {
+      alert('Por favor selecciona una categoría.');
+      return;
+    }
+    if (!formData.cuentaOrigen) {
+      alert('Por favor selecciona una cuenta.');
+      return;
+    }
+    if (tipoTransaccion === 'transferencia' && !formData.cuentaDestino) {
+      alert('Por favor selecciona la cuenta destino.');
       return;
     }
 
@@ -89,9 +102,9 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar }) => {
               onClick={() => setTipoTransaccion(tipo)}
               className={`flex-1 py-3 font-medium transition ${
                 tipoTransaccion === tipo
-                  ? tipo === 'gasto' ? 'text-red-600 border-b-2 border-red-600' 
-                  : tipo === 'ingreso' ? 'text-green-600 border-b-2 border-green-600'
-                  : 'text-blue-600 border-b-2 border-blue-600'
+                  ? tipo === 'gasto' ? 'text-slate-700 border-b-2 border-slate-700' 
+                  : tipo === 'ingreso' ? 'text-teal-600 border-b-2 border-teal-600'
+                  : 'text-slate-600 border-b-2 border-slate-600'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
@@ -357,9 +370,9 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar }) => {
           <button
             type="submit"
             className={`w-full py-3 rounded-xl font-bold text-white transition ${
-              tipoTransaccion === 'gasto' ? 'bg-red-500 hover:bg-red-600' 
-              : tipoTransaccion === 'ingreso' ? 'bg-green-500 hover:bg-green-600'
-              : 'bg-blue-500 hover:bg-blue-600'
+              tipoTransaccion === 'gasto' ? 'bg-slate-600 hover:bg-slate-700' 
+              : tipoTransaccion === 'ingreso' ? 'bg-teal-600 hover:bg-teal-700'
+              : 'bg-slate-700 hover:bg-slate-800'
             }`}
           >
             Guardar {tipoTransaccion}

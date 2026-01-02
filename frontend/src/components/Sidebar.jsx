@@ -47,7 +47,7 @@ const Sidebar = ({ seccionActiva, onCambiarSeccion, visible, onCerrar }) => {
               }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition font-medium ${
                 seccionActiva === item.id
-                  ? 'bg-blue-50 text-blue-700'
+                  ? 'bg-slate-100 text-slate-700 font-semibold'
                   : 'text-gray-600 hover:bg-gray-50'
               }`}
             >

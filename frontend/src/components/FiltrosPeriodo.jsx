@@ -21,7 +21,7 @@ const FiltrosPeriodo = ({ periodo, setPeriodo, fecha, setFecha, esGrupal, setEsG
                 key={p.valor}
                 onClick={() => setPeriodo(p.valor)}
                 className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
-                  periodo === p.valor ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600'
+                  periodo === p.valor ? 'bg-white text-slate-700 shadow-sm font-semibold' : 'text-gray-600'
                 }`}
               >
                 {p.nombre}
@@ -47,7 +47,7 @@ const FiltrosPeriodo = ({ periodo, setPeriodo, fecha, setFecha, esGrupal, setEsG
             <button
               onClick={() => setEsGrupal(false)}
               className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
-                !esGrupal ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600'
+                !esGrupal ? 'bg-white text-slate-700 shadow-sm font-semibold' : 'text-gray-600'
               }`}
             >
               Individual
@@ -55,7 +55,7 @@ const FiltrosPeriodo = ({ periodo, setPeriodo, fecha, setFecha, esGrupal, setEsG
             <button
               onClick={() => setEsGrupal(true)}
               className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
-                esGrupal ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600'
+                esGrupal ? 'bg-white text-slate-700 shadow-sm font-semibold' : 'text-gray-600'
               }`}
             >
               Grupal

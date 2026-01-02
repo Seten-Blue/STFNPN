@@ -62,7 +62,7 @@ const SeccionCuentas = ({ cuentas, onCrear, onActualizar, onEliminar }) => {
         </div>
         <button
           onClick={() => setMostrarModal(true)}
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+          className="flex items-center gap-2 bg-slate-700 text-white px-4 py-2 rounded-lg hover:bg-slate-800 transition"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -72,10 +72,10 @@ const SeccionCuentas = ({ cuentas, onCrear, onActualizar, onEliminar }) => {
       </div>
 
       {/* Saldo total */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white">
-        <p className="text-blue-100 mb-1">Saldo Total</p>
+      <div className="bg-gradient-to-r from-slate-700 to-slate-600 rounded-xl p-6 text-white">
+        <p className="text-slate-200 mb-1">Saldo Total</p>
         <p className="text-4xl font-bold">{formatearMoneda(saldoTotal)}</p>
-        <p className="text-blue-200 text-sm mt-2">{cuentas.length} cuenta(s) activa(s)</p>
+        <p className="text-slate-300 text-sm mt-2">{cuentas.length} cuenta(s) activa(s)</p>
       </div>
 
       {/* Lista de cuentas */}

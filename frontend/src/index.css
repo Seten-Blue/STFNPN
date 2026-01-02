@@ -11,15 +11,15 @@
 html, body {
   width: 100%;
   height: 100%;
-  background-color: #f9fafb;
+  background-color: #18181b;
 }
 
 body {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color: #1f2937;
-  background-color: #f9fafb;
+  color: #e5e7eb;
+  background-color: #18181b;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -29,7 +29,7 @@ body {
 #root {
   width: 100%;
   min-height: 100vh;
-  background-color: #f9fafb;
+  background-color: #18181b;
 }
 
 a {

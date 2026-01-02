@@ -273,7 +273,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#f3f4f6]">
       <Header
         onMenuClick={() => setSidebarVisible(true)}
         onNuevoClick={() => setModalNuevoVisible(true)}

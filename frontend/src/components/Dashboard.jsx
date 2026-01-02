@@ -46,32 +46,32 @@ const Dashboard = ({ transacciones, cuentas, presupuestos, periodo, grupo, esGru
   const maxGasto = Math.max(...Object.values(gastosPorCategoria), 1);
 
   return (
-    <div className="space-y-6 bg-gradient-to-br from-gray-50 via-white to-gray-50 min-h-screen">
+    <div className="space-y-6 min-h-screen bg-[#f3f4f6]">
       {/* Tarjetas de resumen */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <TarjetaResumen
           titulo="Ingresos"
           valor={totalIngresos}
           icono="📈"
-          color="text-green-600"
+          color="text-teal-600"
         />
         <TarjetaResumen
           titulo="Gastos"
           valor={totalGastos}
           icono="📉"
-          color="text-red-600"
+          color="text-slate-600"
         />
         <TarjetaResumen
           titulo="Balance"
           valor={balance}
           icono={balance >= 0 ? "✅" : "⚠️"}
-          color={balance >= 0 ? "text-green-600" : "text-red-600"}
+          color={balance >= 0 ? "text-teal-600" : "text-slate-600"}
         />
         <TarjetaResumen
           titulo="Saldo Total"
           valor={saldoTotal}
           icono="💰"
-          color="text-blue-600"
+          color="text-slate-700"
         />
       </div>
 
@@ -84,11 +84,11 @@ const Dashboard = ({ transacciones, cuentas, presupuestos, periodo, grupo, esGru
             <div>
               <div className="flex justify-between text-sm mb-1">
                 <span className="text-gray-600">Ingresos</span>
-                <span className="text-green-600 font-medium">{formatearMoneda(totalIngresos)}</span>
+                <span className="text-teal-600 font-medium">{formatearMoneda(totalIngresos)}</span>
               </div>
               <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-green-500 rounded-full transition-all"
+                  className="h-full bg-teal-600 rounded-full transition-all"
                   style={{ width: `${totalIngresos > 0 ? (totalIngresos / (totalIngresos + totalGastos) * 100) : 0}%` }}
                 />
               </div>
@@ -96,11 +96,11 @@ const Dashboard = ({ transacciones, cuentas, presupuestos, periodo, grupo, esGru
             <div>
               <div className="flex justify-between text-sm mb-1">
                 <span className="text-gray-600">Gastos</span>
-                <span className="text-red-600 font-medium">{formatearMoneda(totalGastos)}</span>
+                <span className="text-slate-600 font-medium">{formatearMoneda(totalGastos)}</span>
               </div>
               <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-red-500 rounded-full transition-all"
+                  className="h-full bg-slate-400 rounded-full transition-all"
                   style={{ width: `${totalGastos > 0 ? (totalGastos / (totalIngresos + totalGastos) * 100) : 0}%` }}
                 />
               </div>

@@ -64,14 +64,14 @@ const ListaTransacciones = ({ transacciones, onEditar, onEliminar }) => {
                 </div>
                 <div className="flex items-center gap-3">
                   <span className={`font-bold ${
-                    t.tipo === 'ingreso' ? 'text-green-600' : t.tipo === 'gasto' ? 'text-red-600' : 'text-blue-600'
+                    t.tipo === 'ingreso' ? 'text-teal-600' : t.tipo === 'gasto' ? 'text-slate-600' : 'text-slate-700'
                   }`}>
                     {t.tipo === 'ingreso' ? '+' : t.tipo === 'gasto' ? '-' : ''}{formatearMoneda(t.cantidad)}
                   </span>
                   <div className="flex gap-1">
                     <button
                       onClick={() => onEditar(t)}
-                      className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition"
+                      className="p-2 text-gray-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
