@@ -138,3 +138,138 @@ export const presupuestosAPI = {
     return res.json();
   },
 };
+
+// Notificaciones
+export const notificacionesAPI = {
+  obtener: async (filtros = {}) => {
+    const params = new URLSearchParams(filtros);
+    const res = await fetch(`${API_URL}/notificaciones?${params}`);
+    return res.json();
+  },
+  obtenerPendientes: async (filtros = {}) => {
+    const params = new URLSearchParams(filtros);
+    const res = await fetch(`${API_URL}/notificaciones/pendientes?${params}`);
+    return res.json();
+  },
+  contarNoLeidas: async (filtros = {}) => {
+    const params = new URLSearchParams(filtros);
+    const res = await fetch(`${API_URL}/notificaciones/contar?${params}`);
+    return res.json();
+  },
+  crear: async (data) => {
+    const res = await fetch(`${API_URL}/notificaciones`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+  marcarLeida: async (id) => {
+    const res = await fetch(`${API_URL}/notificaciones/${id}/leida`, {
+      method: 'PUT',
+    });
+    return res.json();
+  },
+  marcarTodasLeidas: async (usuarioId) => {
+    const res = await fetch(`${API_URL}/notificaciones/marcar-todas-leidas`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ usuarioId }),
+    });
+    return res.json();
+  },
+  actualizar: async (id, data) => {
+    const res = await fetch(`${API_URL}/notificaciones/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+  eliminar: async (id) => {
+    const res = await fetch(`${API_URL}/notificaciones/${id}`, { method: 'DELETE' });
+    return res.json();
+  },
+};
+
+// Email
+export const emailAPI = {
+  enviarPrueba: async (email) => {
+    const res = await fetch(`${API_URL}/email/prueba`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    return res.json();
+  },
+  procesarPendientes: async () => {
+    const res = await fetch(`${API_URL}/email/procesar`, {
+      method: 'POST',
+    });
+    return res.json();
+  },
+  enviarNotificacion: async (id) => {
+    const res = await fetch(`${API_URL}/email/enviar/${id}`, {
+      method: 'POST',
+    });
+    return res.json();
+  },
+};
+
+// Metas
+export const metasAPI = {
+  obtener: async (filtros = {}) => {
+    const params = new URLSearchParams(filtros);
+    const res = await fetch(`${API_URL}/metas?${params}`);
+    return res.json();
+  },
+  crear: async (data) => {
+    const res = await fetch(`${API_URL}/metas`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+  actualizar: async (id, data) => {
+    const res = await fetch(`${API_URL}/metas/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+  eliminar: async (id) => {
+    const res = await fetch(`${API_URL}/metas/${id}`, { method: 'DELETE' });
+    return res.json();
+  },
+};
+
+// Ahorro Compartido
+export const ahorroCompartidoAPI = {
+  obtener: async (filtros = {}) => {
+    const params = new URLSearchParams(filtros);
+    const res = await fetch(`${API_URL}/ahorro-compartido?${params}`);
+    return res.json();
+  },
+  crear: async (data) => {
+    const res = await fetch(`${API_URL}/ahorro-compartido`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+  actualizar: async (id, data) => {
+    const res = await fetch(`${API_URL}/ahorro-compartido/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+  eliminar: async (id) => {
+    const res = await fetch(`${API_URL}/ahorro-compartido/${id}`, { method: 'DELETE' });
+    return res.json();
+  },
+};

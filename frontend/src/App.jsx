@@ -12,6 +12,11 @@ import SeccionPrestamos from './components/SeccionPrestamos';
 import SeccionPresupuestos from './components/SeccionPresupuestos';
 import SeccionConfiguracion from './components/SeccionConfiguracion';
 import SeccionFusion from './components/SeccionFusion';
+import SeccionNotificaciones from './components/SeccionNotificaciones';
+import ModalGastoCompartido from './components/ModalGastoCompartido';
+import ModalIngresoCompartido from './components/ModalIngresoCompartido';
+import ModalMetaRequerida from './components/ModalMetaRequerida';
+import ModalAhorroCompartido from './components/ModalAhorroCompartido';
 import Login from './pages/Login';
 import { transaccionesAPI, cuentasAPI, prestamosAPI, presupuestosAPI } from './services/api';
 import './App.css';
@@ -21,6 +26,10 @@ function AppContent() {
   const [seccionActiva, setSeccionActiva] = useState('dashboard');
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [modalNuevoVisible, setModalNuevoVisible] = useState(false);
+  const [modalGastoCompartidoVisible, setModalGastoCompartidoVisible] = useState(false);
+  const [modalIngresoCompartidoVisible, setModalIngresoCompartidoVisible] = useState(false);
+  const [modalMetaRequiridaVisible, setModalMetaRequiridaVisible] = useState(false);
+  const [modalAhorroCompartidoVisible, setModalAhorroCompartidoVisible] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Filtros
@@ -281,19 +290,7 @@ function AppContent() {
         );
 
       case 'fusion':
-        return (
-          <SeccionFusion
-            cuentas={cuentas}
-            transacciones={transacciones}
-            cuentaActiva={cuentaActiva}
-            onCrearTransaccion={handleCrearTransaccion}
-            onEliminarTransaccion={handleEliminarTransaccion}
-            periodo={periodo}
-            setPeriodo={setPeriodo}
-            fecha={fecha}
-            setFecha={setFecha}
-          />
-        );
+        return <SeccionFusion />;
 
       case 'configuracion':
         return (
@@ -303,6 +300,9 @@ function AppContent() {
             transacciones={transacciones}
           />
         );
+
+      case 'notificaciones':
+        return <SeccionNotificaciones />;
 
       default:
         return null;
@@ -330,6 +330,10 @@ function AppContent() {
       <Header
         onMenuClick={() => setSidebarVisible(true)}
         onNuevoClick={() => setModalNuevoVisible(true)}
+        onGastoCompartidoClick={() => setModalGastoCompartidoVisible(true)}
+        onIngresoCompartidoClick={() => setModalIngresoCompartidoVisible(true)}
+        onMetaRequeridaClick={() => setModalMetaRequiridaVisible(true)}
+        onAhorroCompartidoClick={() => setModalAhorroCompartidoVisible(true)}
       />
 
       <div className="flex">
@@ -353,6 +357,37 @@ function AppContent() {
         cuentas={cuentas}
         onGuardar={handleCrearTransaccion}
         cuentaActiva={cuentaActiva}
+      />
+
+      <ModalGastoCompartido
+        visible={modalGastoCompartidoVisible}
+        onCerrar={() => setModalGastoCompartidoVisible(false)}
+        cuentas={cuentas}
+        usuarios={[]}
+        onCrear={cargarDatos}
+      />
+
+      <ModalIngresoCompartido
+        visible={modalIngresoCompartidoVisible}
+        onCerrar={() => setModalIngresoCompartidoVisible(false)}
+        cuentas={cuentas}
+        usuarios={[]}
+        onCrear={cargarDatos}
+      />
+
+      <ModalMetaRequerida
+        visible={modalMetaRequiridaVisible}
+        onCerrar={() => setModalMetaRequiridaVisible(false)}
+        usuarios={[]}
+        onCrear={cargarDatos}
+      />
+
+      <ModalAhorroCompartido
+        visible={modalAhorroCompartidoVisible}
+        onCerrar={() => setModalAhorroCompartidoVisible(false)}
+        cuentas={cuentas}
+        usuarios={[]}
+        onCrear={cargarDatos}
       />
     </div>
   );

@@ -7,6 +7,7 @@ const menuItems = [
   { id: 'prestamos', nombre: 'Préstamos', icono: '📋' },
   { id: 'presupuestos', nombre: 'Presupuestos', icono: '🎯' },
   { id: 'fusion', nombre: 'Fusión Cuentas', icono: '🔄' },
+  { id: 'notificaciones', nombre: 'Notificaciones', icono: '🔔' },
   { id: 'configuracion', nombre: 'Configuración', icono: '⚙️' },
 ];
 

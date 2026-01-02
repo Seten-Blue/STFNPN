@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-const Header = ({ onMenuClick, onNuevoClick }) => {
+const Header = ({ onMenuClick, onNuevoClick, onGastoCompartidoClick, onIngresoCompartidoClick, onMetaRequeridaClick, onAhorroCompartidoClick }) => {
   const { usuario, usuarios, cambiarUsuario, cerrarSesion, cargarUsuarios } = useAuth();
   const [mostrarDropdown, setMostrarDropdown] = useState(false);
   const navigate = useNavigate();
@@ -66,6 +66,38 @@ const Header = ({ onMenuClick, onNuevoClick }) => {
             </svg>
             <span className="hidden sm:inline">Nuevo</span>
           </button>
+
+          {/* Botones de modales compartidos */}
+          <div className="hidden md:flex gap-2">
+            <button
+              onClick={onGastoCompartidoClick}
+              className="px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition font-medium text-sm"
+              title="Crear Gasto Compartido"
+            >
+              💸 Gasto Compartido
+            </button>
+            <button
+              onClick={onIngresoCompartidoClick}
+              className="px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition font-medium text-sm"
+              title="Crear Ingreso Compartido"
+            >
+              💰 Ingreso Compartido
+            </button>
+            <button
+              onClick={onMetaRequeridaClick}
+              className="px-3 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition font-medium text-sm"
+              title="Crear Meta"
+            >
+              🎯 Meta
+            </button>
+            <button
+              onClick={onAhorroCompartidoClick}
+              className="px-3 py-2 bg-teal-100 text-teal-700 rounded-lg hover:bg-teal-200 transition font-medium text-sm"
+              title="Crear Fondo de Ahorro"
+            >
+              🏦 Ahorro Compartido
+            </button>
+          </div>
 
           {/* Avatar usuario con dropdown */}
           <div className="relative">

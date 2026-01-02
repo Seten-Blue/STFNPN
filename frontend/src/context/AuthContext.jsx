@@ -52,7 +52,12 @@ export const AuthProvider = ({ children }) => {
         });
         const data = await response.json();
         if (data.success) {
-          setUsuario(data.usuario);
+          // Normalizar usuario: convertir _id a id
+          const usuarioNormalizado = {
+            ...data.usuario,
+            id: data.usuario._id || data.usuario.id
+          };
+          setUsuario(usuarioNormalizado);
           resolve(true);
         } else {
           // Token inválido, limpiar
@@ -85,8 +90,13 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
       
       if (data.success) {
+        // Normalizar usuario: convertir _id a id
+        const usuarioNormalizado = {
+          ...data.usuario,
+          id: data.usuario._id || data.usuario.id
+        };
         setToken(data.token);
-        setUsuario(data.usuario);
+        setUsuario(usuarioNormalizado);
         localStorage.setItem('token', data.token);
         cargarUsuarios();
         return { success: true, message: data.message };
@@ -115,8 +125,13 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
       
       if (data.success) {
+        // Normalizar usuario: convertir _id a id
+        const usuarioNormalizado = {
+          ...data.usuario,
+          id: data.usuario._id || data.usuario.id
+        };
         setToken(data.token);
-        setUsuario(data.usuario);
+        setUsuario(usuarioNormalizado);
         localStorage.setItem('token', data.token);
         cargarUsuarios();
         return { success: true, message: data.message };
@@ -147,7 +162,12 @@ export const AuthProvider = ({ children }) => {
   const cambiarUsuario = (usuarioId) => {
     const usuarioSeleccionado = usuarios.find(u => u._id === usuarioId);
     if (usuarioSeleccionado) {
-      setUsuario(usuarioSeleccionado);
+      // Normalizar usuario: convertir _id a id
+      const usuarioNormalizado = {
+        ...usuarioSeleccionado,
+        id: usuarioSeleccionado._id || usuarioSeleccionado.id
+      };
+      setUsuario(usuarioNormalizado);
     }
   };
 

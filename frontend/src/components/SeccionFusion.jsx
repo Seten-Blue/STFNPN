@@ -1,521 +1,455 @@
-import React, { useState, useEffect } from 'react';
-import { formatearMoneda } from '../utils/constantes';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { transaccionesAPI } from '../services/api';
+import {
+  BarChart, Bar, PieChart, Pie, LineChart, Line,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  Cell
+} from 'recharts';
 
-const SeccionFusion = ({
-  transacciones,
-  cuentas,
-  presupuestos,
-  onCrearTransaccion,
-  periodo,
-  setPeriodo,
-  fecha,
-  setFecha,
-}) => {
-  const { usuario, usuarios, cargarUsuarios } = useAuth();
-  const [usuarioComparativo, setUsuarioComparativo] = useState(null);
-  const [datosComparativos, setDatosComparativos] = useState(null);
-  const [mostrarFormulario, setMostrarFormulario] = useState(false);
-  const [loadingComparativo, setLoadingComparativo] = useState(false);
-  
-  const [formData, setFormData] = useState({
-    concepto: '',
-    cantidad: '',
-    tipo: 'gasto',
-    categoria: 'Otros',
-    distribucion: 'igual',
-    porcentajeUsuario1: 50,
-    porcentajeUsuario2: 50,
-  });
+function SeccionFusion() {
+  const { usuario, usuarios } = useAuth();
+  const [usuarioSeleccionado, setUsuarioSeleccionado] = useState(null);
+  const [transacciones1, setTransacciones1] = useState([]);
+  const [transacciones2, setTransacciones2] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [filtroFecha, setFiltroFecha] = useState('mes');
+  const [fechaInicio, setFechaInicio] = useState(new Date(new Date().setDate(1)).toISOString().split('T')[0]);
+  const [fechaFin, setFechaFin] = useState(new Date().toISOString().split('T')[0]);
+
+  const colores = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6'];
 
   useEffect(() => {
-    cargarUsuarios();
-  }, []);
+    if (usuarioSeleccionado && usuario) {
+      cargarDatos();
+    }
+  }, [usuarioSeleccionado, filtroFecha, fechaInicio, fechaFin]);
 
-  const cargarDatosComparativos = async (usuarioId) => {
-    setLoadingComparativo(true);
+  const cargarDatos = async () => {
+    setLoading(true);
     try {
-      const API_URL = 'http://localhost:3001/api';
-      const params = new URLSearchParams({ usuarioId, periodo, fecha });
-      
-      const [trans, ctas, presup] = await Promise.all([
-        fetch(`${API_URL}/transacciones?${params}`).then(r => r.json()),
-        fetch(`${API_URL}/cuentas?usuarioId=${usuarioId}`).then(r => r.json()),
-        fetch(`${API_URL}/presupuestos/estado?usuarioId=${usuarioId}`).then(r => r.json()),
-      ]);
-      
-      setDatosComparativos({
-        transacciones: Array.isArray(trans) ? trans : [],
-        cuentas: Array.isArray(ctas) ? ctas : [],
-        presupuestos: Array.isArray(presup) ? presup : [],
-      });
+      const filtros = {
+        periodo: filtroFecha,
+        usuarioId: usuario.id,
+      };
+
+      if (filtroFecha === 'personalizado') {
+        filtros.fechaInicio = fechaInicio;
+        filtros.fechaFin = fechaFin;
+      } else {
+        const hoy = new Date();
+        if (filtroFecha === 'mes') {
+          filtros.fecha = hoy.toISOString().split('T')[0];
+        }
+      }
+
+      const trans1 = await transaccionesAPI.obtener(filtros);
+      setTransacciones1(Array.isArray(trans1) ? trans1 : []);
+
+      filtros.usuarioId = usuarioSeleccionado._id;
+      const trans2 = await transaccionesAPI.obtener(filtros);
+      setTransacciones2(Array.isArray(trans2) ? trans2 : []);
     } catch (error) {
-      console.error('Error cargando datos comparativos:', error);
+      console.error('Error al cargar datos:', error);
     } finally {
-      setLoadingComparativo(false);
+      setLoading(false);
     }
   };
 
-  const handleSeleccionarUsuario = (user) => {
-    setUsuarioComparativo(user);
-    cargarDatosComparativos(user._id);
+  const calcularEstadisticas = (transacciones) => {
+    const gastos = transacciones.filter(t => t.tipo === 'gasto');
+    const ingresos = transacciones.filter(t => t.tipo === 'ingreso');
+
+    const totalGastos = gastos.reduce((sum, t) => sum + (t.cantidad || 0), 0);
+    const totalIngresos = ingresos.reduce((sum, t) => sum + (t.cantidad || 0), 0);
+    const balance = totalIngresos - totalGastos;
+
+    const gastosPorCategoria = {};
+    gastos.forEach(t => {
+      const cat = t.categoria || 'Sin categoría';
+      gastosPorCategoria[cat] = (gastosPorCategoria[cat] || 0) + (t.cantidad || 0);
+    });
+
+    const ingresosPorCategoria = {};
+    ingresos.forEach(t => {
+      const cat = t.categoria || 'Sin categoría';
+      ingresosPorCategoria[cat] = (ingresosPorCategoria[cat] || 0) + (t.cantidad || 0);
+    });
+
+    return {
+      totalGastos,
+      totalIngresos,
+      balance,
+      gastos,
+      ingresos,
+      gastosPorCategoria,
+      ingresosPorCategoria,
+      cantidadTransacciones: transacciones.length
+    };
   };
 
-  const calcularTotales = (trans) => {
-    const ingresos = trans.filter(t => t.tipo === 'ingreso').reduce((sum, t) => sum + t.cantidad, 0);
-    const gastos = trans.filter(t => t.tipo === 'gasto').reduce((sum, t) => sum + t.cantidad, 0);
-    return { ingresos, gastos, balance: ingresos - gastos };
-  };
+  const stats1 = calcularEstadisticas(transacciones1);
+  const stats2 = calcularEstadisticas(transacciones2);
 
-  const calcularSaldoTotal = (ctas) => {
-    return ctas.reduce((sum, c) => sum + (c.saldo || 0), 0);
-  };
-
-  const totalesUsuario1 = calcularTotales(transacciones);
-  const saldoUsuario1 = calcularSaldoTotal(cuentas);
-  
-  const totalesUsuario2 = datosComparativos ? calcularTotales(datosComparativos.transacciones) : null;
-  const saldoUsuario2 = datosComparativos ? calcularSaldoTotal(datosComparativos.cuentas) : null;
-
-  const handleCrearTransaccionCompartida = async (e) => {
-    e.preventDefault();
-    if (!formData.concepto || !formData.cantidad) {
-      alert('Por favor completa todos los campos');
-      return;
+  const datosComparacion = [
+    {
+      nombre: usuario?.nombre || 'Usuario 1',
+      ingresos: stats1.totalIngresos,
+      gastos: stats1.totalGastos,
+      balance: stats1.balance
+    },
+    {
+      nombre: usuarioSeleccionado?.nombre || 'Usuario 2',
+      ingresos: stats2.totalIngresos,
+      gastos: stats2.totalGastos,
+      balance: stats2.balance
     }
+  ];
 
-    const cantidadTotal = parseFloat(formData.cantidad);
-    let cantidadUsuario1, cantidadUsuario2;
+  const datosGastosPastel1 = Object.entries(stats1.gastosPorCategoria).map(([cat, valor]) => ({
+    name: cat,
+    value: valor
+  }));
 
-    if (formData.distribucion === 'igual') {
-      cantidadUsuario1 = cantidadTotal / 2;
-      cantidadUsuario2 = cantidadTotal / 2;
-    } else {
-      cantidadUsuario1 = (cantidadTotal * formData.porcentajeUsuario1) / 100;
-      cantidadUsuario2 = (cantidadTotal * formData.porcentajeUsuario2) / 100;
-    }
+  const datosGastosPastel2 = Object.entries(stats2.gastosPorCategoria).map(([cat, valor]) => ({
+    name: cat,
+    value: valor
+  }));
 
-    try {
-      await onCrearTransaccion({
-        concepto: `[Compartido] ${formData.concepto}`,
-        cantidad: cantidadUsuario1,
-        tipo: formData.tipo,
-        categoria: formData.categoria,
-        esCompartida: true,
-        usuarioCompartido: usuarioComparativo._id,
-      });
-
-      const API_URL = 'http://localhost:3001/api';
-      await fetch(`${API_URL}/transacciones`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          concepto: `[Compartido] ${formData.concepto}`,
-          cantidad: cantidadUsuario2,
-          tipo: formData.tipo,
-          categoria: formData.categoria,
-          usuario: usuarioComparativo._id,
-          esCompartida: true,
-          usuarioCompartido: usuario.id,
-        }),
-      });
-
-      setFormData({
-        concepto: '',
-        cantidad: '',
-        tipo: 'gasto',
-        categoria: 'Otros',
-        distribucion: 'igual',
-        porcentajeUsuario1: 50,
-        porcentajeUsuario2: 50,
-      });
-      setMostrarFormulario(false);
-      
-      cargarDatosComparativos(usuarioComparativo._id);
-      alert('Transacción compartida registrada exitosamente');
-    } catch (error) {
-      alert('Error al crear transacción compartida');
-    }
+  const diferenciasValores = {
+    ingresos: stats2.totalIngresos - stats1.totalIngresos,
+    gastos: stats2.totalGastos - stats1.totalGastos,
+    balance: stats2.balance - stats1.balance
   };
 
-  if (!usuarioComparativo) {
-    const otrosUsuarios = usuarios.filter(u => u._id !== usuario?.id);
-    
-    return (
-      <div className="space-y-6">
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <h2 className="text-2xl font-bold text-slate-800 mb-2">🔄 Fusión de Cuentas</h2>
-          <p className="text-slate-600 mb-6">
-            Compara tus finanzas con otro usuario y registra gastos/ingresos compartidos.
-          </p>
-          
-          {otrosUsuarios.length === 0 ? (
-            <div className="text-center py-8 bg-gray-50 rounded-lg">
-              <span className="text-4xl mb-4 block">👥</span>
-              <p className="text-slate-600">No hay otros usuarios registrados.</p>
-              <p className="text-sm text-slate-500 mt-2">
-                Invita a alguien a crear una cuenta para usar esta función.
-              </p>
+  const diferenciasProcentaje = {
+    ingresos: stats1.totalIngresos !== 0 ? ((diferenciasValores.ingresos / stats1.totalIngresos) * 100).toFixed(2) : 0,
+    gastos: stats1.totalGastos !== 0 ? ((diferenciasValores.gastos / stats1.totalGastos) * 100).toFixed(2) : 0,
+    balance: stats1.balance !== 0 ? ((diferenciasValores.balance / Math.abs(stats1.balance)) * 100).toFixed(2) : 0
+  };
+
+  const formatear = (num) => {
+    return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'COP' }).format(num);
+  };
+
+  return (
+    <div className="p-6 bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold text-slate-900 mb-2">🔄 Fusión & Comparativa de Cuentas</h1>
+        <p className="text-slate-600">Análisis detallado y comparación entre usuarios</p>
+      </div>
+
+      {/* Selector de usuario */}
+      <div className="bg-white rounded-xl shadow-md p-6 mb-6 border-l-4 border-blue-500">
+        <h2 className="text-lg font-bold text-slate-800 mb-4">👥 Seleccionar usuario para comparar</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Tu cuenta</label>
+            <div className="px-4 py-3 bg-blue-50 rounded-lg border border-blue-200 text-slate-800 font-medium">
+              {usuario?.nombre || 'Cargando...'}
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Comparar con</label>
+            <select
+              value={usuarioSeleccionado?._id || ''}
+              onChange={(e) => {
+                const u = usuarios.find(usr => usr._id === e.target.value);
+                setUsuarioSeleccionado(u);
+              }}
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-slate-800"
+            >
+              <option value="">Seleccionar usuario...</option>
+              {usuarios.filter(u => u._id !== usuario?.id).map(u => (
+                <option key={u._id} value={u._id}>{u.nombre}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {usuarioSeleccionado ? (
+        <>
+          {/* Filtros */}
+          <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+            <h3 className="text-lg font-bold text-slate-800 mb-4">🔍 Filtros</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Período</label>
+                <select
+                  value={filtroFecha}
+                  onChange={(e) => setFiltroFecha(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-slate-800"
+                >
+                  <option value="mes">Este mes</option>
+                  <option value="trimestre">Este trimestre</option>
+                  <option value="año">Este año</option>
+                  <option value="personalizado">Personalizado</option>
+                </select>
+              </div>
+
+              {filtroFecha === 'personalizado' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Desde</label>
+                    <input
+                      type="date"
+                      value={fechaInicio}
+                      onChange={(e) => setFechaInicio(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-slate-800"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Hasta</label>
+                    <input
+                      type="date"
+                      value={fechaFin}
+                      onChange={(e) => setFechaFin(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-slate-800"
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="mt-4 text-slate-600">Cargando datos...</p>
             </div>
           ) : (
             <>
-              <h3 className="font-semibold text-slate-700 mb-4">Selecciona un usuario para comparar:</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {otrosUsuarios.map(u => (
-                  <button
-                    key={u._id}
-                    onClick={() => handleSeleccionarUsuario(u)}
-                    className="p-4 border-2 border-gray-200 rounded-xl hover:border-teal-500 hover:bg-teal-50 transition text-left group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-full bg-teal-600 flex items-center justify-center text-white text-xl font-bold">
-                        {u.avatar || u.nombre?.charAt(0).toUpperCase()}
-                      </div>
-                      <div>
-                        <div className="font-semibold text-slate-800 group-hover:text-teal-700">
-                          {u.nombre}
+              {/* Resumen Ejecutivo */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div className="bg-gradient-to-br from-green-50 to-green-100 border-l-4 border-green-500 rounded-xl p-4 shadow-md">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-3xl">💰</span>
+                    <span className="text-xs bg-green-200 text-green-800 px-2 py-1 rounded">Ingresos</span>
+                  </div>
+                  <p className="text-slate-700 text-sm font-medium">{usuario?.nombre}</p>
+                  <p className="text-2xl font-bold text-green-700">{formatear(stats1.totalIngresos)}</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-red-50 to-red-100 border-l-4 border-red-500 rounded-xl p-4 shadow-md">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-3xl">💸</span>
+                    <span className="text-xs bg-red-200 text-red-800 px-2 py-1 rounded">Gastos</span>
+                  </div>
+                  <p className="text-slate-700 text-sm font-medium">{usuario?.nombre}</p>
+                  <p className="text-2xl font-bold text-red-700">{formatear(stats1.totalGastos)}</p>
+                </div>
+
+                <div className={`bg-gradient-to-br ${stats2.balance >= 0 ? 'from-blue-50 to-blue-100' : 'from-orange-50 to-orange-100'} border-l-4 ${stats2.balance >= 0 ? 'border-blue-500' : 'border-orange-500'} rounded-xl p-4 shadow-md`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-3xl">⚖️</span>
+                    <span className={`text-xs px-2 py-1 rounded ${stats2.balance >= 0 ? 'bg-blue-200 text-blue-800' : 'bg-orange-200 text-orange-800'}`}>
+                      {stats2.balance >= 0 ? 'Superávit' : 'Déficit'}
+                    </span>
+                  </div>
+                  <p className="text-slate-700 text-sm font-medium">{usuarioSeleccionado?.nombre}</p>
+                  <p className={`text-2xl font-bold ${stats2.balance >= 0 ? 'text-blue-700' : 'text-orange-700'}`}>
+                    {formatear(stats2.balance)}
+                  </p>
+                </div>
+
+                <div className={`bg-gradient-to-br ${Math.max(stats1.totalGastos, stats2.totalGastos) > Math.max(stats1.totalIngresos, stats2.totalIngresos) ? 'from-yellow-50 to-yellow-100 border-l-4 border-yellow-500' : 'from-green-50 to-green-100 border-l-4 border-green-500'} rounded-xl p-4 shadow-md`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-3xl">{Math.max(stats1.totalGastos, stats2.totalGastos) > Math.max(stats1.totalIngresos, stats2.totalIngresos) ? '⚠️' : '✅'}</span>
+                    <span className="text-xs bg-slate-200 text-slate-800 px-2 py-1 rounded">Estado</span>
+                  </div>
+                  <p className="text-slate-700 text-sm font-medium">Finanzas</p>
+                  <p className="text-lg font-bold text-slate-800">
+                    {Math.max(stats1.totalGastos, stats2.totalGastos) > Math.max(stats1.totalIngresos, stats2.totalIngresos)
+                      ? 'Gastos ⬆️'
+                      : 'Equilibrio ✓'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Gráfico de Comparación - Barras */}
+              <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+                <h3 className="text-xl font-bold text-slate-800 mb-4">📊 Comparativa General</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={datosComparacion}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="nombre" />
+                    <YAxis />
+                    <Tooltip formatter={(value) => formatear(value)} />
+                    <Legend />
+                    <Bar dataKey="ingresos" fill="#10b981" name="Ingresos" />
+                    <Bar dataKey="gastos" fill="#ef4444" name="Gastos" />
+                    <Bar dataKey="balance" fill="#3b82f6" name="Balance" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Diferencias */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="bg-white rounded-xl shadow-md p-6 border-t-4 border-green-500">
+                  <h4 className="text-sm font-medium text-slate-600 mb-2">Diferencia Ingresos</h4>
+                  <p className="text-2xl font-bold text-slate-800">{formatear(diferenciasValores.ingresos)}</p>
+                  <p className={`text-sm ${diferenciasValores.ingresos >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {diferenciasValores.ingresos >= 0 ? '+' : ''}{diferenciasProcentaje.ingresos}%
+                  </p>
+                </div>
+
+                <div className="bg-white rounded-xl shadow-md p-6 border-t-4 border-red-500">
+                  <h4 className="text-sm font-medium text-slate-600 mb-2">Diferencia Gastos</h4>
+                  <p className="text-2xl font-bold text-slate-800">{formatear(diferenciasValores.gastos)}</p>
+                  <p className={`text-sm ${diferenciasValores.gastos <= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {diferenciasValores.gastos >= 0 ? '+' : ''}{diferenciasProcentaje.gastos}%
+                  </p>
+                </div>
+
+                <div className="bg-white rounded-xl shadow-md p-6 border-t-4 border-blue-500">
+                  <h4 className="text-sm font-medium text-slate-600 mb-2">Diferencia Balance</h4>
+                  <p className="text-2xl font-bold text-slate-800">{formatear(diferenciasValores.balance)}</p>
+                  <p className={`text-sm ${diferenciasValores.balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {diferenciasValores.balance >= 0 ? '+' : ''}{diferenciasProcentaje.balance}%
+                  </p>
+                </div>
+              </div>
+
+              {/* Gráficos de Gastos por Categoría */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div className="bg-white rounded-xl shadow-md p-6">
+                  <h3 className="text-lg font-bold text-slate-800 mb-4">🗂️ Gastos {usuario?.nombre}</h3>
+                  {datosGastosPastel1.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie
+                          data={datosGastosPastel1}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, value }) => `${name}: ${formatear(value)}`}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {datosGastosPastel1.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={colores[index % colores.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value) => formatear(value)} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <p className="text-center text-slate-500 py-8">Sin gastos en este período</p>
+                  )}
+                </div>
+
+                <div className="bg-white rounded-xl shadow-md p-6">
+                  <h3 className="text-lg font-bold text-slate-800 mb-4">🗂️ Gastos {usuarioSeleccionado?.nombre}</h3>
+                  {datosGastosPastel2.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie
+                          data={datosGastosPastel2}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, value }) => `${name}: ${formatear(value)}`}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {datosGastosPastel2.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={colores[index % colores.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value) => formatear(value)} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <p className="text-center text-slate-500 py-8">Sin gastos en este período</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Detalle de Categorías */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div className="bg-white rounded-xl shadow-md p-6">
+                  <h3 className="text-lg font-bold text-slate-800 mb-4">📋 Detalle Gastos - {usuario?.nombre}</h3>
+                  <div className="space-y-2 max-h-80 overflow-y-auto">
+                    {Object.entries(stats1.gastosPorCategoria)
+                      .sort(([, a], [, b]) => b - a)
+                      .map(([categoria, monto], idx) => (
+                        <div key={idx} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition">
+                          <span className="font-medium text-slate-700">{categoria}</span>
+                          <span className="text-red-600 font-bold">{formatear(monto)}</span>
                         </div>
-                        <div className="text-sm text-slate-500">{u.email}</div>
-                      </div>
+                      ))}
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-xl shadow-md p-6">
+                  <h3 className="text-lg font-bold text-slate-800 mb-4">📋 Detalle Gastos - {usuarioSeleccionado?.nombre}</h3>
+                  <div className="space-y-2 max-h-80 overflow-y-auto">
+                    {Object.entries(stats2.gastosPorCategoria)
+                      .sort(([, a], [, b]) => b - a)
+                      .map(([categoria, monto], idx) => (
+                        <div key={idx} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition">
+                          <span className="font-medium text-slate-700">{categoria}</span>
+                          <span className="text-red-600 font-bold">{formatear(monto)}</span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Historial de Movimientos */}
+              <div className="bg-white rounded-xl shadow-md p-6">
+                <h3 className="text-lg font-bold text-slate-800 mb-4">📅 Historial de Movimientos</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-semibold text-slate-700 mb-3">{usuario?.nombre}</h4>
+                    <div className="space-y-2 max-h-96 overflow-y-auto">
+                      {transacciones1.slice(0, 10).map((t, idx) => (
+                        <div key={idx} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition">
+                          <div>
+                            <p className="font-medium text-slate-800">{t.categoria}</p>
+                            <p className="text-xs text-slate-500">{new Date(t.fecha).toLocaleDateString()}</p>
+                          </div>
+                          <span className={`font-bold ${t.tipo === 'gasto' ? 'text-red-600' : 'text-green-600'}`}>
+                            {t.tipo === 'gasto' ? '-' : '+'}{formatear(t.cantidad)}
+                          </span>
+                        </div>
+                      ))}
                     </div>
-                  </button>
-                ))}
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-slate-700 mb-3">{usuarioSeleccionado?.nombre}</h4>
+                    <div className="space-y-2 max-h-96 overflow-y-auto">
+                      {transacciones2.slice(0, 10).map((t, idx) => (
+                        <div key={idx} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition">
+                          <div>
+                            <p className="font-medium text-slate-800">{t.categoria}</p>
+                            <p className="text-xs text-slate-500">{new Date(t.fecha).toLocaleDateString()}</p>
+                          </div>
+                          <span className={`font-bold ${t.tipo === 'gasto' ? 'text-red-600' : 'text-green-600'}`}>
+                            {t.tipo === 'gasto' ? '-' : '+'}{formatear(t.cantidad)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
             </>
           )}
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <div className="flex justify-between items-start">
-          <div>
-            <h2 className="text-2xl font-bold text-slate-800">🔄 Comparativa de Finanzas</h2>
-            <p className="text-slate-600 text-sm mt-1">
-              Comparando: <span className="font-semibold">{usuario?.nombre}</span> vs{' '}
-              <span className="font-semibold">{usuarioComparativo.nombre}</span>
-            </p>
-          </div>
-          <button
-            onClick={() => {
-              setUsuarioComparativo(null);
-              setDatosComparativos(null);
-            }}
-            className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg font-medium text-slate-700 transition"
-          >
-            Cambiar usuario
-          </button>
-        </div>
-      </div>
-
-      {/* Comparativa principal */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Usuario 1 */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border-2 border-teal-200">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-full bg-teal-600 flex items-center justify-center text-white font-bold">
-              {usuario?.avatar || usuario?.nombre?.charAt(0).toUpperCase()}
-            </div>
-            <div>
-              <h3 className="font-bold text-slate-800">{usuario?.nombre}</h3>
-              <p className="text-xs text-slate-500">Tu cuenta</p>
-            </div>
-          </div>
-          
-          <div className="space-y-3">
-            <div className="flex justify-between items-center p-3 bg-teal-50 rounded-lg">
-              <span className="text-slate-700">Saldo Total</span>
-              <span className="font-bold text-lg text-teal-700">{formatearMoneda(saldoUsuario1)}</span>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-              <span className="text-slate-700">Ingresos</span>
-              <span className="font-bold text-green-700">{formatearMoneda(totalesUsuario1.ingresos)}</span>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
-              <span className="text-slate-700">Gastos</span>
-              <span className="font-bold text-red-700">{formatearMoneda(totalesUsuario1.gastos)}</span>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-slate-100 rounded-lg border-t-2">
-              <span className="font-semibold text-slate-800">Balance</span>
-              <span className={`font-bold text-lg ${totalesUsuario1.balance >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-                {formatearMoneda(totalesUsuario1.balance)}
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-4 pt-4 border-t">
-            <h4 className="font-semibold text-slate-700 mb-2">Cuentas ({cuentas.length})</h4>
-            <div className="space-y-2 max-h-32 overflow-y-auto">
-              {cuentas.map(c => (
-                <div key={c._id} className="flex justify-between text-sm p-2 bg-gray-50 rounded">
-                  <span className="text-slate-700">{c.nombre}</span>
-                  <span className="font-medium text-teal-700">{formatearMoneda(c.saldo)}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Usuario 2 */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border-2 border-purple-200">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white font-bold">
-              {usuarioComparativo.avatar || usuarioComparativo.nombre?.charAt(0).toUpperCase()}
-            </div>
-            <div>
-              <h3 className="font-bold text-slate-800">{usuarioComparativo.nombre}</h3>
-              <p className="text-xs text-slate-500">Cuenta comparativa</p>
-            </div>
-          </div>
-          
-          {loadingComparativo ? (
-            <div className="flex items-center justify-center h-48">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-            </div>
-          ) : datosComparativos ? (
-            <>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-                  <span className="text-slate-700">Saldo Total</span>
-                  <span className="font-bold text-lg text-purple-700">{formatearMoneda(saldoUsuario2)}</span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                  <span className="text-slate-700">Ingresos</span>
-                  <span className="font-bold text-green-700">{formatearMoneda(totalesUsuario2?.ingresos || 0)}</span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
-                  <span className="text-slate-700">Gastos</span>
-                  <span className="font-bold text-red-700">{formatearMoneda(totalesUsuario2?.gastos || 0)}</span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-slate-100 rounded-lg border-t-2">
-                  <span className="font-semibold text-slate-800">Balance</span>
-                  <span className={`font-bold text-lg ${(totalesUsuario2?.balance || 0) >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-                    {formatearMoneda(totalesUsuario2?.balance || 0)}
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-4 pt-4 border-t">
-                <h4 className="font-semibold text-slate-700 mb-2">Cuentas ({datosComparativos.cuentas.length})</h4>
-                <div className="space-y-2 max-h-32 overflow-y-auto">
-                  {datosComparativos.cuentas.map(c => (
-                    <div key={c._id} className="flex justify-between text-sm p-2 bg-gray-50 rounded">
-                      <span className="text-slate-700">{c.nombre}</span>
-                      <span className="font-medium text-purple-700">{formatearMoneda(c.saldo)}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </>
-          ) : null}
-        </div>
-      </div>
-
-      {/* Resumen combinado */}
-      {datosComparativos && (
-        <div className="bg-gradient-to-r from-teal-600 to-purple-600 rounded-xl p-6 text-white">
-          <h3 className="font-bold text-xl mb-4">📊 Resumen Combinado</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white/20 rounded-lg p-4 text-center">
-              <p className="text-sm opacity-80">Saldo Total</p>
-              <p className="text-2xl font-bold">{formatearMoneda(saldoUsuario1 + (saldoUsuario2 || 0))}</p>
-            </div>
-            <div className="bg-white/20 rounded-lg p-4 text-center">
-              <p className="text-sm opacity-80">Ingresos</p>
-              <p className="text-2xl font-bold">{formatearMoneda(totalesUsuario1.ingresos + (totalesUsuario2?.ingresos || 0))}</p>
-            </div>
-            <div className="bg-white/20 rounded-lg p-4 text-center">
-              <p className="text-sm opacity-80">Gastos</p>
-              <p className="text-2xl font-bold">{formatearMoneda(totalesUsuario1.gastos + (totalesUsuario2?.gastos || 0))}</p>
-            </div>
-            <div className="bg-white/20 rounded-lg p-4 text-center">
-              <p className="text-sm opacity-80">Balance</p>
-              <p className="text-2xl font-bold">{formatearMoneda(totalesUsuario1.balance + (totalesUsuario2?.balance || 0))}</p>
-            </div>
-          </div>
+        </>
+      ) : (
+        <div className="bg-white rounded-xl shadow-md p-12 text-center">
+          <span className="text-6xl">👥</span>
+          <p className="mt-4 text-slate-600 text-lg">Selecciona un usuario para comenzar la comparativa</p>
         </div>
       )}
-
-      {/* Formulario compartido */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <h3 className="font-bold text-slate-800 text-lg">💸 Gasto/Ingreso Compartido</h3>
-            <p className="text-sm text-slate-500">Divide automáticamente entre ambos</p>
-          </div>
-          {!mostrarFormulario && (
-            <button
-              onClick={() => setMostrarFormulario(true)}
-              className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-medium transition"
-            >
-              + Nuevo Compartido
-            </button>
-          )}
-        </div>
-
-        {mostrarFormulario && (
-          <form onSubmit={handleCrearTransaccionCompartida} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-800 mb-1">Concepto *</label>
-                <input
-                  type="text"
-                  placeholder="Ej: Cena, Alquiler..."
-                  value={formData.concepto}
-                  onChange={(e) => setFormData({ ...formData, concepto: e.target.value })}
-                  className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none text-slate-800"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-800 mb-1">Cantidad Total *</label>
-                <input
-                  type="number"
-                  placeholder="0.00"
-                  step="0.01"
-                  value={formData.cantidad}
-                  onChange={(e) => setFormData({ ...formData, cantidad: e.target.value })}
-                  className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none text-slate-800"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-800 mb-1">Tipo</label>
-                <select
-                  value={formData.tipo}
-                  onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}
-                  className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none text-slate-800"
-                >
-                  <option value="gasto">Gasto</option>
-                  <option value="ingreso">Ingreso</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-800 mb-1">Categoría</label>
-                <select
-                  value={formData.categoria}
-                  onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
-                  className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none text-slate-800"
-                >
-                  <option value="Alimentación">Alimentación</option>
-                  <option value="Transporte">Transporte</option>
-                  <option value="Hogar">Hogar</option>
-                  <option value="Entretenimiento">Entretenimiento</option>
-                  <option value="Utilidades">Utilidades</option>
-                  <option value="Otros">Otros</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="p-4 bg-slate-50 rounded-lg">
-              <label className="block text-sm font-medium text-slate-800 mb-3">¿Cómo dividir?</label>
-              <div className="flex gap-4 mb-4">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    value="igual"
-                    checked={formData.distribucion === 'igual'}
-                    onChange={(e) => setFormData({ ...formData, distribucion: e.target.value, porcentajeUsuario1: 50, porcentajeUsuario2: 50 })}
-                    className="w-4 h-4 text-teal-600"
-                  />
-                  <span className="text-sm font-medium text-slate-700">50/50</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    value="personalizado"
-                    checked={formData.distribucion === 'personalizado'}
-                    onChange={(e) => setFormData({ ...formData, distribucion: e.target.value })}
-                    className="w-4 h-4 text-teal-600"
-                  />
-                  <span className="text-sm font-medium text-slate-700">Personalizado</span>
-                </label>
-              </div>
-
-              {formData.distribucion === 'personalizado' && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs text-slate-600 mb-1">{usuario?.nombre} (%)</label>
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={formData.porcentajeUsuario1}
-                      onChange={(e) => {
-                        const val = parseInt(e.target.value) || 0;
-                        setFormData({ ...formData, porcentajeUsuario1: val, porcentajeUsuario2: 100 - val });
-                      }}
-                      className="w-full px-3 py-2 border rounded-lg text-slate-800"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-slate-600 mb-1">{usuarioComparativo.nombre} (%)</label>
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={formData.porcentajeUsuario2}
-                      onChange={(e) => {
-                        const val = parseInt(e.target.value) || 0;
-                        setFormData({ ...formData, porcentajeUsuario2: val, porcentajeUsuario1: 100 - val });
-                      }}
-                      className="w-full px-3 py-2 border rounded-lg text-slate-800"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {formData.cantidad && (
-                <div className="mt-4 p-3 bg-white rounded-lg border">
-                  <p className="text-xs text-slate-600 mb-2">Vista previa:</p>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-teal-700 font-medium">
-                      {usuario?.nombre}: {formatearMoneda((parseFloat(formData.cantidad) * formData.porcentajeUsuario1) / 100)}
-                    </span>
-                    <span className="text-sm text-purple-700 font-medium">
-                      {usuarioComparativo.nombre}: {formatearMoneda((parseFloat(formData.cantidad) * formData.porcentajeUsuario2) / 100)}
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                type="submit"
-                className="px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-medium transition"
-              >
-                Registrar
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setMostrarFormulario(false);
-                  setFormData({
-                    concepto: '',
-                    cantidad: '',
-                    tipo: 'gasto',
-                    categoria: 'Otros',
-                    distribucion: 'igual',
-                    porcentajeUsuario1: 50,
-                    porcentajeUsuario2: 50,
-                  });
-                }}
-                className="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-slate-700 rounded-lg font-medium transition"
-              >
-                Cancelar
-              </button>
-            </div>
-          </form>
-        )}
-      </div>
     </div>
   );
-};
+}
 
 export default SeccionFusion;
