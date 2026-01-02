@@ -52,10 +52,11 @@ export const AuthProvider = ({ children }) => {
         });
         const data = await response.json();
         if (data.success) {
-          // Normalizar usuario: convertir _id a id
+      // Normalizar usuario: asegurar que tiene tanto id como _id
           const usuarioNormalizado = {
             ...data.usuario,
-            id: data.usuario._id || data.usuario.id
+            id: data.usuario.id || data.usuario._id,
+            _id: data.usuario._id || data.usuario.id
           };
           setUsuario(usuarioNormalizado);
           resolve(true);

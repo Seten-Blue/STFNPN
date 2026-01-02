@@ -22,7 +22,7 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
     miPago: '', // Lo que pago yo específicamente
   });
 
-  const participantesDisponibles = [usuario, ...usuarios.filter(u => u._id !== usuario.id)];
+  const participantesDisponibles = usuario ? [usuario, ...usuarios.filter(u => u._id !== usuario.id && u._id !== usuario._id)] : [];
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -105,7 +105,8 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
         }
         
         const montoRestante = montoTotal - miPago;
-        const otrosParticipantes = participantesSeleccionados.filter(id => id !== usuario.id);
+        const usuarioId = usuario._id || usuario.id;
+        const otrosParticipantes = participantesSeleccionados.filter(id => id !== usuarioId);
         
         if (otrosParticipantes.length === 0) {
           alert('Necesitas al menos otro participante además de ti');
@@ -113,7 +114,7 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
         }
         
         // El usuario paga su porción
-        participantesConMonto[usuario.id] = miPago;
+        participantesConMonto[usuarioId] = miPago;
         
         // Los demás dividen el resto equitativamente
         const pagoPorOtro = montoRestante / otrosParticipantes.length;
@@ -137,7 +138,7 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
         hora: formData.hora,
         cuentaOrigen: formData.cuentaOrigen,
         anotaciones: `GASTO COMPARTIDO: ${formData.concepto}`,
-        usuario: usuario.id,
+        usuario: usuario._id || usuario.id,
         esUrgente: formData.esUrgente,
         esProgramada: formData.esProgramada && !formData.diferirCuotas,
         fechaProgramada: formData.esProgramada && !formData.diferirCuotas ? formData.fechaProgramada : null,

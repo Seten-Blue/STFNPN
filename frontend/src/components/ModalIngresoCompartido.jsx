@@ -21,7 +21,7 @@ function ModalIngresoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear 
     miPago: '',
   });
 
-  const participantesDisponibles = [usuario, ...usuarios.filter(u => u._id !== usuario.id)];
+  const participantesDisponibles = usuario ? [usuario, ...usuarios.filter(u => u._id !== usuario.id && u._id !== usuario._id)] : [];
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -98,14 +98,15 @@ function ModalIngresoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear 
         }
         
         const montoRestante = montoTotal - miPago;
-        const otrosParticipantes = participantesSeleccionados.filter(id => id !== usuario.id);
+        const usuarioId = usuario._id || usuario.id;
+        const otrosParticipantes = participantesSeleccionados.filter(id => id !== usuarioId);
         
         if (otrosParticipantes.length === 0) {
           alert('Necesitas al menos otro participante además de ti');
           return;
         }
         
-        participantesConMonto[usuario.id] = miPago;
+        participantesConMonto[usuarioId] = miPago;
         const pagoPorOtro = montoRestante / otrosParticipantes.length;
         otrosParticipantes.forEach(id => {
           participantesConMonto[id] = pagoPorOtro;
@@ -127,7 +128,7 @@ function ModalIngresoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear 
         hora: formData.hora,
         cuentaDestino: formData.cuentaDestino,
         anotaciones: `INGRESO COMPARTIDO: ${formData.concepto}`,
-        usuario: usuario.id,
+        usuario: usuario._id || usuario.id,
         esProgramada: formData.esProgramada && !formData.diferirCuotas,
         fechaProgramada: formData.esProgramada && !formData.diferirCuotas ? formData.fechaProgramada : null,
         diferirCuotas: formData.diferirCuotas,
