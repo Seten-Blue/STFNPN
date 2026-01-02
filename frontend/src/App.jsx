@@ -153,12 +153,19 @@ function AppContent() {
     try {
       const dataConUsuario = {
         ...data,
-        usuario: usuario.id
+        usuario: usuario._id || usuario.id,
+        sujeto: 'Sujeto 1'
       };
-      await prestamosAPI.crear(dataConUsuario);
-      cargarDatos();
+      console.log('📤 Creando préstamo:', dataConUsuario);
+      const resultado = await prestamosAPI.crear(dataConUsuario);
+      if (resultado.error) {
+        alert('Error al crear préstamo: ' + resultado.error);
+      } else {
+        cargarDatos();
+      }
     } catch (error) {
-      alert('Error al crear préstamo');
+      console.error('Error al crear préstamo:', error);
+      alert('Error al crear préstamo: ' + error.message);
     }
   };
 
