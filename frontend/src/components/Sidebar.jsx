@@ -6,6 +6,7 @@ const menuItems = [
   { id: 'cuentas', nombre: 'Cuentas', icono: '🏦' },
   { id: 'prestamos', nombre: 'Préstamos', icono: '📋' },
   { id: 'presupuestos', nombre: 'Presupuestos', icono: '🎯' },
+  { id: 'fusion', nombre: 'Fusión Cuentas', icono: '🔄' },
   { id: 'configuracion', nombre: 'Configuración', icono: '⚙️' },
 ];
 

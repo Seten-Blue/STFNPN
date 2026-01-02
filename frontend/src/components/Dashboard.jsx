@@ -16,27 +16,24 @@ const TarjetaResumen = ({ titulo, valor, icono, color, subtitulo }) => {
   );
 };
 
-const Dashboard = ({ transacciones, cuentas, presupuestos, periodo, grupo, esGrupal, sujetoActivo = 'Sujeto 1' }) => {
-  // Filtrar por sujeto activo
-  const transaccionesDelSujeto = transacciones.filter(t => t.sujeto === sujetoActivo);
-  const cuentasDelSujeto = cuentas.filter(c => c.sujeto === sujetoActivo);
-  const presupuestosDelSujeto = presupuestos.filter(p => p.sujeto === sujetoActivo);
-
+const Dashboard = ({ transacciones, cuentas, presupuestos, periodo, cuentaActiva }) => {
+  // Sin filtros de sujeto, mostrar todos los datos del usuario actual
+  
   // Calcular totales
-  const totalIngresos = transaccionesDelSujeto
+  const totalIngresos = transacciones
     .filter(t => t.tipo === 'ingreso')
     .reduce((sum, t) => sum + t.cantidad, 0);
   
-  const totalGastos = transaccionesDelSujeto
+  const totalGastos = transacciones
     .filter(t => t.tipo === 'gasto')
     .reduce((sum, t) => sum + t.cantidad, 0);
   
   const balance = totalIngresos - totalGastos;
 
-  const saldoTotal = cuentasDelSujeto.reduce((sum, c) => sum + c.saldo, 0);
+  const saldoTotal = cuentas.reduce((sum, c) => sum + c.saldo, 0);
 
   // Gastos por categoría
-  const gastosPorCategoria = transaccionesDelSujeto
+  const gastosPorCategoria = transacciones
     .filter(t => t.tipo === 'gasto')
     .reduce((acc, t) => {
       if (!acc[t.categoria]) acc[t.categoria] = 0;
@@ -50,17 +47,8 @@ const Dashboard = ({ transacciones, cuentas, presupuestos, periodo, grupo, esGru
 
   const maxGasto = Math.max(...Object.values(gastosPorCategoria), 1);
 
-  // Información de sujeto
-  const sujetoInfo = sujetoActivo || 'Selecciona un sujeto';
-
   return (
     <div className="space-y-6 min-h-screen bg-[#f3f4f6]">
-      {/* Resumen de sujetos */}
-      <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-        <p className="text-sm text-gray-600">
-          <span className="font-medium text-gray-800">Mostrando datos de:</span> <span className="font-bold text-blue-600">{sujetoInfo}</span>
-        </p>
-      </div>
 
       {/* Tarjetas de resumen */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -126,11 +114,11 @@ const Dashboard = ({ transacciones, cuentas, presupuestos, periodo, grupo, esGru
         {/* Saldo por cuenta */}
         <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
           <h3 className="font-bold text-gray-800 mb-4">Cuentas</h3>
-          {cuentasDelSujeto.length === 0 ? (
-            <p className="text-gray-500 text-sm">No hay cuentas registradas para este sujeto</p>
+          {cuentas.length === 0 ? (
+            <p className="text-gray-500 text-sm">No hay cuentas registradas</p>
           ) : (
             <div className="space-y-3">
-              {cuentasDelSujeto.map((cuenta) => (
+              {cuentas.map((cuenta) => (
                 <div key={cuenta._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center gap-3">
                     <div

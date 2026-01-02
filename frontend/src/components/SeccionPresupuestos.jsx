@@ -1,17 +1,14 @@
 import React, { useState } from 'react';
 import { formatearMoneda } from '../utils/constantes';
 
-const SeccionPresupuestos = ({ presupuestos, onCrear, onActualizar, onEliminar, sujetoActivo = 'Sujeto 1' }) => {
-  // Filtrar presupuestos por sujeto activo
-  const presupuestosDelSujeto = presupuestos.filter(p => p.sujeto === sujetoActivo);
+const SeccionPresupuestos = ({ presupuestos, onCrear, onActualizar, onEliminar, cuentaActiva }) => {
+  // Sin filtros de sujeto, mostrar todos los presupuestos del usuario
 
   const [mostrarModal, setMostrarModal] = useState(false);
   const [formData, setFormData] = useState({
     tipo: 'maxima_perdida',
     periodo: 'mensual',
     monto: '',
-    grupo: 'personal',
-    sujeto: sujetoActivo,
   });
 
   const handleSubmit = (e) => {
@@ -29,8 +26,6 @@ const SeccionPresupuestos = ({ presupuestos, onCrear, onActualizar, onEliminar, 
       tipo: 'maxima_perdida',
       periodo: 'mensual',
       monto: '',
-      grupo: 'personal',
-      sujeto: sujetoActivo,
     });
   };
 
@@ -39,7 +34,7 @@ const SeccionPresupuestos = ({ presupuestos, onCrear, onActualizar, onEliminar, 
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Presupuestos - {sujetoActivo}</h2>
+          <h2 className="text-2xl font-bold text-gray-800">Presupuestos</h2>
           <p className="text-gray-500">Define límites de gasto y metas de ahorro</p>
         </div>
         <button
@@ -55,7 +50,7 @@ const SeccionPresupuestos = ({ presupuestos, onCrear, onActualizar, onEliminar, 
 
       {/* Lista de presupuestos */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {presupuestosDelSujeto.map((p) => {
+        {presupuestos.map((p) => {
           const porcentaje = p.porcentajeUsado || 0;
           const excedido = porcentaje > 100;
 

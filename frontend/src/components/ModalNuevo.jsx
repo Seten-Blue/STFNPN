@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { categoriasPredeterminadas, coloresDisponibles, frecuenciasRecurrencia } from '../utils/constantes';
 
-const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, sujetoActivo, sujetos = [] }) => {
+const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => {
   const [tipoTransaccion, setTipoTransaccion] = useState('gasto');
   const [mostrarOpciones, setMostrarOpciones] = useState(false);
   const [formData, setFormData] = useState({
@@ -13,12 +13,10 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, sujetoActivo, sujet
     esRecurrente: false,
     frecuenciaRecurrencia: '',
     tieneRecordatorio: false,
-    cuentaOrigen: '',
+    cuentaOrigen: cuentaActiva,
     cuentaDestino: '',
     colorIcono: '#3B82F6',
-    grupo: 'personal',
-    esGrupal: false,
-    sujeto: sujetoActivo || 'Sujeto 1',
+    cuenta: cuentaActiva,
   });
 
   const categorias = tipoTransaccion === 'gasto' 
@@ -87,12 +85,9 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, sujetoActivo, sujet
       cantidad: parseFloat(formData.cantidad),
       fecha: formData.fecha,
       hora: horaValida,
-      sujeto: formData.sujeto,
       anotaciones: formData.anotaciones || undefined,
       cuentaOrigen: formData.cuentaOrigen || undefined,
       colorIcono: formData.colorIcono || undefined,
-      grupo: formData.grupo || 'personal',
-      esGrupal: formData.esGrupal || false,
     };
     if (tipoTransaccion === 'transferencia') {
       datos.cuentaDestino = formData.cuentaDestino || undefined;
@@ -120,9 +115,6 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, sujetoActivo, sujet
       cuentaOrigen: '',
       cuentaDestino: '',
       colorIcono: '#3B82F6',
-      grupo: 'personal',
-      esGrupal: false,
-      sujeto: sujetoActivo || 'Sujeto 1',
     });
     onCerrar();
   };
@@ -153,7 +145,7 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, sujetoActivo, sujet
                   ? tipo === 'gasto' ? 'text-slate-700 border-b-2 border-slate-700' 
                   : tipo === 'ingreso' ? 'text-teal-600 border-b-2 border-teal-600'
                   : 'text-slate-600 border-b-2 border-slate-600'
-                  : 'text-gray-500 hover:text-gray-700'
+                  : 'text-gray-500 hover:text-slate-800'
               }`}
             >
               {tipo.charAt(0).toUpperCase() + tipo.slice(1)}
@@ -161,27 +153,12 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, sujetoActivo, sujet
           ))}
         </div>
 
-        {/* Selector de sujeto */}
-        <div className="px-4 py-3 bg-blue-50 border-b border-blue-100">
-          <label className="text-sm font-medium text-gray-700 mb-2 block">Sujeto</label>
-          <select
-            name="sujeto"
-            value={formData.sujeto}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          >
-            {sujetos.map((s) => (
-              <option key={s.id} value={s.nombre}>{s.nombre}</option>
-            ))}
-          </select>
-        </div>
-
         {/* Formulario */}
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           {/* Categoría (solo para gasto/ingreso) */}
           {tipoTransaccion !== 'transferencia' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Categoría</label>
+              <label className="block text-sm font-medium text-slate-800 mb-2">Categoría</label>
               <div className="grid grid-cols-3 gap-2">
                 {categorias.map((cat) => (
                   <button
@@ -195,7 +172,7 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, sujetoActivo, sujet
                     }`}
                   >
                     <span className="text-2xl">{cat.icono}</span>
-                    <span className="text-xs mt-1 text-gray-600">{cat.nombre}</span>
+                    <span className="text-xs mt-1 text-slate-700">{cat.nombre}</span>
                   </button>
                 ))}
               </div>
@@ -206,7 +183,7 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, sujetoActivo, sujet
           {tipoTransaccion === 'transferencia' && (
             <>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Cuenta Origen</label>
+                <label className="block text-sm font-medium text-slate-800 mb-1">Cuenta Origen</label>
                 <select
                   name="cuentaOrigen"
                   value={formData.cuentaOrigen}
@@ -221,7 +198,7 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, sujetoActivo, sujet
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Cuenta Destino</label>
+                <label className="block text-sm font-medium text-slate-800 mb-1">Cuenta Destino</label>
                 <select
                   name="cuentaDestino"
                   value={formData.cuentaDestino}
@@ -241,7 +218,7 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, sujetoActivo, sujet
           {/* Cuenta para gasto/ingreso */}
           {tipoTransaccion !== 'transferencia' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">¿De qué cuenta?</label>
+              <label className="block text-sm font-medium text-slate-800 mb-1">¿De qué cuenta?</label>
               <select
                 name="cuentaOrigen"
                 value={formData.cuentaOrigen}
@@ -258,7 +235,7 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, sujetoActivo, sujet
 
           {/* Cantidad */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Cantidad *</label>
+            <label className="block text-sm font-medium text-slate-800 mb-1">Cantidad *</label>
             <input
               type="number"
               name="cantidad"
@@ -273,7 +250,7 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, sujetoActivo, sujet
           {/* Fecha y Hora */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
+              <label className="block text-sm font-medium text-slate-800 mb-1">Fecha</label>
               <input
                 type="date"
                 name="fecha"
@@ -283,7 +260,7 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, sujetoActivo, sujet
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Hora</label>
+              <label className="block text-sm font-medium text-slate-800 mb-1">Hora</label>
               <input
                 type="time"
                 name="hora"
@@ -293,47 +270,6 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, sujetoActivo, sujet
               />
             </div>
           </div>
-
-          {/* Individual/Grupal */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Tipo</label>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setFormData(prev => ({ ...prev, esGrupal: false, grupo: 'personal' }))}
-                className={`flex-1 py-2 rounded-lg border-2 transition ${
-                  !formData.esGrupal ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200'
-                }`}
-              >
-                Individual
-              </button>
-              <button
-                type="button"
-                onClick={() => setFormData(prev => ({ ...prev, esGrupal: true }))}
-                className={`flex-1 py-2 rounded-lg border-2 transition ${
-                  formData.esGrupal ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200'
-                }`}
-              >
-                Grupal
-              </button>
-            </div>
-          </div>
-
-          {formData.esGrupal && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Grupo</label>
-              <select
-                name="grupo"
-                value={formData.grupo}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="familia">Familia</option>
-                <option value="trabajo">Trabajo</option>
-                <option value="amigos">Amigos</option>
-              </select>
-            </div>
-          )}
 
           {/* Opciones adicionales */}
           <button
@@ -351,7 +287,7 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, sujetoActivo, sujet
             <div className="space-y-4 border-t border-gray-200 pt-4">
               {/* Anotaciones */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Anotaciones</label>
+                <label className="block text-sm font-medium text-slate-800 mb-1">Anotaciones</label>
                 <textarea
                   name="anotaciones"
                   value={formData.anotaciones}
@@ -364,7 +300,7 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, sujetoActivo, sujet
 
               {/* Recurrencia */}
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-700">¿Se repite?</span>
+                <span className="text-sm font-medium text-slate-800">¿Se repite?</span>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
                     type="checkbox"
@@ -379,7 +315,7 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, sujetoActivo, sujet
 
               {formData.esRecurrente && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Frecuencia</label>
+                  <label className="block text-sm font-medium text-slate-800 mb-1">Frecuencia</label>
                   <select
                     name="frecuenciaRecurrencia"
                     value={formData.frecuenciaRecurrencia}
@@ -396,7 +332,7 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, sujetoActivo, sujet
 
               {/* Recordatorio */}
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-700">Recordatorio</span>
+                <span className="text-sm font-medium text-slate-800">Recordatorio</span>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
                     type="checkbox"
@@ -411,7 +347,7 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, sujetoActivo, sujet
 
               {/* Color del icono */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Color del icono</label>
+                <label className="block text-sm font-medium text-slate-800 mb-2">Color del icono</label>
                 <div className="flex gap-2 flex-wrap">
                   {coloresDisponibles.map((color) => (
                     <button

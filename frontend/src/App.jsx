@@ -11,7 +11,7 @@ import SeccionCuentas from './components/SeccionCuentas';
 import SeccionPrestamos from './components/SeccionPrestamos';
 import SeccionPresupuestos from './components/SeccionPresupuestos';
 import SeccionConfiguracion from './components/SeccionConfiguracion';
-import SelectorSujetos from './components/SelectorSujetos';
+import SeccionFusion from './components/SeccionFusion';
 import Login from './pages/Login';
 import { transaccionesAPI, cuentasAPI, prestamosAPI, presupuestosAPI } from './services/api';
 import './App.css';
@@ -26,15 +26,9 @@ function AppContent() {
   // Filtros
   const [periodo, setPeriodo] = useState('mes');
   const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0]);
-  const [esGrupal, setEsGrupal] = useState(false);
-  const [grupo, setGrupo] = useState('personal');
 
-  // Sujetos
-  const [sujetos, setSujetos] = useState([
-    { id: '1', nombre: 'Sujeto 1' },
-    { id: '2', nombre: 'Sujeto 2' },
-  ]);
-  const [sujetoActivo, setsujetoActivo] = useState('1');
+  // Cuenta activa (primera cuenta del usuario)
+  const [cuentaActiva, setCuentaActiva] = useState(null);
 
   // Datos
   const [transacciones, setTransacciones] = useState([]);
@@ -47,28 +41,33 @@ function AppContent() {
     if (usuario && token) {
       cargarDatos();
     }
-  }, [periodo, fecha, esGrupal, grupo, usuario, token]);
+  }, [periodo, fecha, usuario, token]);
 
   const cargarDatos = async () => {
-    if (!usuario) return; // Agregar validación
+    if (!usuario) return;
     setLoading(true);
     try {
       const filtros = {
         periodo,
         fecha,
         usuarioId: usuario.id,
-        ...(esGrupal && { grupo, esGrupal: 'true' }),
       };
 
       const [trans, ctas, prest, presup] = await Promise.all([
         transaccionesAPI.obtener(filtros),
-        cuentasAPI.obtener(),
-        prestamosAPI.obtener(),
-        presupuestosAPI.estado({ grupo: esGrupal ? grupo : 'personal' }),
+        cuentasAPI.obtener({ usuarioId: usuario.id }),
+        prestamosAPI.obtener({ usuarioId: usuario.id }),
+        presupuestosAPI.estado({ usuarioId: usuario.id }),
       ]);
 
       setTransacciones(Array.isArray(trans) ? trans : []);
       setCuentas(Array.isArray(ctas) ? ctas : []);
+      
+      // Establecer primera cuenta como activa si existe
+      if (Array.isArray(ctas) && ctas.length > 0 && !cuentaActiva) {
+        setCuentaActiva(ctas[0]._id);
+      }
+
       setPrestamos(Array.isArray(prest) ? prest : []);
       setPresupuestos(Array.isArray(presup) ? presup : []);
     } catch (error) {
@@ -197,15 +196,6 @@ function AppContent() {
     }
   };
 
-  // Handlers de sujetos
-  const handleAgregarSujeto = (nombre) => {
-    const nuevoSujeto = {
-      id: Date.now().toString(),
-      nombre: nombre,
-    };
-    setSujetos([...sujetos, nuevoSujeto]);
-    setsujetoActivo(nuevoSujeto.id);
-  };
   const renderSeccion = () => {
     if (loading) {
       return (
@@ -222,30 +212,18 @@ function AppContent() {
       case 'dashboard':
         return (
           <>
-            <SelectorSujetos
-              sujetos={sujetos}
-              sujetoActivo={sujetoActivo}
-              onCambiarSujeto={setsujetoActivo}
-              onAgregarSujeto={handleAgregarSujeto}
-            />
             <FiltrosPeriodo
               periodo={periodo}
               setPeriodo={setPeriodo}
               fecha={fecha}
               setFecha={setFecha}
-              esGrupal={esGrupal}
-              setEsGrupal={setEsGrupal}
-              grupo={grupo}
-              setGrupo={setGrupo}
             />
             <Dashboard
               transacciones={transacciones}
               cuentas={cuentas}
               presupuestos={presupuestos}
               periodo={periodo}
-              grupo={grupo}
-              esGrupal={esGrupal}
-              sujetoActivo={sujetoActivo}
+              cuentaActiva={cuentaActiva}
             />
           </>
         );
@@ -258,10 +236,6 @@ function AppContent() {
               setPeriodo={setPeriodo}
               fecha={fecha}
               setFecha={setFecha}
-              esGrupal={esGrupal}
-              setEsGrupal={setEsGrupal}
-              grupo={grupo}
-              setGrupo={setGrupo}
             />
             <ListaTransacciones
               transacciones={transacciones}
@@ -278,7 +252,7 @@ function AppContent() {
             onCrear={handleCrearCuenta}
             onActualizar={handleActualizarCuenta}
             onEliminar={handleEliminarCuenta}
-            sujetoActivo={sujetoActivo}
+            cuentaActiva={cuentaActiva}
           />
         );
 
@@ -291,7 +265,7 @@ function AppContent() {
             onActualizar={handleActualizarPrestamo}
             onRegistrarPago={handleRegistrarPago}
             onEliminar={handleEliminarPrestamo}
-            sujetoActivo={sujetoActivo}
+            cuentaActiva={cuentaActiva}
           />
         );
 
@@ -302,7 +276,22 @@ function AppContent() {
             onCrear={handleCrearPresupuesto}
             onActualizar={() => {}}
             onEliminar={handleEliminarPresupuesto}
-            sujetoActivo={sujetoActivo}
+            cuentaActiva={cuentaActiva}
+          />
+        );
+
+      case 'fusion':
+        return (
+          <SeccionFusion
+            cuentas={cuentas}
+            transacciones={transacciones}
+            cuentaActiva={cuentaActiva}
+            onCrearTransaccion={handleCrearTransaccion}
+            onEliminarTransaccion={handleEliminarTransaccion}
+            periodo={periodo}
+            setPeriodo={setPeriodo}
+            fecha={fecha}
+            setFecha={setFecha}
           />
         );
 
@@ -363,8 +352,7 @@ function AppContent() {
         onCerrar={() => setModalNuevoVisible(false)}
         cuentas={cuentas}
         onGuardar={handleCrearTransaccion}
-        sujetoActivo={sujetoActivo}
-        sujetos={sujetos}
+        cuentaActiva={cuentaActiva}
       />
     </div>
   );
