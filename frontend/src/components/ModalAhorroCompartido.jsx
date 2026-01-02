@@ -83,6 +83,7 @@ function ModalAhorroCompartido({ visible, onCerrar, cuentas, usuarios, onCrear }
         motivo: formData.motivo,
         fechaCreacion: formData.fechaCreacion,
         progreso: (calcularTotalAportaciones() / parseFloat(formData.montoObjetivo)) * 100,
+        usuario: usuario.id,
       };
 
       if (ahorroCompartidoAPI && ahorroCompartidoAPI.crear) {

@@ -14,6 +14,8 @@ function ModalIngresoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear 
     tipoDistribucion: 'equitativa',
     cuentaDestino: cuentas[0]?._id || '',
     anotaciones: '',
+    esProgramada: false,
+    fechaProgramada: new Date().toISOString().split('T')[0],
   });
 
   const participantesDisponibles = [usuario, ...usuarios.filter(u => u._id !== usuario.id)];
@@ -72,6 +74,10 @@ function ModalIngresoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear 
         hora: formData.hora,
         cuentaOrigen: formData.cuentaDestino,
         anotaciones: `INGRESO COMPARTIDO: ${formData.concepto}\n${JSON.stringify(formData.participantes)}`,
+        usuario: usuario.id,
+        esProgramada: formData.esProgramada,
+        fechaProgramada: formData.esProgramada ? formData.fechaProgramada : null,
+        aplicada: !formData.esProgramada, // Si no es programada, se aplica inmediatamente
       };
 
       await transaccionesAPI.crear(transaccion);
@@ -95,6 +101,8 @@ function ModalIngresoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear 
       tipoDistribucion: 'equitativa',
       cuentaDestino: cuentas[0]?._id || '',
       anotaciones: '',
+      esProgramada: false,
+      fechaProgramada: new Date().toISOString().split('T')[0],
     });
   };
 
@@ -182,6 +190,34 @@ function ModalIngresoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear 
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 text-slate-800"
               />
             </div>
+          </div>
+
+          {/* Programar Ingreso */}
+          <div>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="esProgramada"
+                checked={formData.esProgramada}
+                onChange={handleChange}
+                className="w-4 h-4 text-green-500"
+              />
+              <span className="text-sm font-bold text-slate-800">📆 ¿Programar para una fecha futura?</span>
+            </label>
+            {formData.esProgramada && (
+              <input
+                type="date"
+                name="fechaProgramada"
+                value={formData.fechaProgramada}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 text-slate-800 mt-2"
+              />
+            )}
+            <p className="text-xs text-slate-600 mt-1">
+              {formData.esProgramada 
+                ? '📌 Este ingreso se aplicará en la fecha programada, no inmediatamente.'
+                : '✅ Este ingreso se aplicará inmediatamente.'}
+            </p>
           </div>
 
           {/* Tipo de Distribución */}

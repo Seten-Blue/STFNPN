@@ -54,6 +54,7 @@ function ModalMetaRequerida({ visible, onCerrar, usuarios, onCrear }) {
         estado: 'activa',
         progreso: 0,
         motivo: formData.motivo,
+        usuario: usuario.id,
       };
 
       if (metasAPI && metasAPI.crear) {

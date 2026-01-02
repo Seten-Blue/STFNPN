@@ -15,6 +15,8 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
     cuentaOrigen: cuentas[0]?._id || '',
     anotaciones: '',
     esUrgente: false,
+    esProgramada: false,
+    fechaProgramada: new Date().toISOString().split('T')[0],
   });
 
   const participantesDisponibles = [usuario, ...usuarios.filter(u => u._id !== usuario.id)];
@@ -73,7 +75,11 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
         hora: formData.hora,
         cuentaOrigen: formData.cuentaOrigen,
         anotaciones: `GASTO COMPARTIDO: ${formData.concepto}\n${JSON.stringify(formData.participantes)}`,
+        usuario: usuario.id,
         esUrgente: formData.esUrgente,
+        esProgramada: formData.esProgramada,
+        fechaProgramada: formData.esProgramada ? formData.fechaProgramada : null,
+        aplicada: !formData.esProgramada, // Si no es programada, se aplica inmediatamente
       };
 
       await transaccionesAPI.crear(transaccion);
@@ -98,6 +104,8 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
       cuentaOrigen: cuentas[0]?._id || '',
       anotaciones: '',
       esUrgente: false,
+      esProgramada: false,
+      fechaProgramada: new Date().toISOString().split('T')[0],
     });
   };
 
@@ -185,6 +193,34 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 text-slate-800"
               />
             </div>
+          </div>
+
+          {/* Programar Gasto */}
+          <div>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="esProgramada"
+                checked={formData.esProgramada}
+                onChange={handleChange}
+                className="w-4 h-4 text-orange-500"
+              />
+              <span className="text-sm font-bold text-slate-800">📆 ¿Programar para una fecha futura?</span>
+            </label>
+            {formData.esProgramada && (
+              <input
+                type="date"
+                name="fechaProgramada"
+                value={formData.fechaProgramada}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 text-slate-800 mt-2"
+              />
+            )}
+            <p className="text-xs text-slate-600 mt-1">
+              {formData.esProgramada 
+                ? '📌 Este gasto se aplicará en la fecha programada, no inmediatamente.'
+                : '✅ Este gasto se aplicará inmediatamente.'}
+            </p>
           </div>
 
           {/* Tipo de Distribución */}
