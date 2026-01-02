@@ -22,7 +22,20 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
     miPago: '', // Lo que pago yo específicamente
   });
 
-  const participantesDisponibles = usuario ? [usuario, ...usuarios.filter(u => u._id !== usuario.id && u._id !== usuario._id)] : [];
+  const participantesDisponibles = usuario ? [usuario, ...usuarios.filter(u => {
+    // Normalizar IDs a string para comparación correcta
+    const uId = typeof u._id === 'string' ? u._id : u._id?.toString?.() || u.id;
+    const usuarioIdStr = typeof usuario._id === 'string' ? usuario._id : usuario._id?.toString?.();
+    return uId !== usuarioIdStr;
+  })] : [];
+
+  // Función para normalizar IDs a string
+  const normalizarId = (id) => {
+    if (typeof id === 'string') return id;
+    if (id?._id) return id._id.toString();
+    if (id?.toString) return id.toString();
+    return String(id);
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -33,17 +46,19 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
   };
 
   const toggleParticipante = (usuarioId) => {
+    // Normalizar el ID para que sea string
+    const idNormalizado = normalizarId(usuarioId);
     setFormData(prev => {
       // Verificar si el participante existe en el objeto (no si su valor es > 0)
-      const isSelected = usuarioId in prev.participantes;
+      const isSelected = idNormalizado in prev.participantes;
       const newParticipantes = { ...prev.participantes };
       
       if (isSelected) {
         // Deseleccionar
-        delete newParticipantes[usuarioId];
+        delete newParticipantes[idNormalizado];
       } else {
         // Seleccionar: en distribución personalizada dejar en 0 para que el usuario lo edite
-        newParticipantes[usuarioId] = 0;
+        newParticipantes[idNormalizado] = 0;
       }
       
       return {
@@ -391,7 +406,8 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
             <label className="block text-sm font-bold text-slate-800 mb-2">👥 Participantes</label>
             <div className="space-y-2 bg-slate-50 p-3 rounded-lg max-h-48 overflow-y-auto">
               {participantesDisponibles.map(p => {
-                const pId = p._id || p.id;
+                // Normalizar ID a string para consistencia
+                const pId = normalizarId(p._id || p.id);
                 return (
                 <div key={pId} className="flex items-center justify-between p-2 bg-white rounded hover:bg-slate-100">
                   <label className="flex items-center flex-1">
