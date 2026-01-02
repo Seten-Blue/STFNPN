@@ -13,7 +13,12 @@ export const transaccionesAPI = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
-    return res.json();
+    const json = await res.json();
+    if (!res.ok) {
+      console.error('❌ Error en crear transacción:', json);
+      throw new Error(json.error || `Error ${res.status}`);
+    }
+    return json;
   },
   actualizar: async (id, data) => {
     const res = await fetch(`${API_URL}/transacciones/${id}`, {
