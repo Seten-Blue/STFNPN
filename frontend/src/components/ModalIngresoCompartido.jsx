@@ -29,13 +29,33 @@ function ModalIngresoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear 
   };
 
   const toggleParticipante = (usuarioId) => {
-    setFormData(prev => ({
-      ...prev,
-      participantes: {
-        ...prev.participantes,
-        [usuarioId]: prev.participantes[usuarioId] ? 0 : (parseFloat(formData.monto) || 0) / Object.keys(prev.participantes).length || (parseFloat(formData.monto) || 0) / 2
+    setFormData(prev => {
+      const isSelected = prev.participantes[usuarioId] && prev.participantes[usuarioId] > 0;
+      const newParticipantes = { ...prev.participantes };
+      
+      if (isSelected) {
+        delete newParticipantes[usuarioId];
+      } else {
+        if (prev.tipoDistribucion === 'equitativa') {
+          const participantesActuales = Object.keys(newParticipantes).filter(k => newParticipantes[k] > 0).length;
+          const nuevoTotal = participantesActuales + 1;
+          const montoTotal = parseFloat(prev.monto) || 0;
+          const montoIndividual = montoTotal / nuevoTotal;
+          
+          Object.keys(newParticipantes).forEach(id => {
+            newParticipantes[id] = montoIndividual;
+          });
+          newParticipantes[usuarioId] = montoIndividual;
+        } else {
+          newParticipantes[usuarioId] = 0;
+        }
       }
-    }));
+      
+      return {
+        ...prev,
+        participantes: newParticipantes
+      };
+    });
   };
 
   const handleMontoParticipante = (usuarioId, nuevoMonto) => {
@@ -65,29 +85,55 @@ function ModalIngresoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear 
         return;
       }
 
+      // Validar que hay participantes seleccionados
+      const participantesSeleccionados = Object.keys(formData.participantes).filter(k => formData.participantes[k] > 0);
+      if (participantesSeleccionados.length === 0) {
+        alert('Selecciona al menos un participante');
+        return;
+      }
+
+      // Validar monto en distribución personalizada
+      if (formData.tipoDistribucion === 'personalizada') {
+        const totalAsignado = calcularTotalParticipantes();
+        const montoTotal = parseFloat(formData.monto);
+        if (Math.abs(totalAsignado - montoTotal) > 0.01) {
+          alert(`El total asignado ($${totalAsignado.toFixed(2)}) debe ser igual al monto ($${montoTotal.toFixed(2)})`);
+          return;
+        }
+      }
+
       const montoTotal = parseFloat(formData.monto);
+      
+      // Crear objeto de participantes con sus montos
+      const participantesConMonto = {};
+      participantesSeleccionados.forEach(usuarioId => {
+        participantesConMonto[usuarioId] = formData.participantes[usuarioId];
+      });
+
       const transaccion = {
         tipo: 'ingreso',
-        categoria: 'Ingreso Compartido',
+        categoria: formData.categoria,
         cantidad: montoTotal,
         fecha: formData.fecha,
         hora: formData.hora,
-        cuentaOrigen: formData.cuentaDestino,
-        anotaciones: `INGRESO COMPARTIDO: ${formData.concepto}\n${JSON.stringify(formData.participantes)}`,
+        cuentaDestino: formData.cuentaDestino,
+        anotaciones: `INGRESO COMPARTIDO: ${formData.concepto}`,
         usuario: usuario.id,
         esProgramada: formData.esProgramada,
         fechaProgramada: formData.esProgramada ? formData.fechaProgramada : null,
-        aplicada: !formData.esProgramada, // Si no es programada, se aplica inmediatamente
+        participantes: participantesConMonto
       };
 
       await transaccionesAPI.crear(transaccion);
       onCrear?.();
       resetForm();
       onCerrar();
+      alert('Ingreso compartido creado exitosamente');
     } catch (error) {
       console.error('Error al crear ingreso compartido:', error);
-      alert('Error al crear ingreso compartido');
+      alert('Error al crear ingreso compartido: ' + error.message);
     }
+  };
   };
 
   const resetForm = () => {

@@ -30,13 +30,37 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
   };
 
   const toggleParticipante = (usuarioId) => {
-    setFormData(prev => ({
-      ...prev,
-      participantes: {
-        ...prev.participantes,
-        [usuarioId]: prev.participantes[usuarioId] ? 0 : (parseFloat(formData.monto) || 0) / Object.keys(prev.participantes).length || (parseFloat(formData.monto) || 0) / 2
+    setFormData(prev => {
+      const isSelected = prev.participantes[usuarioId] && prev.participantes[usuarioId] > 0;
+      const newParticipantes = { ...prev.participantes };
+      
+      if (isSelected) {
+        // Deseleccionar: quitar del objeto
+        delete newParticipantes[usuarioId];
+      } else {
+        // Seleccionar: calcular monto según tipo de distribución
+        if (prev.tipoDistribucion === 'equitativa') {
+          const participantesActuales = Object.keys(newParticipantes).filter(k => newParticipantes[k] > 0).length;
+          const nuevoTotal = participantesActuales + 1;
+          const montoTotal = parseFloat(prev.monto) || 0;
+          const montoIndividual = montoTotal / nuevoTotal;
+          
+          // Recalcular todos los montos equitativamente
+          Object.keys(newParticipantes).forEach(id => {
+            newParticipantes[id] = montoIndividual;
+          });
+          newParticipantes[usuarioId] = montoIndividual;
+        } else {
+          // Distribución personalizada: dejar en 0 para que el usuario lo edite
+          newParticipantes[usuarioId] = 0;
+        }
       }
-    }));
+      
+      return {
+        ...prev,
+        participantes: newParticipantes
+      };
+    });
   };
 
   const handleMontoParticipante = (usuarioId, nuevoMonto) => {
@@ -66,29 +90,54 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
         return;
       }
 
+      // Validar que hay participantes seleccionados
+      const participantesSeleccionados = Object.keys(formData.participantes).filter(k => formData.participantes[k] > 0);
+      if (participantesSeleccionados.length === 0) {
+        alert('Selecciona al menos un participante');
+        return;
+      }
+
+      // Validar monto en distribución personalizada
+      if (formData.tipoDistribucion === 'personalizada') {
+        const totalAsignado = calcularTotalParticipantes();
+        const montoTotal = parseFloat(formData.monto);
+        if (Math.abs(totalAsignado - montoTotal) > 0.01) {
+          alert(`El total asignado ($${totalAsignado.toFixed(2)}) debe ser igual al monto ($${montoTotal.toFixed(2)})`);
+          return;
+        }
+      }
+
       const montoTotal = parseFloat(formData.monto);
+      
+      // Crear objeto de participantes con sus montos
+      const participantesConMonto = {};
+      participantesSeleccionados.forEach(usuarioId => {
+        participantesConMonto[usuarioId] = formData.participantes[usuarioId];
+      });
+
       const transaccion = {
         tipo: 'gasto',
-        categoria: 'Gasto Compartido',
+        categoria: formData.categoria,
         cantidad: montoTotal,
         fecha: formData.fecha,
         hora: formData.hora,
         cuentaOrigen: formData.cuentaOrigen,
-        anotaciones: `GASTO COMPARTIDO: ${formData.concepto}\n${JSON.stringify(formData.participantes)}`,
+        anotaciones: `GASTO COMPARTIDO: ${formData.concepto}`,
         usuario: usuario.id,
         esUrgente: formData.esUrgente,
         esProgramada: formData.esProgramada,
         fechaProgramada: formData.esProgramada ? formData.fechaProgramada : null,
-        aplicada: !formData.esProgramada, // Si no es programada, se aplica inmediatamente
+        participantes: participantesConMonto  // Enviar los participantes como objeto separado
       };
 
       await transaccionesAPI.crear(transaccion);
       onCrear?.();
       resetForm();
       onCerrar();
+      alert('Gasto compartido creado exitosamente');
     } catch (error) {
       console.error('Error al crear gasto compartido:', error);
-      alert('Error al crear gasto compartido');
+      alert('Error al crear gasto compartido: ' + error.message);
     }
   };
 
