@@ -105,24 +105,36 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
       if (formData.tipoDistribucion === 'equitativa') {
         // Modo equitativo: el usuario especifica su pago (miPago)
         // El resto se divide entre los demás participantes
-        const miPago = parseFloat(formData.miPago) || 0;
+        const montoRestante = montoTotal;
         
-        if (miPago <= 0 || miPago >= montoTotal) {
-          alert('Tu pago debe ser mayor a 0 y menor al monto total');
+        // Si el usuario especificó un monto para sí mismo, usar ese, sino dividir equitativamente entre todos
+        const miPago = formData.miPago ? parseFloat(formData.miPago) : (montoTotal / participantesSeleccionados.length);
+        
+        if (miPago <= 0 || miPago > montoTotal) {
+          alert('Tu pago debe ser mayor a 0 y no puede exceder el monto total');
           return;
         }
         
-        const montoRestante = montoTotal - miPago;
-        const otrosParticipantes = participantesSeleccionados.filter(id => id !== usuarioId);
-        
-        // El usuario paga su porción
-        participantesConMonto[usuarioId] = miPago;
-        
-        // Los demás dividen el resto equitativamente
-        const pagoPorOtro = montoRestante / otrosParticipantes.length;
-        otrosParticipantes.forEach(id => {
-          participantesConMonto[id] = pagoPorOtro;
-        });
+        // Si el usuario especificó un monto personalizado
+        if (formData.miPago) {
+          const montoRestante2 = montoTotal - miPago;
+          const otrosParticipantes = participantesSeleccionados.filter(id => id !== usuarioId);
+          
+          // El usuario paga su porción
+          participantesConMonto[usuarioId] = miPago;
+          
+          // Los demás dividen el resto equitativamente
+          const pagoPorOtro = montoRestante2 / otrosParticipantes.length;
+          otrosParticipantes.forEach(id => {
+            participantesConMonto[id] = pagoPorOtro;
+          });
+        } else {
+          // Si no especificó, dividir equitativamente entre TODOS incluido él
+          const pagoPorPersona = montoTotal / participantesSeleccionados.length;
+          participantesSeleccionados.forEach(id => {
+            participantesConMonto[id] = pagoPorPersona;
+          });
+        }
       } else {
         // Modo personalizado: validar que los montos sumen el total
         const totalAsignado = Object.values(participantesConMonto).reduce((sum, m) => sum + (parseFloat(m) || 0), 0);

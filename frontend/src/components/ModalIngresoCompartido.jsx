@@ -97,22 +97,31 @@ function ModalIngresoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear 
       let participantesConMonto = {};
       
       if (formData.tipoDistribucion === 'equitativa') {
-        // El usuario especifica cuánto le corresponde a él
-        const miPago = parseFloat(formData.miPago) || 0;
+        // Equitativa: dividir equitativamente, opcionalmente especificando miPago
+        const miPago = formData.miPago ? parseFloat(formData.miPago) : (montoTotal / participantesSeleccionados.length);
         
-        if (miPago <= 0 || miPago >= montoTotal) {
-          alert('Tu pago debe ser mayor a 0 y menor al monto total');
-          return;
+        if (formData.miPago) {
+          // Usuario especifica cuánto le corresponde
+          if (miPago <= 0 || miPago > montoTotal) {
+            alert('Tu pago debe ser mayor a 0 y no mayor al monto total');
+            return;
+          }
+          
+          const montoRestante = montoTotal - miPago;
+          const otrosParticipantes = participantesSeleccionados.filter(id => id !== usuarioId);
+          
+          participantesConMonto[usuarioId] = miPago;
+          const pagoPorOtro = montoRestante / otrosParticipantes.length;
+          otrosParticipantes.forEach(id => {
+            participantesConMonto[id] = pagoPorOtro;
+          });
+        } else {
+          // No se especifica miPago: dividir equitativamente entre TODOS
+          const pagoPorPersona = montoTotal / participantesSeleccionados.length;
+          participantesSeleccionados.forEach(id => {
+            participantesConMonto[id] = pagoPorPersona;
+          });
         }
-        
-        const montoRestante = montoTotal - miPago;
-        const otrosParticipantes = participantesSeleccionados.filter(id => id !== usuarioId);
-        
-        participantesConMonto[usuarioId] = miPago;
-        const pagoPorOtro = montoRestante / otrosParticipantes.length;
-        otrosParticipantes.forEach(id => {
-          participantesConMonto[id] = pagoPorOtro;
-        });
       } else {
         // Modo personalizado: validar que los montos sumen el total
         const totalAsignado = Object.values(participantesConMonto).reduce((sum, m) => sum + (parseFloat(m) || 0), 0);
