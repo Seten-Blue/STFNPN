@@ -135,7 +135,7 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
               value={formData.concepto}
               onChange={handleChange}
               placeholder="Ej: Cena, Viaje, Compras"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 text-slate-800"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 text-slate-900 font-medium"
               required
             />
           </div>
@@ -150,7 +150,7 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
               onChange={handleChange}
               placeholder="0.00"
               step="0.01"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 text-slate-800"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 text-slate-900 font-medium"
               required
             />
           </div>
@@ -162,7 +162,7 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
               name="cuentaOrigen"
               value={formData.cuentaOrigen}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 text-slate-800"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 text-slate-900 font-medium"
             >
               <option value="">Seleccionar cuenta</option>
               {cuentas.map(c => (
