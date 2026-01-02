@@ -64,7 +64,7 @@ const SeccionConfiguracion = ({ configuracion, onActualizar, transacciones }) =>
     setMensajeCredenciales('');
 
     try {
-      const response = await fetch('/api/email/actualizar-credenciales', {
+      const response = await fetch('http://localhost:3001/api/email/actualizar-credenciales', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(credenciales)
@@ -90,7 +90,7 @@ const SeccionConfiguracion = ({ configuracion, onActualizar, transacciones }) =>
 
   const handleProbarEmail = async () => {
     try {
-      const response = await fetch('/api/email/prueba', {
+      const response = await fetch('http://localhost:3001/api/email/prueba', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: 'test@example.com' })
