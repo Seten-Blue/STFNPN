@@ -81,9 +81,16 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
       }
 
       // Validar que hay participantes seleccionados
-      const participantesSeleccionados = Object.keys(formData.participantes);
-      if (participantesSeleccionados.length === 0) {
-        alert('Selecciona al menos un participante');
+      let participantesSeleccionados = Object.keys(formData.participantes);
+      const usuarioId = usuario._id || usuario.id;
+      
+      // Asegurar que el usuario actual siempre está incluido
+      if (!participantesSeleccionados.includes(usuarioId)) {
+        participantesSeleccionados.push(usuarioId);
+      }
+      
+      if (participantesSeleccionados.length < 2) {
+        alert('Selecciona al menos un participante adicional además de ti');
         return;
       }
 
@@ -93,7 +100,7 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
       // Si es equitativa y el usuario especifica su pago, se divide el resto
       // Si el usuario pone montos personalizados, se usa eso
       
-      let participantesConMonto = { ...formData.participantes };
+      let participantesConMonto = {};
       
       if (formData.tipoDistribucion === 'equitativa') {
         // Modo equitativo: el usuario especifica su pago (miPago)
@@ -106,13 +113,7 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
         }
         
         const montoRestante = montoTotal - miPago;
-        const usuarioId = usuario._id || usuario.id;
         const otrosParticipantes = participantesSeleccionados.filter(id => id !== usuarioId);
-        
-        if (otrosParticipantes.length === 0) {
-          alert('Necesitas al menos otro participante además de ti');
-          return;
-        }
         
         // El usuario paga su porción
         participantesConMonto[usuarioId] = miPago;
