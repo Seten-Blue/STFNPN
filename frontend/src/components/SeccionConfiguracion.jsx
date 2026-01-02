@@ -1,11 +1,14 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { monedasDisponibles } from '../utils/constantes';
 import { emailAPI } from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 
 const SeccionConfiguracion = ({ configuracion, onActualizar, transacciones }) => {
   const { usuario, token } = useContext(AuthContext);
-  const [moneda, setMoneda] = useState(configuracion?.moneda || 'CLP');
+  const [moneda, setMoneda] = useState(() => {
+    // Cargar moneda del localStorage al iniciar
+    return localStorage.getItem('monedaActiva') || 'CLP';
+  });
   const [exportando, setExportando] = useState(false);
   
   // Credenciales de Email
@@ -30,6 +33,7 @@ const SeccionConfiguracion = ({ configuracion, onActualizar, transacciones }) =>
 
   const handleCambiarMoneda = (nuevaMoneda) => {
     setMoneda(nuevaMoneda);
+    localStorage.setItem('monedaActiva', nuevaMoneda);
     onActualizar({ moneda: nuevaMoneda });
   };
 
@@ -193,12 +197,15 @@ const SeccionConfiguracion = ({ configuracion, onActualizar, transacciones }) =>
             <button
               key={m.codigo}
               onClick={() => handleCambiarMoneda(m.codigo)}
-              className={`p-3 rounded-xl border-2 transition text-left ${
-                moneda === m.codigo ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+              className={`p-4 rounded-xl border-2 transition text-left font-medium ${
+                moneda === m.codigo 
+                  ? 'border-blue-600 bg-blue-100 text-blue-900 shadow-md' 
+                  : 'border-gray-300 bg-white text-gray-700 hover:border-blue-400 hover:bg-blue-50'
               }`}
             >
-              <p className="font-bold">{m.simbolo} {m.codigo}</p>
-              <p className="text-xs text-gray-500">{m.nombre}</p>
+              <p className="font-bold text-lg">{m.simbolo} {m.codigo}</p>
+              <p className="text-sm text-gray-600">{m.nombre}</p>
+              {moneda === m.codigo && <p className="text-xs mt-1">✓ Seleccionada</p>}
             </button>
           ))}
         </div>
