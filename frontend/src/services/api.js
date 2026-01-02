@@ -25,6 +25,10 @@ export const transaccionesAPI = {
   },
   eliminar: async (id) => {
     const res = await fetch(`${API_URL}/transacciones/${id}`, { method: 'DELETE' });
+    if (!res.ok) {
+      const error = await res.text();
+      throw new Error(`Error ${res.status}: ${error}`);
+    }
     return res.json();
   },
   resumen: async (filtros = {}) => {
