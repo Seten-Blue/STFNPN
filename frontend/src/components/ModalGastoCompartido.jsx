@@ -17,6 +17,9 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
     esUrgente: false,
     esProgramada: false,
     fechaProgramada: new Date().toISOString().split('T')[0],
+    diferirCuotas: false,
+    numeroCuotas: 1,
+    miPago: '', // Lo que pago yo específicamente
   });
 
   const participantesDisponibles = [usuario, ...usuarios.filter(u => u._id !== usuario.id)];
@@ -35,25 +38,11 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
       const newParticipantes = { ...prev.participantes };
       
       if (isSelected) {
-        // Deseleccionar: quitar del objeto
+        // Deseleccionar
         delete newParticipantes[usuarioId];
       } else {
-        // Seleccionar: calcular monto según tipo de distribución
-        if (prev.tipoDistribucion === 'equitativa') {
-          const participantesActuales = Object.keys(newParticipantes).filter(k => newParticipantes[k] > 0).length;
-          const nuevoTotal = participantesActuales + 1;
-          const montoTotal = parseFloat(prev.monto) || 0;
-          const montoIndividual = montoTotal / nuevoTotal;
-          
-          // Recalcular todos los montos equitativamente
-          Object.keys(newParticipantes).forEach(id => {
-            newParticipantes[id] = montoIndividual;
-          });
-          newParticipantes[usuarioId] = montoIndividual;
-        } else {
-          // Distribución personalizada: dejar en 0 para que el usuario lo edite
-          newParticipantes[usuarioId] = 0;
-        }
+        // Seleccionar: en distribución personalizada dejar en 0 para que el usuario lo edite
+        newParticipantes[usuarioId] = 0;
       }
       
       return {
@@ -91,29 +80,54 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
       }
 
       // Validar que hay participantes seleccionados
-      const participantesSeleccionados = Object.keys(formData.participantes).filter(k => formData.participantes[k] > 0);
+      const participantesSeleccionados = Object.keys(formData.participantes);
       if (participantesSeleccionados.length === 0) {
         alert('Selecciona al menos un participante');
         return;
       }
 
-      // Validar monto en distribución personalizada
-      if (formData.tipoDistribucion === 'personalizada') {
-        const totalAsignado = calcularTotalParticipantes();
-        const montoTotal = parseFloat(formData.monto);
+      const montoTotal = parseFloat(formData.monto);
+      
+      // LÓGICA CORRECTA DE DISTRIBUCIÓN:
+      // Si es equitativa y el usuario especifica su pago, se divide el resto
+      // Si el usuario pone montos personalizados, se usa eso
+      
+      let participantesConMonto = { ...formData.participantes };
+      
+      if (formData.tipoDistribucion === 'equitativa') {
+        // Modo equitativo: el usuario especifica su pago (miPago)
+        // El resto se divide entre los demás participantes
+        const miPago = parseFloat(formData.miPago) || 0;
+        
+        if (miPago <= 0 || miPago >= montoTotal) {
+          alert('Tu pago debe ser mayor a 0 y menor al monto total');
+          return;
+        }
+        
+        const montoRestante = montoTotal - miPago;
+        const otrosParticipantes = participantesSeleccionados.filter(id => id !== usuario.id);
+        
+        if (otrosParticipantes.length === 0) {
+          alert('Necesitas al menos otro participante además de ti');
+          return;
+        }
+        
+        // El usuario paga su porción
+        participantesConMonto[usuario.id] = miPago;
+        
+        // Los demás dividen el resto equitativamente
+        const pagoPorOtro = montoRestante / otrosParticipantes.length;
+        otrosParticipantes.forEach(id => {
+          participantesConMonto[id] = pagoPorOtro;
+        });
+      } else {
+        // Modo personalizado: validar que los montos sumen el total
+        const totalAsignado = Object.values(participantesConMonto).reduce((sum, m) => sum + (parseFloat(m) || 0), 0);
         if (Math.abs(totalAsignado - montoTotal) > 0.01) {
           alert(`El total asignado ($${totalAsignado.toFixed(2)}) debe ser igual al monto ($${montoTotal.toFixed(2)})`);
           return;
         }
       }
-
-      const montoTotal = parseFloat(formData.monto);
-      
-      // Crear objeto de participantes con sus montos
-      const participantesConMonto = {};
-      participantesSeleccionados.forEach(usuarioId => {
-        participantesConMonto[usuarioId] = formData.participantes[usuarioId];
-      });
 
       const transaccion = {
         tipo: 'gasto',
@@ -125,9 +139,11 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
         anotaciones: `GASTO COMPARTIDO: ${formData.concepto}`,
         usuario: usuario.id,
         esUrgente: formData.esUrgente,
-        esProgramada: formData.esProgramada,
-        fechaProgramada: formData.esProgramada ? formData.fechaProgramada : null,
-        participantes: participantesConMonto  // Enviar los participantes como objeto separado
+        esProgramada: formData.esProgramada && !formData.diferirCuotas,
+        fechaProgramada: formData.esProgramada && !formData.diferirCuotas ? formData.fechaProgramada : null,
+        diferirCuotas: formData.diferirCuotas,
+        numeroCuotas: formData.diferirCuotas ? parseInt(formData.numeroCuotas) : 1,
+        participantes: participantesConMonto
       };
 
       await transaccionesAPI.crear(transaccion);
@@ -155,6 +171,9 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
       esUrgente: false,
       esProgramada: false,
       fechaProgramada: new Date().toISOString().split('T')[0],
+      diferirCuotas: false,
+      numeroCuotas: 1,
+      miPago: '',
     });
   };
 
@@ -272,6 +291,38 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
             </p>
           </div>
 
+          {/* Diferir a Cuotas */}
+          <div>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="diferirCuotas"
+                checked={formData.diferirCuotas}
+                onChange={handleChange}
+                className="w-4 h-4 text-orange-500"
+                disabled={formData.esProgramada}
+              />
+              <span className="text-sm font-bold text-slate-800">📊 ¿Diferir a cuotas?</span>
+            </label>
+            {formData.diferirCuotas && (
+              <div className="mt-2">
+                <label className="block text-xs font-bold text-slate-800 mb-1">Número de cuotas</label>
+                <input
+                  type="number"
+                  name="numeroCuotas"
+                  value={formData.numeroCuotas}
+                  onChange={handleChange}
+                  min="1"
+                  max="24"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 text-slate-800"
+                />
+                <p className="text-xs text-slate-600 mt-1">
+                  Cada cuota será de ${(parseFloat(formData.monto) / parseInt(formData.numeroCuotas) || 0).toFixed(2)}
+                </p>
+              </div>
+            )}
+          </div>
+
           {/* Tipo de Distribución */}
           <div>
             <label className="block text-sm font-bold text-slate-800 mb-2">⚖️ Tipo de Distribución</label>
@@ -285,7 +336,7 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
                   onChange={handleChange}
                   className="w-4 h-4 text-orange-500"
                 />
-                <span className="ml-2 text-slate-700">Equitativa (50/50, 33/33/33)</span>
+                <span className="ml-2 text-slate-700">Equitativa (Yo pago X, el resto divide lo demás)</span>
               </label>
               <label className="flex items-center">
                 <input
@@ -296,10 +347,29 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
                   onChange={handleChange}
                   className="w-4 h-4 text-orange-500"
                 />
-                <span className="ml-2 text-slate-700">Personalizada (manual)</span>
+                <span className="ml-2 text-slate-700">Personalizada (especificar cada pago)</span>
               </label>
             </div>
           </div>
+
+          {/* Mi Pago (solo si es equitativa) */}
+          {formData.tipoDistribucion === 'equitativa' && (
+            <div>
+              <label className="block text-sm font-bold text-slate-800 mb-1">💵 Mi Pago</label>
+              <input
+                type="number"
+                name="miPago"
+                value={formData.miPago}
+                onChange={handleChange}
+                placeholder="¿Cuánto pagas tú?"
+                step="0.01"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 text-slate-900 font-medium"
+              />
+              <p className="text-xs text-slate-600 mt-1">
+                El resto se dividirá entre los otros participantes
+              </p>
+            </div>
+          )}
 
           {/* Participantes */}
           <div>
