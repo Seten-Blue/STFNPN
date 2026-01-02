@@ -98,6 +98,26 @@ function SeccionNotificaciones() {
     }
   };
 
+  const handleAceptar = async (id) => {
+    try {
+      await notificacionesAPI.actualizar(id, { estado: 'aceptada' });
+      cargarNotificaciones();
+      alert('✅ Acción aceptada');
+    } catch (error) {
+      console.error('Error al aceptar:', error);
+    }
+  };
+
+  const handleDeclinar = async (id) => {
+    try {
+      await notificacionesAPI.actualizar(id, { estado: 'declinada' });
+      cargarNotificaciones();
+      alert('❌ Acción declinada');
+    } catch (error) {
+      console.error('Error al declinar:', error);
+    }
+  };
+
   const handleMarcarTodasLeidas = async () => {
     try {
       await notificacionesAPI.marcarTodasLeidas(usuario.id);
@@ -216,19 +236,39 @@ function SeccionNotificaciones() {
                 key={notif._id} 
                 className={`flex items-center justify-between p-3 rounded-lg ${notif.urgente ? 'bg-red-100' : 'bg-white'}`}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-1">
                   <span className="text-xl">{notif.urgente ? '🚨' : '📌'}</span>
-                  <div>
+                  <div className="flex-1">
                     <p className="font-medium text-slate-800">{notif.titulo}</p>
                     <p className="text-sm text-slate-600">{notif.mensaje}</p>
                   </div>
                 </div>
-                <button
-                  onClick={() => handleMarcarLeida(notif._id)}
-                  className="px-3 py-1 text-sm bg-orange-200 text-orange-800 rounded hover:bg-orange-300"
-                >
-                  ✓ Leída
-                </button>
+                <div className="flex gap-2 ml-2">
+                  {(notif.tipo.includes('compartido') || notif.tipo.includes('Gasto') || notif.tipo.includes('Ingreso')) && (
+                    <>
+                      <button
+                        onClick={() => handleAceptar(notif._id)}
+                        className="px-3 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600 font-medium"
+                        title="Aceptar esta acción"
+                      >
+                        ✓ Aceptar
+                      </button>
+                      <button
+                        onClick={() => handleDeclinar(notif._id)}
+                        className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 font-medium"
+                        title="Declinar esta acción"
+                      >
+                        ✗ Declinar
+                      </button>
+                    </>
+                  )}
+                  <button
+                    onClick={() => handleMarcarLeida(notif._id)}
+                    className="px-3 py-1 text-sm bg-orange-200 text-orange-800 rounded hover:bg-orange-300"
+                  >
+                    ✓ Leída
+                  </button>
+                </div>
               </div>
             ))}
           </div>
