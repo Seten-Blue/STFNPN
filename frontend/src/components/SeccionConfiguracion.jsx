@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { monedasDisponibles } from '../utils/constantes';
 import { emailAPI } from '../services/api';
+import { AuthContext } from '../context/AuthContext';
 
 const SeccionConfiguracion = ({ configuracion, onActualizar, transacciones }) => {
+  const { usuario, token } = useContext(AuthContext);
   const [moneda, setMoneda] = useState(configuracion?.moneda || 'CLP');
   const [exportando, setExportando] = useState(false);
+  
+  // Credenciales de Email
   const [mostrarCredenciales, setMostrarCredenciales] = useState(false);
   const [credenciales, setCredenciales] = useState({
     emailUsuario: '',
@@ -12,6 +16,17 @@ const SeccionConfiguracion = ({ configuracion, onActualizar, transacciones }) =>
   });
   const [guardandoCredenciales, setGuardandoCredenciales] = useState(false);
   const [mensajeCredenciales, setMensajeCredenciales] = useState('');
+
+  // Credenciales de Usuario
+  const [mostrarCredencialesUsuario, setMostrarCredencialesUsuario] = useState(false);
+  const [credencialesUsuario, setCredencialesUsuario] = useState({
+    email: usuario?.email || '',
+    contraseña: '',
+    nuevaContraseña: '',
+    confirmarContraseña: ''
+  });
+  const [guardandoCredencialesUsuario, setGuardandoCredencialesUsuario] = useState(false);
+  const [mensajeCredencialesUsuario, setMensajeCredencialesUsuario] = useState('');
 
   const handleCambiarMoneda = (nuevaMoneda) => {
     setMoneda(nuevaMoneda);
@@ -107,6 +122,59 @@ const SeccionConfiguracion = ({ configuracion, onActualizar, transacciones }) =>
     }
   };
 
+  const handleActualizarCredencialesUsuario = async (e) => {
+    e.preventDefault();
+
+    if (!credencialesUsuario.contraseña) {
+      setMensajeCredencialesUsuario('Por favor ingresa tu contraseña actual');
+      return;
+    }
+
+    if (credencialesUsuario.nuevaContraseña && credencialesUsuario.nuevaContraseña !== credencialesUsuario.confirmarContraseña) {
+      setMensajeCredencialesUsuario('Las contraseñas nuevas no coinciden');
+      return;
+    }
+
+    setGuardandoCredencialesUsuario(true);
+    setMensajeCredencialesUsuario('');
+
+    try {
+      const response = await fetch('http://localhost:3001/api/auth/actualizar-credenciales', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          email: credencialesUsuario.email,
+          contraseña: credencialesUsuario.contraseña,
+          nuevaContraseña: credencialesUsuario.nuevaContraseña || undefined
+        })
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setMensajeCredencialesUsuario('✅ Credenciales actualizadas correctamente');
+        setCredencialesUsuario({
+          email: data.usuario.email,
+          contraseña: '',
+          nuevaContraseña: '',
+          confirmarContraseña: ''
+        });
+        setTimeout(() => {
+          setMostrarCredencialesUsuario(false);
+          setMensajeCredencialesUsuario('');
+        }, 2000);
+      } else {
+        setMensajeCredencialesUsuario(`❌ ${data.message || 'Error al actualizar credenciales'}`);
+      }
+    } catch (error) {
+      setMensajeCredencialesUsuario('❌ Error de conexión');
+    } finally {
+      setGuardandoCredencialesUsuario(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -165,6 +233,119 @@ const SeccionConfiguracion = ({ configuracion, onActualizar, transacciones }) =>
             Exportar PDF
           </button>
         </div>
+      </div>
+
+      {/* Credenciales de Usuario */}
+      <div className="bg-white rounded-xl p-5 shadow-sm border border-purple-100">
+        <h3 className="font-bold text-purple-600 mb-4 flex items-center gap-2">
+          <span>👤</span> Credenciales de Usuario
+        </h3>
+        <p className="text-sm text-gray-500 mb-4">
+          Actualiza tu email o contraseña en caso de error
+        </p>
+
+        {!mostrarCredencialesUsuario ? (
+          <button
+            onClick={() => setMostrarCredencialesUsuario(true)}
+            className="flex items-center gap-2 bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Modificar Credenciales
+          </button>
+        ) : (
+          <form onSubmit={handleActualizarCredencialesUsuario} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email
+              </label>
+              <input
+                type="email"
+                value={credencialesUsuario.email}
+                onChange={(e) => setCredencialesUsuario({ ...credencialesUsuario, email: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Contraseña Actual *
+              </label>
+              <input
+                type="password"
+                value={credencialesUsuario.contraseña}
+                onChange={(e) => setCredencialesUsuario({ ...credencialesUsuario, contraseña: e.target.value })}
+                placeholder="Requerida para confirmar cambios"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              />
+              <p className="text-xs text-gray-500 mt-1">Ingresa tu contraseña actual para confirmar cambios</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nueva Contraseña (opcional)
+              </label>
+              <input
+                type="password"
+                value={credencialesUsuario.nuevaContraseña}
+                onChange={(e) => setCredencialesUsuario({ ...credencialesUsuario, nuevaContraseña: e.target.value })}
+                placeholder="Déjalo vacío si no deseas cambiar"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              />
+              <p className="text-xs text-gray-500 mt-1">Mínimo 6 caracteres</p>
+            </div>
+
+            {credencialesUsuario.nuevaContraseña && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Confirmar Nueva Contraseña
+                </label>
+                <input
+                  type="password"
+                  value={credencialesUsuario.confirmarContraseña}
+                  onChange={(e) => setCredencialesUsuario({ ...credencialesUsuario, confirmarContraseña: e.target.value })}
+                  placeholder="Repite la nueva contraseña"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+            )}
+
+            {mensajeCredencialesUsuario && (
+              <div className={`p-3 rounded-lg text-sm ${
+                mensajeCredencialesUsuario.includes('✅') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+              }`}>
+                {mensajeCredencialesUsuario}
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <button
+                type="submit"
+                disabled={guardandoCredencialesUsuario}
+                className="flex-1 bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition disabled:opacity-50 font-medium"
+              >
+                {guardandoCredencialesUsuario ? 'Guardando...' : 'Guardar Cambios'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMostrarCredencialesUsuario(false);
+                  setCredencialesUsuario({
+                    email: usuario?.email || '',
+                    contraseña: '',
+                    nuevaContraseña: '',
+                    confirmarContraseña: ''
+                  });
+                  setMensajeCredencialesUsuario('');
+                }}
+                className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition font-medium"
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
+        )}
       </div>
 
       {/* Credenciales de Email */}
