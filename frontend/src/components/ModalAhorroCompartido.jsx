@@ -42,12 +42,15 @@ function ModalAhorroCompartido({ visible, onCerrar, cuentas, usuarios, onCrear }
   };
 
   const toggleParticipante = (usuarioId) => {
+    const usuarioIdStr = normalizarId(usuarioId);
     setFormData(prev => ({
       ...prev,
-      participantes: {
-        ...prev.participantes,
-        [usuarioId]: prev.participantes[usuarioId] ? 0 : 0
-      }
+      participantes: usuarioIdStr in prev.participantes
+        ? Object.keys(prev.participantes).reduce((obj, key) => {
+            if (key !== usuarioIdStr) obj[key] = prev.participantes[key];
+            return obj;
+          }, {})
+        : { ...prev.participantes, [usuarioIdStr]: 0 }
     }));
   };
 
@@ -78,12 +81,11 @@ function ModalAhorroCompartido({ visible, onCerrar, cuentas, usuarios, onCrear }
         return;
       }
 
-      const participantesActivos = Object.entries(formData.participantes)
-        .filter(([_, monto]) => monto > 0)
-        .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
-
-      if (Object.keys(participantesActivos).length === 0) {
-        alert('Debe haber al menos un participante con aportación');
+      // Obtener participantes seleccionados (no necesitan tener aportación inicial)
+      const participantesSeleccionados = Object.keys(formData.participantes).map(id => id);
+      
+      if (participantesSeleccionados.length === 0) {
+        alert('Debe haber al menos un participante');
         return;
       }
 
@@ -91,13 +93,10 @@ function ModalAhorroCompartido({ visible, onCerrar, cuentas, usuarios, onCrear }
         nombre: formData.nombre,
         descripcion: formData.descripcion,
         montoObjetivo: parseFloat(formData.montoObjetivo),
-        montoActual: calcularTotalAportaciones(),
         cuentaDestino: formData.cuentaDestino,
-        participantes: participantesActivos,
+        participantes: participantesSeleccionados,  // Array de IDs de participantes
         estado: formData.estado,
         motivo: formData.motivo,
-        fechaCreacion: formData.fechaCreacion,
-        progreso: (calcularTotalAportaciones() / parseFloat(formData.montoObjetivo)) * 100,
         usuario: usuarioIdNormalizado,
       };
 
@@ -239,9 +238,9 @@ function ModalAhorroCompartido({ visible, onCerrar, cuentas, usuarios, onCrear }
             />
           </div>
 
-          {/* Participantes y Aportaciones */}
+          {/* Participantes */}
           <div>
-            <label className="block text-sm font-bold text-slate-800 mb-2">👥 Participantes y Aportaciones</label>
+            <label className="block text-sm font-bold text-slate-800 mb-2">👥 Participantes</label>
             <div className="space-y-2 bg-slate-50 p-3 rounded-lg max-h-48 overflow-y-auto">
               {participantesDisponibles.map(p => {
                 const pId = normalizarId(p._id || p.id);
@@ -250,22 +249,12 @@ function ModalAhorroCompartido({ visible, onCerrar, cuentas, usuarios, onCrear }
                     <label className="flex items-center flex-1">
                       <input
                         type="checkbox"
-                        checked={!!formData.participantes[pId] || formData.participantes[pId] === 0}
+                        checked={pId in formData.participantes}
                         onChange={() => toggleParticipante(pId)}
                         className="w-4 h-4 text-teal-500"
                       />
                       <span className="ml-2 text-slate-700 text-sm">{p.nombre}</span>
                     </label>
-                    {(formData.participantes[pId] !== undefined) && (
-                      <input
-                        type="number"
-                        value={formData.participantes[pId]}
-                        onChange={(e) => handleMontoParticipante(pId, e.target.value)}
-                        step="0.01"
-                        placeholder="0.00"
-                        className="w-24 px-2 py-1 border border-slate-300 rounded text-xs"
-                      />
-                    )}
                   </div>
                 );
               })}
