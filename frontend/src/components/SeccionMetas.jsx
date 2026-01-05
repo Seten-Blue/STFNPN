@@ -53,8 +53,6 @@ function SeccionMetas() {
       alert('Error al agregar aportación: ' + (error.message || error));
     }
   };
-    }
-  };
 
   const handleEliminar = async (metaId) => {
     if (window.confirm('¿Estás seguro de eliminar esta meta?')) {
