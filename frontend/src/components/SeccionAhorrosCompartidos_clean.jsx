@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+    import React, { useState, useEffect } from 'react';
 import { ahorroCompartidoAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { formatearMoneda } from '../utils/constantes';
@@ -106,7 +106,6 @@ function SeccionAhorrosCompartidos() {
                 </div>
               </div>
 
-              {/* Información del Ahorro */}
               <div className="space-y-3 mb-4">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Objetivo</span>
@@ -126,7 +125,6 @@ function SeccionAhorrosCompartidos() {
                 </div>
               </div>
 
-              {/* Barra de Progreso */}
               <div className="mb-4">
                 <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
                   <div
@@ -136,7 +134,6 @@ function SeccionAhorrosCompartidos() {
                 </div>
               </div>
 
-              {/* Participantes y Estado */}
               {ahorro.participantes && (
                 <div className="mb-4 bg-teal-50 p-3 rounded-lg border border-teal-100">
                   <h4 className="text-sm font-bold text-teal-700 mb-2">
@@ -153,7 +150,6 @@ function SeccionAhorrosCompartidos() {
                 </div>
               )}
 
-              {/* Estado */}
               <div className="space-y-3 pt-4 border-t border-gray-100">
                 <div className="flex items-center justify-between">
                   <span className={`px-3 py-1 rounded-full text-xs font-bold ${
@@ -170,7 +166,6 @@ function SeccionAhorrosCompartidos() {
                   )}
                 </div>
 
-                {/* Botones de Aportación y Detalles */}
                 <div className="flex gap-3">
                   <button
                     onClick={() => setAportacionModal({ visible: true, ahorroId: ahorro._id, monto: '' })}
@@ -191,22 +186,19 @@ function SeccionAhorrosCompartidos() {
         </div>
       )}
 
-      {/* Modal de Aportación */}
       {aportacionModal.visible && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl">
-            {/* Header */}
             <div className="bg-gradient-to-r from-teal-600 to-cyan-600 p-6 text-white rounded-t-2xl">
               <h3 className="text-2xl font-bold">💰 Hacer Aportación</h3>
               <p className="text-teal-100 text-sm mt-1">Contribuye al ahorro compartido</p>
             </div>
 
-            {/* Contenido */}
             <div className="p-6 space-y-6">
               <div className="bg-teal-50 p-4 rounded-lg border border-teal-200">
-                <p className="text-sm text-teal-600 font-medium">Ahorro: {
-                  ahorros.find(a => a._id === aportacionModal.ahorroId)?.nombre || 'Cargando...'
-                }</p>
+                <p className="text-sm text-teal-600 font-medium">
+                  Ahorro: {ahorros.find(a => a._id === aportacionModal.ahorroId)?.nombre || 'Cargando...'}
+                </p>
               </div>
 
               <div>
@@ -229,7 +221,6 @@ function SeccionAhorrosCompartidos() {
                 <p className="text-xs text-gray-500 mt-2">Ingresa el monto que deseas ahorrar</p>
               </div>
 
-              {/* Botones */}
               <div className="flex gap-3 pt-4">
                 <button
                   onClick={() => setAportacionModal({ ...aportacionModal, visible: false })}
@@ -249,7 +240,6 @@ function SeccionAhorrosCompartidos() {
         </div>
       )}
 
-      {/* Modal de Detalles */}
       <ModalDetallesAhorro
         ahorroId={detallesModal.ahorroId}
         visible={detallesModal.visible}
