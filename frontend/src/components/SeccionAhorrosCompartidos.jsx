@@ -191,58 +191,54 @@ function SeccionAhorrosCompartidos() {
         </div>
       )}
 
-      {/* Modal de Aportación */}
-      {aportacionModal.visible && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 shadow-2xl w-96 max-h-96 overflow-auto">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Hacer Aportación</h3>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Monto a Ahorrar</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={aportacionModal.monto}
-                  onChange={(e) => setAportacionModal({
-                    ...aportacionModal,
-                    monto: e.target.value
-                  })}
-                  placeholder="0.00"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none text-gray-800"
-                />
-              </div>
-
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setAportacionModal({ ...aportacionModal, visible: false })}
-                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 font-bold rounded-lg hover:bg-gray-300 transition"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={() => handleAgregarAportacion(aportacionModal.ahorroId)}
-                  className="flex-1 px-4 py-2 bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-bold rounded-lg hover:from-teal-600 hover:to-cyan-700 transition"
-                >
-                  Aceptar
-                </button>
+      <>
+        {/* Modal de Aportación */}
+        {aportacionModal.visible && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 shadow-2xl w-96 max-h-96 overflow-auto">
+              <h3 className="text-xl font-bold text-gray-800 mb-4">Hacer Aportación</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Monto a Ahorrar</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={aportacionModal.monto}
+                    onChange={(e) => setAportacionModal({
+                      ...aportacionModal,
+                      monto: e.target.value
+                    })}
+                    placeholder="0.00"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none text-gray-800"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setAportacionModal({ ...aportacionModal, visible: false })}
+                    className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 font-bold rounded-lg hover:bg-gray-300 transition"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={() => handleAgregarAportacion(aportacionModal.ahorroId)}
+                    className="flex-1 px-4 py-2 bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-bold rounded-lg hover:from-teal-600 hover:to-cyan-700 transition"
+                  >
+                    Aceptar
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         )}
-
-      {/* Modal de Detalles */}
-      <ModalDetallesAhorro
-        ahorroId={detallesModal.ahorroId}
-        visible={detallesModal.visible}
-        onClose={() => setDetallesModal({ visible: false, ahorroId: null })}
-        onAporteEliminado={() => cargarAhorros()}
-      />
-            </div>
-          </div>
-        </div>
-      )}
+        {/* Modal de Detalles */}
+        <ModalDetallesAhorro
+          ahorroId={detallesModal.ahorroId}
+          visible={detallesModal.visible}
+          onClose={() => setDetallesModal({ visible: false, ahorroId: null })}
+          onAporteEliminado={() => cargarAhorros()}
+        />
+      </>
     </div>
   );
 }

@@ -246,7 +246,8 @@ function SeccionMetas() {
               </div>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
       {/* Modal de Detalles */}
       <ModalDetallesMeta
@@ -255,8 +256,6 @@ function SeccionMetas() {
         onClose={() => setDetallesModal({ visible: false, metaId: null })}
         onAporteEliminado={() => cargarMetas()}
       />
-        </div>
-      )}
     </div>
   );
 }
