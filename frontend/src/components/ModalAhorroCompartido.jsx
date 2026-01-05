@@ -16,7 +16,22 @@ function ModalAhorroCompartido({ visible, onCerrar, cuentas, usuarios, onCrear }
     fechaCreacion: new Date().toISOString().split('T')[0],
   });
 
-  const participantesDisponibles = [usuario, ...usuarios.filter(u => u._id !== usuario.id)];
+  // Normalizar IDs para comparación correcta
+  const normalizarId = (id) => {
+    if (typeof id === 'string') return id;
+    if (id?._id) return id._id.toString();
+    if (id?.toString) return id.toString();
+    return String(id);
+  };
+
+  const usuarioIdNormalizado = normalizarId(usuario._id || usuario.id);
+  const participantesDisponibles = [
+    usuario,
+    ...usuarios.filter(u => {
+      const uId = normalizarId(u._id || u.id);
+      return uId !== usuarioIdNormalizado;
+    })
+  ];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -83,7 +98,7 @@ function ModalAhorroCompartido({ visible, onCerrar, cuentas, usuarios, onCrear }
         motivo: formData.motivo,
         fechaCreacion: formData.fechaCreacion,
         progreso: (calcularTotalAportaciones() / parseFloat(formData.montoObjetivo)) * 100,
-        usuario: usuario.id,
+        usuario: usuarioIdNormalizado,
       };
 
       if (ahorroCompartidoAPI && ahorroCompartidoAPI.crear) {
@@ -228,29 +243,32 @@ function ModalAhorroCompartido({ visible, onCerrar, cuentas, usuarios, onCrear }
           <div>
             <label className="block text-sm font-bold text-slate-800 mb-2">👥 Participantes y Aportaciones</label>
             <div className="space-y-2 bg-slate-50 p-3 rounded-lg max-h-48 overflow-y-auto">
-              {participantesDisponibles.map(p => (
-                <div key={p._id} className="flex items-center justify-between p-2 bg-white rounded hover:bg-slate-100">
-                  <label className="flex items-center flex-1">
-                    <input
-                      type="checkbox"
-                      checked={!!formData.participantes[p._id] || formData.participantes[p._id] === 0}
-                      onChange={() => toggleParticipante(p._id)}
-                      className="w-4 h-4 text-teal-500"
-                    />
-                    <span className="ml-2 text-slate-700 text-sm">{p.nombre}</span>
-                  </label>
-                  {(formData.participantes[p._id] !== undefined) && (
-                    <input
-                      type="number"
-                      value={formData.participantes[p._id]}
-                      onChange={(e) => handleMontoParticipante(p._id, e.target.value)}
-                      step="0.01"
-                      placeholder="0.00"
-                      className="w-24 px-2 py-1 border border-slate-300 rounded text-xs"
-                    />
-                  )}
-                </div>
-              ))}
+              {participantesDisponibles.map(p => {
+                const pId = normalizarId(p._id || p.id);
+                return (
+                  <div key={pId} className="flex items-center justify-between p-2 bg-white rounded hover:bg-slate-100">
+                    <label className="flex items-center flex-1">
+                      <input
+                        type="checkbox"
+                        checked={!!formData.participantes[pId] || formData.participantes[pId] === 0}
+                        onChange={() => toggleParticipante(pId)}
+                        className="w-4 h-4 text-teal-500"
+                      />
+                      <span className="ml-2 text-slate-700 text-sm">{p.nombre}</span>
+                    </label>
+                    {(formData.participantes[pId] !== undefined) && (
+                      <input
+                        type="number"
+                        value={formData.participantes[pId]}
+                        onChange={(e) => handleMontoParticipante(pId, e.target.value)}
+                        step="0.01"
+                        placeholder="0.00"
+                        className="w-24 px-2 py-1 border border-slate-300 rounded text-xs"
+                      />
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
 

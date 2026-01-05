@@ -15,7 +15,8 @@ export const AuthProvider = ({ children }) => {
     if (storedToken) {
       setToken(storedToken);
     } else {
-      setLoading(false);
+      // Auto-login con usuario por defecto
+      autoLoginDefaultUser();
     }
   }, []);
 
@@ -111,7 +112,6 @@ export const AuthProvider = ({ children }) => {
       setLoadingAuth(false);
     }
   };
-
   // Login
   const iniciarSesion = async (email, contraseña) => {
     try {
@@ -144,6 +144,20 @@ export const AuthProvider = ({ children }) => {
       return { success: false, message: error.message };
     } finally {
       setLoadingAuth(false);
+    }
+  };
+
+  // Auto-login con usuario por defecto
+  const autoLoginDefaultUser = async () => {
+    try {
+      const result = await iniciarSesion('roger@example.com', 'password123');
+      if (!result.success) {
+        console.log('Auto-login failed, app will show login screen');
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error('Error en auto-login:', error);
+      setLoading(false);
     }
   };
 

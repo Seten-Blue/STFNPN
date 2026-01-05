@@ -13,6 +13,8 @@ import SeccionPresupuestos from './components/SeccionPresupuestos';
 import SeccionConfiguracion from './components/SeccionConfiguracion';
 import SeccionFusion from './components/SeccionFusion';
 import SeccionNotificaciones from './components/SeccionNotificaciones';
+import SeccionMetas from './components/SeccionMetas';
+import SeccionAhorrosCompartidos from './components/SeccionAhorrosCompartidos';
 import ModalGastoCompartido from './components/ModalGastoCompartido';
 import ModalIngresoCompartido from './components/ModalIngresoCompartido';
 import ModalMetaRequerida from './components/ModalMetaRequerida';
@@ -303,6 +305,12 @@ function AppContent() {
           />
         );
 
+      case 'metas':
+        return <SeccionMetas />;
+
+      case 'ahorroscompartidos':
+        return <SeccionAhorrosCompartidos />;
+
       case 'fusion':
         return <SeccionFusion />;
 
@@ -392,7 +400,7 @@ function AppContent() {
       <ModalMetaRequerida
         visible={modalMetaRequiridaVisible}
         onCerrar={() => setModalMetaRequiridaVisible(false)}
-        usuarios={[]}
+        usuarios={usuariosDelContexto}
         onCrear={cargarDatos}
       />
 
@@ -400,7 +408,7 @@ function AppContent() {
         visible={modalAhorroCompartidoVisible}
         onCerrar={() => setModalAhorroCompartidoVisible(false)}
         cuentas={cuentas}
-        usuarios={[]}
+        usuarios={usuariosDelContexto}
         onCrear={cargarDatos}
       />
     </div>

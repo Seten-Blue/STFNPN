@@ -94,7 +94,7 @@ function ModalIngresoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear 
 
       // Validar que hay participantes seleccionados
       let participantesSeleccionados = Object.keys(formData.participantes);
-      const usuarioId = usuario._id || usuario.id;
+      const usuarioId = normalizarId(usuario._id || usuario.id);
       
       // Asegurar que el usuario actual siempre está incluido
       if (!participantesSeleccionados.includes(usuarioId)) {
@@ -138,12 +138,34 @@ function ModalIngresoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear 
           });
         }
       } else {
-        // Modo personalizado: validar que los montos sumen el total
+        // Modo personalizado: usar los montos especificados en formData.participantes
+        participantesConMonto = { ...formData.participantes };
+        
+        // Asegurar que el usuario actual está incluido
+        if (!(usuarioId in participantesConMonto)) {
+          participantesConMonto[usuarioId] = 0;
+        }
+        
+        // Validar que los montos sumen el total
         const totalAsignado = Object.values(participantesConMonto).reduce((sum, m) => sum + (parseFloat(m) || 0), 0);
         if (Math.abs(totalAsignado - montoTotal) > 0.01) {
           alert(`El total asignado ($${totalAsignado.toFixed(2)}) debe ser igual al monto ($${montoTotal.toFixed(2)})`);
           return;
         }
+      }
+
+      // IMPORTANTE: Asegurar que TODOS los participantes tienen montos válidos (> 0)
+      // Eliminar participantes con monto 0
+      Object.keys(participantesConMonto).forEach(id => {
+        if (parseFloat(participantesConMonto[id]) <= 0) {
+          delete participantesConMonto[id];
+        }
+      });
+
+      // CRÍTICO: El usuario creador SIEMPRE debe estar incluido con un monto > 0
+      if (!(usuarioId in participantesConMonto) || parseFloat(participantesConMonto[usuarioId]) <= 0) {
+        alert('⚠️ Debes incluirte a ti mismo en el ingreso compartido con un monto mayor a 0');
+        return;
       }
 
       const transaccion = {
@@ -154,7 +176,7 @@ function ModalIngresoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear 
         hora: formData.hora,
         cuentaDestino: formData.cuentaDestino,
         anotaciones: `INGRESO COMPARTIDO: ${formData.concepto}`,
-        usuario: usuario._id || usuario.id,
+        usuario: usuarioId,
         esProgramada: formData.esProgramada && !formData.diferirCuotas,
         fechaProgramada: formData.esProgramada && !formData.diferirCuotas ? formData.fechaProgramada : null,
         diferirCuotas: formData.diferirCuotas,
@@ -170,11 +192,24 @@ function ModalIngresoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear 
         anotaciones: transaccion.anotaciones.substring(0, 40) + '...'
       });
 
-      await transaccionesAPI.crear(transaccion);
+      const respuesta = await transaccionesAPI.crear(transaccion);
+      
+      // Mostrar resumen de lo que se creó
+      if (respuesta && respuesta.resumen) {
+        const { transacciones: trans } = respuesta.resumen;
+        const detalleTransacciones = trans.map(t => 
+          `✓ ${t.usuario}: $${t.cantidad.toFixed(2)} (Cuenta: ${t.cuenta})`
+        ).join('\n');
+        
+        alert(`✅ Ingreso compartido creado exitosamente!\n\nTransacciones creadas:\n${detalleTransacciones}`);
+        console.log('📋 Resumen de transacciones creadas:', respuesta.resumen);
+      } else {
+        alert('✅ Ingreso compartido creado exitosamente');
+      }
+      
       onCrear?.();
       resetForm();
       onCerrar();
-      alert('Ingreso compartido creado exitosamente');
     } catch (error) {
       console.error('Error al crear ingreso compartido:', error);
       alert('Error al crear ingreso compartido: ' + error.message);

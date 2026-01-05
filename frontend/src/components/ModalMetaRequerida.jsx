@@ -10,12 +10,27 @@ function ModalMetaRequerida({ visible, onCerrar, usuarios, onCrear }) {
     montoObjetivo: '',
     fechaLimite: '',
     categoria: 'Meta de Ahorro',
-    participantes: [usuario.id],
+    participantes: [usuario._id || usuario.id],
     prioridad: 'media',
     motivo: '',
   });
 
-  const participantesDisponibles = [usuario, ...usuarios.filter(u => u._id !== usuario.id)];
+  // Normalizar IDs para comparación correcta
+  const normalizarId = (id) => {
+    if (typeof id === 'string') return id;
+    if (id?._id) return id._id.toString();
+    if (id?.toString) return id.toString();
+    return String(id);
+  };
+
+  const usuarioIdNormalizado = normalizarId(usuario._id || usuario.id);
+  const participantesDisponibles = [
+    usuario,
+    ...usuarios.filter(u => {
+      const uId = normalizarId(u._id || u.id);
+      return uId !== usuarioIdNormalizado;
+    })
+  ];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -54,7 +69,7 @@ function ModalMetaRequerida({ visible, onCerrar, usuarios, onCrear }) {
         estado: 'activa',
         progreso: 0,
         motivo: formData.motivo,
-        usuario: usuario.id,
+        usuario: usuarioIdNormalizado,
       };
 
       if (metasAPI && metasAPI.crear) {
@@ -213,17 +228,20 @@ function ModalMetaRequerida({ visible, onCerrar, usuarios, onCrear }) {
           <div>
             <label className="block text-sm font-bold text-slate-800 mb-2">👥 Participantes</label>
             <div className="space-y-2 bg-slate-50 p-3 rounded-lg max-h-36 overflow-y-auto">
-              {participantesDisponibles.map(p => (
-                <label key={p._id} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={formData.participantes.includes(p._id)}
-                    onChange={() => toggleParticipante(p._id)}
-                    className="w-4 h-4 text-purple-500"
-                  />
-                  <span className="ml-2 text-slate-700 text-sm">{p.nombre}</span>
-                </label>
-              ))}
+              {participantesDisponibles.map(p => {
+                const pId = normalizarId(p._id || p.id);
+                return (
+                  <label key={pId} className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={formData.participantes.includes(pId)}
+                      onChange={() => toggleParticipante(pId)}
+                      className="w-4 h-4 text-purple-500"
+                    />
+                    <span className="ml-2 text-slate-700 text-sm">{p.nombre}</span>
+                  </label>
+                );
+              })}
             </div>
             <p className="text-xs text-slate-600 mt-2">
               {formData.participantes.length} participante(s) en esta meta
