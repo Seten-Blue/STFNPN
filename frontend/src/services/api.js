@@ -252,11 +252,31 @@ export const metasAPI = {
     const res = await fetch(`${API_URL}/metas/${id}`, { method: 'DELETE' });
     return res.json();
   },
+  obtenerDetalles: async (id) => {
+    const res = await fetch(`${API_URL}/metas/${id}/detalles`);
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || `Error ${res.status}`);
+    }
+    return res.json();
+  },
   agregarAportacion: async (id, data) => {
     const res = await fetch(`${API_URL}/metas/${id}/aportacion`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || `Error ${res.status}`);
+    }
+    return res.json();
+  },
+  eliminarAporte: async (id, aporteId, usuarioId) => {
+    const res = await fetch(`${API_URL}/metas/${id}/aporte/${aporteId}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ usuarioId }),
     });
     if (!res.ok) {
       const error = await res.json();
@@ -293,11 +313,31 @@ export const ahorroCompartidoAPI = {
     const res = await fetch(`${API_URL}/ahorro-compartido/${id}`, { method: 'DELETE' });
     return res.json();
   },
+  obtenerDetalles: async (id) => {
+    const res = await fetch(`${API_URL}/ahorro-compartido/${id}/detalles`);
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || `Error ${res.status}`);
+    }
+    return res.json();
+  },
   agregarAportacion: async (id, data) => {
     const res = await fetch(`${API_URL}/ahorro-compartido/${id}/aportacion`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || `Error ${res.status}`);
+    }
+    return res.json();
+  },
+  eliminarAporte: async (id, aporteId, usuarioId) => {
+    const res = await fetch(`${API_URL}/ahorro-compartido/${id}/aporte/${aporteId}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ usuarioId }),
     });
     if (!res.ok) {
       const error = await res.json();

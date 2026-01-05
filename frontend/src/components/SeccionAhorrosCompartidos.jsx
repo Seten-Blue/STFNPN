@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ahorroCompartidoAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { formatearMoneda } from '../utils/constantes';
+import ModalDetallesAhorro from './ModalDetallesAhorro';
 
 function SeccionAhorrosCompartidos() {
   const { usuario } = useAuth();
@@ -12,6 +13,7 @@ function SeccionAhorrosCompartidos() {
     ahorroId: null,
     monto: ''
   });
+  const [detallesModal, setDetallesModal] = useState({ visible: false, ahorroId: null });
 
   useEffect(() => {
     if (usuario) {
@@ -168,13 +170,21 @@ function SeccionAhorrosCompartidos() {
                   )}
                 </div>
 
-                {/* Botón de Aportación */}
-                <button
-                  onClick={() => setAportacionModal({ visible: true, ahorroId: ahorro._id, monto: '' })}
-                  className="w-full bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-bold py-2 px-4 rounded-lg transition"
-                >
-                  💰 Ahorrar Ahora
-                </button>
+                {/* Botones de Aportación y Detalles */}
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setAportacionModal({ visible: true, ahorroId: ahorro._id, monto: '' })}
+                    className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-bold py-2 px-4 rounded-lg transition"
+                  >
+                    💰 Aporte
+                  </button>
+                  <button
+                    onClick={() => setDetallesModal({ visible: true, ahorroId: ahorro._id })}
+                    className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-2 px-4 rounded-lg transition"
+                  >
+                    📋 Detalles
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -218,6 +228,17 @@ function SeccionAhorrosCompartidos() {
                   Aceptar
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+      {/* Modal de Detalles */}
+      <ModalDetallesAhorro
+        ahorroId={detallesModal.ahorroId}
+        visible={detallesModal.visible}
+        onClose={() => setDetallesModal({ visible: false, ahorroId: null })}
+        onAporteEliminado={() => cargarAhorros()}
+      />
             </div>
           </div>
         </div>

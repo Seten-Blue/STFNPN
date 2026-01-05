@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { metasAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { formatearMoneda } from '../utils/constantes';
+import ModalDetallesMeta from './ModalDetallesMeta';
 
 function SeccionMetas() {
   const { usuario } = useAuth();
   const [metas, setMetas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [aportacionModal, setAportacionModal] = useState({ visible: false, metaId: null, monto: '' });
+  const [detallesModal, setDetallesModal] = useState({ visible: false, metaId: null });
 
   useEffect(() => {
     if (usuario) {
@@ -184,13 +186,21 @@ function SeccionMetas() {
                   )}
                 </div>
 
-                {/* Botón de Aportación */}
-                <button
-                  onClick={() => setAportacionModal({ visible: true, metaId: meta._id, monto: '' })}
-                  className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold py-2 px-4 rounded-lg transition"
-                >
-                  💰 Hacer Aportación
-                </button>
+                {/* Botones de Aportación y Detalles */}
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setAportacionModal({ visible: true, metaId: meta._id, monto: '' })}
+                    className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold py-2 px-4 rounded-lg transition"
+                  >
+                    💰 Aporte
+                  </button>
+                  <button
+                    onClick={() => setDetallesModal({ visible: true, metaId: meta._id })}
+                    className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-2 px-4 rounded-lg transition"
+                  >
+                    📋 Detalles
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -216,7 +226,7 @@ function SeccionMetas() {
                     monto: e.target.value
                   })}
                   placeholder="0.00"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-gray-800"
                 />
               </div>
 
@@ -236,6 +246,15 @@ function SeccionMetas() {
               </div>
             </div>
           </div>
+        )}
+
+      {/* Modal de Detalles */}
+      <ModalDetallesMeta
+        metaId={detallesModal.metaId}
+        visible={detallesModal.visible}
+        onClose={() => setDetallesModal({ visible: false, metaId: null })}
+        onAporteEliminado={() => cargarMetas()}
+      />
         </div>
       )}
     </div>
