@@ -8,7 +8,7 @@ const SeccionPrestamos = ({ prestamos, cuentas, onCrear, onActualizar, onRegistr
 
   const [mostrarModal, setMostrarModal] = useState(false);
   const [detallesModal, setDetallesModal] = useState({ visible: false, prestamoId: null });
-  const [pagoModal, setPagoModal] = useState({ visible: false, prestamoId: null });
+  const [pagoModal, setPagoModal] = useState({ visible: false, prestamo: null });
   const [editando, setEditando] = useState(null);
   const [formData, setFormData] = useState({
     nombre: '',
@@ -64,7 +64,7 @@ const SeccionPrestamos = ({ prestamos, cuentas, onCrear, onActualizar, onRegistr
   };
 
   const handlePago = (prestamo) => {
-    setPagoModal({ visible: true, prestamoId: prestamo._id });
+    setPagoModal({ visible: true, prestamo: prestamo });
   };
 
   const totalDeuda = prestamos.reduce((sum, p) => sum + (p.montoRestante || 0), 0);
@@ -340,8 +340,8 @@ const SeccionPrestamos = ({ prestamos, cuentas, onCrear, onActualizar, onRegistr
       {/* Modal de Registrar Pago */}
       <ModalRegistrarPagoPrestamo
         visible={pagoModal.visible}
-        onClose={() => setPagoModal({ visible: false, prestamoId: null })}
-        prestamo={prestamos.find(p => p._id === pagoModal.prestamoId)}
+        onClose={() => setPagoModal({ visible: false, prestamo: null })}
+        prestamo={pagoModal.prestamo}
         onRegistrar={onRegistrarPago}
       />
     </div>
