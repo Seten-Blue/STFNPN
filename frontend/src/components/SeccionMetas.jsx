@@ -32,22 +32,27 @@ function SeccionMetas() {
   const handleAgregarAportacion = async (metaId) => {
     try {
       const monto = parseFloat(aportacionModal.monto);
-      if (!monto || monto <= 0) {
+      console.log('📊 Intentando agregar aportación:', { metaId, monto, usuarioId: usuario._id || usuario.id });
+      
+      if (!monto || isNaN(monto) || monto <= 0) {
         alert('Ingresa un monto válido');
         return;
       }
 
-      await metasAPI.agregarAportacion(metaId, {
+      const resultado = await metasAPI.agregarAportacion(metaId, {
         usuarioId: usuario._id || usuario.id,
         monto: monto
       });
-
+      
+      console.log('✅ Aportación exitosa:', resultado);
       cargarMetas();
       setAportacionModal({ visible: false, metaId: null, monto: '' });
-      alert('✅ Aportación agregada');
+      alert('✅ Aportación registrada correctamente');
     } catch (error) {
-      console.error('Error al agregar aportación:', error);
-      alert('Error al agregar aportación: ' + error.message);
+      console.error('❌ Error al agregar aportación:', error);
+      alert('Error al agregar aportación: ' + (error.message || error));
+    }
+  };
     }
   };
 

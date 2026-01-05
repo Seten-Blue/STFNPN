@@ -34,22 +34,25 @@ function SeccionAhorrosCompartidos() {
 
   const handleAgregarAportacion = async (ahorroId) => {
     const monto = parseFloat(aportacionModal.monto);
-    if (!monto || monto <= 0) {
+    console.log('💰 Intentando agregar aportación:', { ahorroId, monto, usuarioId: usuario._id || usuario.id });
+    
+    if (!monto || isNaN(monto) || monto <= 0) {
       alert('Ingresa un monto válido');
       return;
     }
 
     try {
-      await ahorroCompartidoAPI.agregarAportacion(ahorroId, {
+      const resultado = await ahorroCompartidoAPI.agregarAportacion(ahorroId, {
         usuarioId: usuario._id || usuario.id,
         monto: monto
       });
+      console.log('✅ Aportación exitosa:', resultado);
       setAportacionModal({ visible: false, ahorroId: null, monto: '' });
       cargarAhorros();
       alert('✅ Aportación registrada exitosamente');
     } catch (error) {
-      console.error('Error al agregar aportación:', error);
-      alert('Error al registrar aportación: ' + error.message);
+      console.error('❌ Error al agregar aportación:', error);
+      alert('Error al registrar aportación: ' + (error.message || error));
     }
   };
 
