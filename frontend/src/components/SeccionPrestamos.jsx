@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import { formatearMoneda, formatearFecha } from '../utils/constantes';
+import ModalDetallesPrestamo from './ModalDetallesPrestamo';
+import ModalRegistrarPagoPrestamo from './ModalRegistrarPagoPrestamo';
 
 const SeccionPrestamos = ({ prestamos, cuentas, onCrear, onActualizar, onRegistrarPago, onEliminar, cuentaActiva }) => {
   // Sin filtros de sujeto, mostrar todos los préstamos del usuario
 
   const [mostrarModal, setMostrarModal] = useState(false);
+  const [detallesModal, setDetallesModal] = useState({ visible: false, prestamoId: null });
+  const [pagoModal, setPagoModal] = useState({ visible: false, prestamoId: null });
   const [editando, setEditando] = useState(null);
   const [formData, setFormData] = useState({
     nombre: '',
@@ -20,10 +24,17 @@ const SeccionPrestamos = ({ prestamos, cuentas, onCrear, onActualizar, onRegistr
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Validar campos requeridos
+    if (!formData.nombre || !formData.montoTotal || !formData.totalCuotas) {
+      alert('Por favor completa los campos requeridos');
+      return;
+    }
+
     const datos = {
       ...formData,
       montoTotal: parseFloat(formData.montoTotal),
-      montoDeuda: parseFloat(formData.montoDeuda) || parseFloat(formData.montoTotal),
+      montoDeuda: formData.montoDeuda ? parseFloat(formData.montoDeuda) : parseFloat(formData.montoTotal),
       totalCuotas: parseInt(formData.totalCuotas),
       diaPago: parseInt(formData.diaPago),
     };
@@ -53,10 +64,7 @@ const SeccionPrestamos = ({ prestamos, cuentas, onCrear, onActualizar, onRegistr
   };
 
   const handlePago = (prestamo) => {
-    const nuevasCuotas = prestamo.cuotasPagadas + 1;
-    if (window.confirm(`¿Registrar pago de cuota ${nuevasCuotas}/${prestamo.totalCuotas}?`)) {
-      onRegistrarPago(prestamo._id, nuevasCuotas);
-    }
+    setPagoModal({ visible: true, prestamoId: prestamo._id });
   };
 
   const totalDeuda = prestamos.reduce((sum, p) => sum + (p.montoRestante || 0), 0);
@@ -162,6 +170,12 @@ const SeccionPrestamos = ({ prestamos, cuentas, onCrear, onActualizar, onRegistr
 
               {/* Acciones */}
               <div className="flex lg:flex-col gap-2">
+                <button
+                  onClick={() => setDetallesModal({ visible: true, prestamoId: prestamo._id })}
+                  className="flex-1 lg:flex-none bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition text-sm font-medium"
+                >
+                  Ver Detalles
+                </button>
                 {prestamo.estado !== 'pagado' && (
                   <button
                     onClick={() => handlePago(prestamo)}
@@ -197,7 +211,7 @@ const SeccionPrestamos = ({ prestamos, cuentas, onCrear, onActualizar, onRegistr
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white p-4 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="text-lg font-bold">{editando ? 'Editar Préstamo' : 'Nuevo Préstamo'}</h3>
+              <h3 className="text-lg font-bold text-gray-900">{editando ? 'Editar Préstamo' : 'Nuevo Préstamo'}</h3>
               <button onClick={cerrarModal} className="p-2 hover:bg-gray-100 rounded-lg">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -206,97 +220,97 @@ const SeccionPrestamos = ({ prestamos, cuentas, onCrear, onActualizar, onRegistr
             </div>
             <form onSubmit={handleSubmit} className="p-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+                <label className="block text-sm font-medium text-gray-800 mb-1">Nombre *</label>
                 <input
                   type="text"
                   value={formData.nombre}
                   onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
                   placeholder="Ej: Crédito de consumo"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Descripción/Anotación</label>
+                <label className="block text-sm font-medium text-gray-800 mb-1">Descripción/Anotación</label>
                 <textarea
                   value={formData.descripcion}
                   onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
                   rows={2}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Monto Original *</label>
+                  <label className="block text-sm font-medium text-gray-800 mb-1">Monto Original *</label>
                   <input
                     type="number"
                     value={formData.montoTotal}
                     onChange={(e) => setFormData({ ...formData, montoTotal: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Deuda Total</label>
+                  <label className="block text-sm font-medium text-gray-800 mb-1">Deuda Total</label>
                   <input
                     type="number"
                     value={formData.montoDeuda}
                     onChange={(e) => setFormData({ ...formData, montoDeuda: e.target.value })}
                     placeholder="Con intereses"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Fecha que se sacó el crédito *</label>
+                <label className="block text-sm font-medium text-gray-800 mb-1">Fecha que se sacó el crédito *</label>
                 <input
                   type="date"
                   value={formData.fechaInicio}
                   onChange={(e) => setFormData({ ...formData, fechaInicio: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">¿Quién prestó? (opcional)</label>
+                <label className="block text-sm font-medium text-gray-800 mb-1">¿Quién prestó? (opcional)</label>
                 <input
                   type="text"
                   value={formData.prestamista}
                   onChange={(e) => setFormData({ ...formData, prestamista: e.target.value })}
                   placeholder="Ej: Banco de Chile"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Total Cuotas *</label>
+                  <label className="block text-sm font-medium text-gray-800 mb-1">Total Cuotas *</label>
                   <input
                     type="number"
                     value={formData.totalCuotas}
                     onChange={(e) => setFormData({ ...formData, totalCuotas: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Día de Pago *</label>
+                  <label className="block text-sm font-medium text-gray-800 mb-1">Día de Pago *</label>
                   <input
                     type="number"
                     min="1"
                     max="31"
                     value={formData.diaPago}
                     onChange={(e) => setFormData({ ...formData, diaPago: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900"
                     required
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Cuenta Asociada</label>
+                <label className="block text-sm font-medium text-gray-800 mb-1">Cuenta Asociada</label>
                 <select
                   value={formData.cuentaAsociada}
                   onChange={(e) => setFormData({ ...formData, cuentaAsociada: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900"
                 >
                   <option value="">Seleccionar cuenta</option>
                   {cuentas.map((c) => (
@@ -314,6 +328,22 @@ const SeccionPrestamos = ({ prestamos, cuentas, onCrear, onActualizar, onRegistr
           </div>
         </div>
       )}
+
+      {/* Modal de Detalles */}
+      <ModalDetallesPrestamo
+        prestamoId={detallesModal.prestamoId}
+        visible={detallesModal.visible}
+        onClose={() => setDetallesModal({ visible: false, prestamoId: null })}
+        prestamos={prestamos}
+      />
+
+      {/* Modal de Registrar Pago */}
+      <ModalRegistrarPagoPrestamo
+        visible={pagoModal.visible}
+        onClose={() => setPagoModal({ visible: false, prestamoId: null })}
+        prestamo={prestamos.find(p => p._id === pagoModal.prestamoId)}
+        onRegistrar={onRegistrarPago}
+      />
     </div>
   );
 };

@@ -129,7 +129,7 @@ const SeccionPresupuestos = ({ presupuestos, onCrear, onActualizar, onEliminar, 
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-md">
             <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="text-lg font-bold">Nuevo Presupuesto</h3>
+              <h3 className="text-lg font-bold text-gray-900">Nuevo Presupuesto</h3>
               <button onClick={cerrarModal} className="p-2 hover:bg-gray-100 rounded-lg">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -138,7 +138,7 @@ const SeccionPresupuestos = ({ presupuestos, onCrear, onActualizar, onEliminar, 
             </div>
             <form onSubmit={handleSubmit} className="p-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Tipo</label>
+                <label className="block text-sm font-bold text-gray-800 mb-2">Tipo</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
@@ -147,8 +147,8 @@ const SeccionPresupuestos = ({ presupuestos, onCrear, onActualizar, onEliminar, 
                       formData.tipo === 'maxima_perdida' ? 'border-red-500 bg-red-50' : 'border-gray-200'
                     }`}
                   >
-                    <span className="text-2xl block">🛑</span>
-                    <span className="text-sm">Máx. Pérdida</span>
+                    <span className="text-2xl block text-gray-900">🛑</span>
+                    <span className="text-sm text-gray-900">Máx. Pérdida</span>
                   </button>
                   <button
                     type="button"
@@ -157,17 +157,17 @@ const SeccionPresupuestos = ({ presupuestos, onCrear, onActualizar, onEliminar, 
                       formData.tipo === 'objetivo' ? 'border-green-500 bg-green-50' : 'border-gray-200'
                     }`}
                   >
-                    <span className="text-2xl block">🎯</span>
-                    <span className="text-sm">Objetivo</span>
+                    <span className="text-2xl block text-gray-900">🎯</span>
+                    <span className="text-sm text-gray-900">Objetivo</span>
                   </button>
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Período</label>
+                <label className="block text-sm font-bold text-gray-800 mb-1">Período</label>
                 <select
                   value={formData.periodo}
                   onChange={(e) => setFormData({ ...formData, periodo: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900"
                 >
                   <option value="diario">Diario</option>
                   <option value="mensual">Mensual</option>
@@ -175,21 +175,21 @@ const SeccionPresupuestos = ({ presupuestos, onCrear, onActualizar, onEliminar, 
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Monto *</label>
+                <label className="block text-sm font-bold text-gray-800 mb-1">Monto *</label>
                 <input
                   type="number"
                   value={formData.monto}
                   onChange={(e) => setFormData({ ...formData, monto: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Grupo</label>
+                <label className="block text-sm font-bold text-gray-800 mb-1">Grupo</label>
                 <select
                   value={formData.grupo}
                   onChange={(e) => setFormData({ ...formData, grupo: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900"
                 >
                   <option value="personal">Personal</option>
                   <option value="familia">Familia</option>

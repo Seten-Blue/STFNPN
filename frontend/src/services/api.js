@@ -100,11 +100,11 @@ export const prestamosAPI = {
     });
     return res.json();
   },
-  registrarPago: async (id, cuotasPagadas) => {
+  registrarPago: async (id, datoPago) => {
     const res = await fetch(`${API_URL}/prestamos/${id}/pago`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cuotasPagadas }),
+      body: JSON.stringify(datoPago),
     });
     return res.json();
   },
