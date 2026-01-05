@@ -7,6 +7,7 @@ function SeccionMetas() {
   const { usuario } = useAuth();
   const [metas, setMetas] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [aportacionModal, setAportacionModal] = useState({ visible: false, metaId: null, monto: '' });
 
   useEffect(() => {
     if (usuario) {
@@ -17,6 +18,7 @@ function SeccionMetas() {
   const cargarMetas = async () => {
     setLoading(true);
     try {
+      // Obtener todas las metas del usuario (como creador)
       const data = await metasAPI.obtener({ usuarioId: usuario._id || usuario.id });
       setMetas(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -27,14 +29,25 @@ function SeccionMetas() {
     }
   };
 
-  const handleActualizar = async (metaId, nuevosDatos) => {
+  const handleAgregarAportacion = async (metaId) => {
     try {
-      await metasAPI.actualizar(metaId, nuevosDatos);
+      const monto = parseFloat(aportacionModal.monto);
+      if (!monto || monto <= 0) {
+        alert('Ingresa un monto válido');
+        return;
+      }
+
+      await metasAPI.agregarAportacion(metaId, {
+        usuarioId: usuario._id || usuario.id,
+        monto: monto
+      });
+
       cargarMetas();
-      alert('✅ Meta actualizada');
+      setAportacionModal({ visible: false, metaId: null, monto: '' });
+      alert('✅ Aportación agregada');
     } catch (error) {
-      console.error('Error al actualizar meta:', error);
-      alert('Error al actualizar meta');
+      console.error('Error al agregar aportación:', error);
+      alert('Error al agregar aportación: ' + error.message);
     }
   };
 
@@ -113,48 +126,113 @@ function SeccionMetas() {
               </div>
 
               {/* Participantes */}
-              {meta.participantes && meta.participantes.length > 0 && (
+              {meta.participantes && (
                 <div className="mb-4">
-                  <h4 className="text-sm font-bold text-gray-700 mb-2">👥 Participantes ({meta.participantes.length})</h4>
+                  <h4 className="text-sm font-bold text-gray-700 mb-2">
+                    👥 Participantes ({Array.isArray(meta.participantes) ? meta.participantes.length : Object.keys(meta.participantes).length})
+                  </h4>
                   <div className="space-y-1 text-xs">
-                    {meta.participantes.map((p, idx) => (
-                      <div key={idx} className="flex justify-between text-gray-600">
-                        <span>{p.nombre || 'Usuario desconocido'}</span>
-                        <span className="text-gray-400">({formatearMoneda(p.aportacion || 0)})</span>
-                      </div>
-                    ))}
+                    {Array.isArray(meta.participantes) ? (
+                      // Si es array (con objeto {usuarioId, aportacion})
+                      meta.participantes.map((p, idx) => (
+                        <div key={idx} className="flex justify-between text-gray-600">
+                          <span>{p.nombre || `Usuario ${p.usuarioId?.substring(0, 8)}`}</span>
+                          <span className="font-bold text-purple-600">{formatearMoneda(p.aportacion || 0)}</span>
+                        </div>
+                      ))
+                    ) : (
+                      // Si es objeto Map {usuarioId: monto}
+                      Object.entries(meta.participantes).map(([usuarioId, monto], idx) => (
+                        <div key={idx} className="flex justify-between text-gray-600">
+                          <span className="truncate">Usuario: {usuarioId.substring(0, 8)}...</span>
+                          <span className="font-bold text-purple-600">{formatearMoneda(monto || 0)}</span>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               )}
 
               {/* Estado y Fecha */}
-              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                <div className="flex gap-2">
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                    meta.estado === 'activa' ? 'bg-green-100 text-green-800' :
-                    meta.estado === 'pausada' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-blue-100 text-blue-800'
-                  }`}>
-                    {meta.estado || 'activa'}
-                  </span>
-                  {meta.prioridad && (
+              <div className="space-y-3 pt-4 border-t border-gray-100">
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-2">
                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                      meta.prioridad === 'alta' ? 'bg-red-100 text-red-800' :
-                      meta.prioridad === 'media' ? 'bg-orange-100 text-orange-800' :
+                      meta.estado === 'activa' ? 'bg-green-100 text-green-800' :
+                      meta.estado === 'pausada' ? 'bg-yellow-100 text-yellow-800' :
                       'bg-blue-100 text-blue-800'
                     }`}>
-                      {meta.prioridad}
+                      {meta.estado || 'activa'}
+                    </span>
+                    {meta.prioridad && (
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                        meta.prioridad === 'alta' ? 'bg-red-100 text-red-800' :
+                        meta.prioridad === 'media' ? 'bg-orange-100 text-orange-800' :
+                        'bg-blue-100 text-blue-800'
+                      }`}>
+                        {meta.prioridad}
+                      </span>
+                    )}
+                  </div>
+                  {meta.fechaLimite && (
+                    <span className="text-xs text-gray-500">
+                      📅 {new Date(meta.fechaLimite).toLocaleDateString('es-ES')}
                     </span>
                   )}
                 </div>
-                {meta.fechaLimite && (
-                  <span className="text-xs text-gray-500">
-                    📅 {new Date(meta.fechaLimite).toLocaleDateString('es-ES')}
-                  </span>
-                )}
+
+                {/* Botón de Aportación */}
+                <button
+                  onClick={() => setAportacionModal({ visible: true, metaId: meta._id, monto: '' })}
+                  className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold py-2 px-4 rounded-lg transition"
+                >
+                  💰 Hacer Aportación
+                </button>
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Modal de Aportación */}
+      {aportacionModal.visible && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 shadow-2xl w-96 max-h-96 overflow-auto">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Hacer Aportación</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Monto a Aportar</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={aportacionModal.monto}
+                  onChange={(e) => setAportacionModal({
+                    ...aportacionModal,
+                    monto: e.target.value
+                  })}
+                  placeholder="0.00"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setAportacionModal({ ...aportacionModal, visible: false })}
+                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 font-bold rounded-lg hover:bg-gray-300 transition"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => handleAgregarAportacion(aportacionModal.metaId)}
+                  className="flex-1 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold rounded-lg hover:from-indigo-600 hover:to-purple-700 transition"
+                >
+                  Aceptar
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

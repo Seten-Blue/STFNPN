@@ -252,6 +252,18 @@ export const metasAPI = {
     const res = await fetch(`${API_URL}/metas/${id}`, { method: 'DELETE' });
     return res.json();
   },
+  agregarAportacion: async (id, data) => {
+    const res = await fetch(`${API_URL}/metas/${id}/aportacion`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || `Error ${res.status}`);
+    }
+    return res.json();
+  },
 };
 
 // Ahorro Compartido
@@ -279,6 +291,18 @@ export const ahorroCompartidoAPI = {
   },
   eliminar: async (id) => {
     const res = await fetch(`${API_URL}/ahorro-compartido/${id}`, { method: 'DELETE' });
+    return res.json();
+  },
+  agregarAportacion: async (id, data) => {
+    const res = await fetch(`${API_URL}/ahorro-compartido/${id}/aportacion`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || `Error ${res.status}`);
+    }
     return res.json();
   },
 };

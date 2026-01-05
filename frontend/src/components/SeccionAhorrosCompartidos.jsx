@@ -7,6 +7,11 @@ function SeccionAhorrosCompartidos() {
   const { usuario } = useAuth();
   const [ahorros, setAhorros] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [aportacionModal, setAportacionModal] = useState({
+    visible: false,
+    ahorroId: null,
+    monto: ''
+  });
 
   useEffect(() => {
     if (usuario) {
@@ -27,14 +32,24 @@ function SeccionAhorrosCompartidos() {
     }
   };
 
-  const handleActualizar = async (ahorroId, nuevosDatos) => {
+  const handleAgregarAportacion = async (ahorroId) => {
+    const monto = parseFloat(aportacionModal.monto);
+    if (!monto || monto <= 0) {
+      alert('Ingresa un monto válido');
+      return;
+    }
+
     try {
-      await ahorroCompartidoAPI.actualizar(ahorroId, nuevosDatos);
+      await ahorroCompartidoAPI.agregarAportacion(ahorroId, {
+        usuarioId: usuario._id || usuario.id,
+        monto: monto
+      });
+      setAportacionModal({ visible: false, ahorroId: null, monto: '' });
       cargarAhorros();
-      alert('✅ Ahorro actualizado');
+      alert('✅ Aportación registrada exitosamente');
     } catch (error) {
-      console.error('Error al actualizar ahorro:', error);
-      alert('Error al actualizar ahorro');
+      console.error('Error al agregar aportación:', error);
+      alert('Error al registrar aportación: ' + error.message);
     }
   };
 
@@ -134,22 +149,74 @@ function SeccionAhorrosCompartidos() {
               )}
 
               {/* Estado */}
-              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                  ahorro.estado === 'activo' ? 'bg-green-100 text-green-800' :
-                  ahorro.estado === 'pausado' ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-blue-100 text-blue-800'
-                }`}>
-                  {ahorro.estado || 'activo'}
-                </span>
-                {ahorro.createdAt && (
-                  <span className="text-xs text-gray-500">
-                    📅 {new Date(ahorro.createdAt).toLocaleDateString('es-ES')}
+              <div className="space-y-3 pt-4 border-t border-gray-100">
+                <div className="flex items-center justify-between">
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                    ahorro.estado === 'activo' ? 'bg-green-100 text-green-800' :
+                    ahorro.estado === 'pausado' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-blue-100 text-blue-800'
+                  }`}>
+                    {ahorro.estado || 'activo'}
                   </span>
-                )}
+                  {ahorro.createdAt && (
+                    <span className="text-xs text-gray-500">
+                      📅 {new Date(ahorro.createdAt).toLocaleDateString('es-ES')}
+                    </span>
+                  )}
+                </div>
+
+                {/* Botón de Aportación */}
+                <button
+                  onClick={() => setAportacionModal({ visible: true, ahorroId: ahorro._id, monto: '' })}
+                  className="w-full bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-bold py-2 px-4 rounded-lg transition"
+                >
+                  💰 Ahorrar Ahora
+                </button>
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Modal de Aportación */}
+      {aportacionModal.visible && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 shadow-2xl w-96 max-h-96 overflow-auto">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Hacer Aportación</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Monto a Ahorrar</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={aportacionModal.monto}
+                  onChange={(e) => setAportacionModal({
+                    ...aportacionModal,
+                    monto: e.target.value
+                  })}
+                  placeholder="0.00"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setAportacionModal({ ...aportacionModal, visible: false })}
+                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 font-bold rounded-lg hover:bg-gray-300 transition"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => handleAgregarAportacion(aportacionModal.ahorroId)}
+                  className="flex-1 px-4 py-2 bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-bold rounded-lg hover:from-teal-600 hover:to-cyan-700 transition"
+                >
+                  Aceptar
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
