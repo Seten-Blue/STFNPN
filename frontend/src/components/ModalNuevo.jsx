@@ -211,12 +211,12 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
           {tipoTransaccion === 'transferencia' && (
             <>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Cuenta Origen</label>
+                <label className="block text-sm font-bold text-gray-900 mb-1">Cuenta Origen</label>
                 <select
                   name="cuentaOrigen"
                   value={formData.cuentaOrigen ?? ""}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-400 rounded-lg text-gray-900 bg-white placeholder-gray-500 focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
                   required
                 >
                   <option value="">Seleccionar cuenta</option>
@@ -226,12 +226,12 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Cuenta Destino</label>
+                <label className="block text-sm font-bold text-gray-900 mb-1">Cuenta Destino</label>
                 <select
                   name="cuentaDestino"
                   value={formData.cuentaDestino ?? ""}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-400 rounded-lg text-gray-900 bg-white placeholder-gray-500 focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
                   required
                 >
                   <option value="">Seleccionar cuenta</option>
@@ -246,12 +246,12 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
           {/* Cuenta para gasto/ingreso */}
           {tipoTransaccion !== 'transferencia' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">¿De qué cuenta?</label>
+              <label className="block text-sm font-bold text-gray-900 mb-1">¿De qué cuenta?</label>
               <select
                 name="cuentaOrigen"
                 value={formData.cuentaOrigen ?? ""}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-400 rounded-lg text-gray-900 bg-white placeholder-gray-500 focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
               >
                 <option value="">Seleccionar cuenta</option>
                 {cuentas.map((c) => (
@@ -263,14 +263,14 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
 
           {/* Cantidad */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Cantidad *</label>
+            <label className="block text-sm font-bold text-gray-900 mb-1">Cantidad *</label>
             <input
               type="number"
               name="cantidad"
               value={formData.cantidad}
               onChange={handleChange}
               placeholder="0"
-              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-2xl font-bold text-center"
+              className="w-full px-3 py-3 border border-gray-400 rounded-lg text-gray-900 bg-white placeholder-gray-500 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 text-2xl font-bold text-center"
               required
             />
           </div>
@@ -278,23 +278,23 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
           {/* Fecha y Hora */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
+              <label className="block text-sm font-bold text-gray-900 mb-1">Fecha</label>
               <input
                 type="date"
                 name="fecha"
                 value={formData.fecha}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-400 rounded-lg text-gray-900 bg-white placeholder-gray-500 focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Hora</label>
+              <label className="block text-sm font-bold text-gray-900 mb-1">Hora</label>
               <input
                 type="time"
                 name="hora"
                 value={formData.hora}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-400 rounded-lg text-gray-900 bg-white placeholder-gray-500 focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
               />
             </div>
           </div>
@@ -315,14 +315,14 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
             <div className="space-y-4 border-t border-gray-200 pt-4">
               {/* Anotaciones */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Anotaciones</label>
+                <label className="block text-sm font-bold text-gray-900 mb-1">Anotaciones</label>
                 <textarea
                   name="anotaciones"
                   value={formData.anotaciones}
                   onChange={handleChange}
                   rows={2}
                   placeholder="Notas adicionales..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-400 rounded-lg text-gray-900 bg-white placeholder-gray-500 focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
                 />
               </div>
 
@@ -343,12 +343,12 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
 
               {formData.esRecurrente && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Frecuencia</label>
+                  <label className="block text-sm font-bold text-gray-900 mb-1">Frecuencia</label>
                   <select
                     name="frecuenciaRecurrencia"
                     value={formData.frecuenciaRecurrencia ?? ""}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-400 rounded-lg text-gray-900 bg-white placeholder-gray-500 focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
                   >
                     <option value="">Seleccionar</option>
                     {frecuenciasRecurrencia.map((f) => (

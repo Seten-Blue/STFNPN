@@ -73,7 +73,7 @@ function AppContent() {
 
       const [trans, ctas, prest, presup] = await Promise.all([
         transaccionesAPI.obtener(filtros),
-        cuentasAPI.obtener({ usuarioId: usuario._id || usuario.id }),
+        cuentasAPI.obtener({}), // El backend ahora obtiene usuarioId del token
         prestamosAPI.obtener({ usuarioId: usuario._id || usuario.id }),
         presupuestosAPI.estado({ usuarioId: usuario._id || usuario.id }),
       ]);
@@ -122,11 +122,8 @@ function AppContent() {
   // Handlers de cuentas
   const handleCrearCuenta = async (data) => {
     try {
-      const dataConUsuario = {
-        ...data,
-        usuario: usuario.id
-      };
-      await cuentasAPI.crear(dataConUsuario);
+      // No necesario enviar usuarioId, el backend lo obtiene del token
+      await cuentasAPI.crear(data);
       cargarDatos();
     } catch (error) {
       alert('Error al crear cuenta');

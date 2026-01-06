@@ -5,7 +5,7 @@ const menuItems = [
   { id: 'transacciones', nombre: 'Transacciones', icono: '💸' },
   { id: 'cuentas', nombre: 'Cuentas', icono: '🏦' },
   { id: 'prestamos', nombre: 'Préstamos', icono: '📋' },
-  { id: 'presupuestos', nombre: 'Presupuestos', icono: '🎯' },
+  { id: 'presupuestos', nombre: 'Presupuestos', icono: '📊' },
   { id: 'metas', nombre: 'Metas', icono: '🎯' },
   { id: 'ahorroscompartidos', nombre: 'Ahorros Compartidos', icono: '🏦' },
   { id: 'fusion', nombre: 'Fusión Cuentas', icono: '🔄' },

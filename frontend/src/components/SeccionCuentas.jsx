@@ -150,21 +150,21 @@ const SeccionCuentas = ({ cuentas, onCrear, onActualizar, onEliminar, cuentaActi
             </div>
             <form onSubmit={handleSubmit} className="p-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+                <label className="block text-sm font-bold text-gray-900 mb-1">Nombre *</label>
                 <input
                   type="text"
                   value={formData.nombre}
                   onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-400 rounded-lg text-gray-900 bg-white placeholder-gray-500 focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                <label className="block text-sm font-bold text-gray-900 mb-1">Tipo</label>
                 <select
                   value={formData.tipo}
                   onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-400 rounded-lg text-gray-900 bg-white placeholder-gray-500 focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
                 >
                   {tiposCuenta.map((t) => (
                     <option key={t.valor} value={t.valor}>{t.icono} {t.nombre}</option>
@@ -172,26 +172,26 @@ const SeccionCuentas = ({ cuentas, onCrear, onActualizar, onEliminar, cuentaActi
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Entidad (opcional)</label>
+                <label className="block text-sm font-bold text-gray-900 mb-1">Entidad (opcional)</label>
                 <input
                   type="text"
                   value={formData.entidad}
                   onChange={(e) => setFormData({ ...formData, entidad: e.target.value })}
                   placeholder="Ej: Banco de Chile"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-400 rounded-lg text-gray-900 bg-white placeholder-gray-500 focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Saldo Inicial</label>
+                <label className="block text-sm font-bold text-gray-900 mb-1">Saldo Inicial</label>
                 <input
                   type="number"
                   value={formData.saldo}
                   onChange={(e) => setFormData({ ...formData, saldo: parseFloat(e.target.value) || 0 })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-400 rounded-lg text-gray-900 bg-white placeholder-gray-500 focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Color</label>
+                <label className="block text-sm font-bold text-gray-900 mb-2">Color</label>
                 <div className="flex gap-2 flex-wrap">
                   {coloresDisponibles.map((color) => (
                     <button

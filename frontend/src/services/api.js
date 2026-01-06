@@ -1,16 +1,27 @@
 const API_URL = 'http://localhost:3001/api';
 
+// Función auxiliar para obtener headers con token
+const getHeaders = () => {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+  };
+};
+
 // Transacciones
 export const transaccionesAPI = {
   obtener: async (filtros = {}) => {
     const params = new URLSearchParams(filtros);
-    const res = await fetch(`${API_URL}/transacciones?${params}`);
+    const res = await fetch(`${API_URL}/transacciones?${params}`, {
+      headers: getHeaders()
+    });
     return res.json();
   },
   crear: async (data) => {
     const res = await fetch(`${API_URL}/transacciones`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
     const json = await res.json();
@@ -23,13 +34,16 @@ export const transaccionesAPI = {
   actualizar: async (id, data) => {
     const res = await fetch(`${API_URL}/transacciones/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
     return res.json();
   },
   eliminar: async (id) => {
-    const res = await fetch(`${API_URL}/transacciones/${id}`, { method: 'DELETE' });
+    const res = await fetch(`${API_URL}/transacciones/${id}`, { 
+      method: 'DELETE',
+      headers: getHeaders()
+    });
     if (!res.ok) {
       const error = await res.text();
       throw new Error(`Error ${res.status}: ${error}`);
@@ -38,7 +52,9 @@ export const transaccionesAPI = {
   },
   resumen: async (filtros = {}) => {
     const params = new URLSearchParams(filtros);
-    const res = await fetch(`${API_URL}/transacciones/resumen?${params}`);
+    const res = await fetch(`${API_URL}/transacciones/resumen?${params}`, {
+      headers: getHeaders()
+    });
     return res.json();
   },
 };
@@ -47,13 +63,15 @@ export const transaccionesAPI = {
 export const cuentasAPI = {
   obtener: async (filtros = {}) => {
     const params = new URLSearchParams(filtros);
-    const res = await fetch(`${API_URL}/cuentas?${params}`);
+    const res = await fetch(`${API_URL}/cuentas?${params}`, {
+      headers: getHeaders()
+    });
     return res.json();
   },
   crear: async (data) => {
     const res = await fetch(`${API_URL}/cuentas`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
     return res.json();
@@ -61,18 +79,23 @@ export const cuentasAPI = {
   actualizar: async (id, data) => {
     const res = await fetch(`${API_URL}/cuentas/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
     return res.json();
   },
   eliminar: async (id) => {
-    const res = await fetch(`${API_URL}/cuentas/${id}`, { method: 'DELETE' });
+    const res = await fetch(`${API_URL}/cuentas/${id}`, { 
+      method: 'DELETE',
+      headers: getHeaders()
+    });
     return res.json();
   },
   saldo: async (filtros = {}) => {
     const params = new URLSearchParams(filtros);
-    const res = await fetch(`${API_URL}/cuentas/saldo?${params}`);
+    const res = await fetch(`${API_URL}/cuentas/saldo?${params}`, {
+      headers: getHeaders()
+    });
     return res.json();
   },
 };
@@ -81,13 +104,15 @@ export const cuentasAPI = {
 export const prestamosAPI = {
   obtener: async (filtros = {}) => {
     const params = new URLSearchParams(filtros);
-    const res = await fetch(`${API_URL}/prestamos?${params}`);
+    const res = await fetch(`${API_URL}/prestamos?${params}`, {
+      headers: getHeaders()
+    });
     return res.json();
   },
   crear: async (data) => {
     const res = await fetch(`${API_URL}/prestamos`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
     return res.json();
@@ -95,7 +120,7 @@ export const prestamosAPI = {
   actualizar: async (id, data) => {
     const res = await fetch(`${API_URL}/prestamos/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
     return res.json();
@@ -103,13 +128,16 @@ export const prestamosAPI = {
   registrarPago: async (id, datoPago) => {
     const res = await fetch(`${API_URL}/prestamos/${id}/pago`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getHeaders(),
       body: JSON.stringify(datoPago),
     });
     return res.json();
   },
   eliminar: async (id) => {
-    const res = await fetch(`${API_URL}/prestamos/${id}`, { method: 'DELETE' });
+    const res = await fetch(`${API_URL}/prestamos/${id}`, { 
+      method: 'DELETE',
+      headers: getHeaders()
+    });
     return res.json();
   },
 };
@@ -118,18 +146,22 @@ export const prestamosAPI = {
 export const presupuestosAPI = {
   obtener: async (filtros = {}) => {
     const params = new URLSearchParams(filtros);
-    const res = await fetch(`${API_URL}/presupuestos?${params}`);
+    const res = await fetch(`${API_URL}/presupuestos?${params}`, {
+      headers: getHeaders()
+    });
     return res.json();
   },
   estado: async (filtros = {}) => {
     const params = new URLSearchParams(filtros);
-    const res = await fetch(`${API_URL}/presupuestos/estado?${params}`);
+    const res = await fetch(`${API_URL}/presupuestos/estado?${params}`, {
+      headers: getHeaders()
+    });
     return res.json();
   },
   crear: async (data) => {
     const res = await fetch(`${API_URL}/presupuestos`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
     return res.json();
@@ -137,13 +169,16 @@ export const presupuestosAPI = {
   actualizar: async (id, data) => {
     const res = await fetch(`${API_URL}/presupuestos/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
     return res.json();
   },
   eliminar: async (id) => {
-    const res = await fetch(`${API_URL}/presupuestos/${id}`, { method: 'DELETE' });
+    const res = await fetch(`${API_URL}/presupuestos/${id}`, { 
+      method: 'DELETE',
+      headers: getHeaders()
+    });
     return res.json();
   },
 };
@@ -152,23 +187,29 @@ export const presupuestosAPI = {
 export const notificacionesAPI = {
   obtener: async (filtros = {}) => {
     const params = new URLSearchParams(filtros);
-    const res = await fetch(`${API_URL}/notificaciones?${params}`);
+    const res = await fetch(`${API_URL}/notificaciones?${params}`, {
+      headers: getHeaders()
+    });
     return res.json();
   },
   obtenerPendientes: async (filtros = {}) => {
     const params = new URLSearchParams(filtros);
-    const res = await fetch(`${API_URL}/notificaciones/pendientes?${params}`);
+    const res = await fetch(`${API_URL}/notificaciones/pendientes?${params}`, {
+      headers: getHeaders()
+    });
     return res.json();
   },
   contarNoLeidas: async (filtros = {}) => {
     const params = new URLSearchParams(filtros);
-    const res = await fetch(`${API_URL}/notificaciones/contar?${params}`);
+    const res = await fetch(`${API_URL}/notificaciones/contar?${params}`, {
+      headers: getHeaders()
+    });
     return res.json();
   },
   crear: async (data) => {
     const res = await fetch(`${API_URL}/notificaciones`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
     return res.json();
@@ -176,13 +217,14 @@ export const notificacionesAPI = {
   marcarLeida: async (id) => {
     const res = await fetch(`${API_URL}/notificaciones/${id}/leida`, {
       method: 'PUT',
+      headers: getHeaders()
     });
     return res.json();
   },
   marcarTodasLeidas: async (usuarioId) => {
     const res = await fetch(`${API_URL}/notificaciones/marcar-todas-leidas`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getHeaders(),
       body: JSON.stringify({ usuarioId }),
     });
     return res.json();
@@ -190,13 +232,16 @@ export const notificacionesAPI = {
   actualizar: async (id, data) => {
     const res = await fetch(`${API_URL}/notificaciones/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
     return res.json();
   },
   eliminar: async (id) => {
-    const res = await fetch(`${API_URL}/notificaciones/${id}`, { method: 'DELETE' });
+    const res = await fetch(`${API_URL}/notificaciones/${id}`, { 
+      method: 'DELETE',
+      headers: getHeaders()
+    });
     return res.json();
   },
 };
@@ -206,7 +251,7 @@ export const emailAPI = {
   enviarPrueba: async (email) => {
     const res = await fetch(`${API_URL}/email/prueba`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getHeaders(),
       body: JSON.stringify({ email }),
     });
     return res.json();
@@ -214,12 +259,14 @@ export const emailAPI = {
   procesarPendientes: async () => {
     const res = await fetch(`${API_URL}/email/procesar`, {
       method: 'POST',
+      headers: getHeaders()
     });
     return res.json();
   },
   enviarNotificacion: async (id) => {
     const res = await fetch(`${API_URL}/email/enviar/${id}`, {
       method: 'POST',
+      headers: getHeaders()
     });
     return res.json();
   },
@@ -229,13 +276,15 @@ export const emailAPI = {
 export const metasAPI = {
   obtener: async (filtros = {}) => {
     const params = new URLSearchParams(filtros);
-    const res = await fetch(`${API_URL}/metas?${params}`);
+    const res = await fetch(`${API_URL}/metas?${params}`, {
+      headers: getHeaders()
+    });
     return res.json();
   },
   crear: async (data) => {
     const res = await fetch(`${API_URL}/metas`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
     return res.json();
@@ -243,17 +292,22 @@ export const metasAPI = {
   actualizar: async (id, data) => {
     const res = await fetch(`${API_URL}/metas/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
     return res.json();
   },
   eliminar: async (id) => {
-    const res = await fetch(`${API_URL}/metas/${id}`, { method: 'DELETE' });
+    const res = await fetch(`${API_URL}/metas/${id}`, { 
+      method: 'DELETE',
+      headers: getHeaders()
+    });
     return res.json();
   },
   obtenerDetalles: async (id) => {
-    const res = await fetch(`${API_URL}/metas/${id}/detalles`);
+    const res = await fetch(`${API_URL}/metas/${id}/detalles`, {
+      headers: getHeaders()
+    });
     if (!res.ok) {
       const error = await res.json();
       throw new Error(error.error || `Error ${res.status}`);
@@ -263,7 +317,7 @@ export const metasAPI = {
   agregarAportacion: async (id, data) => {
     const res = await fetch(`${API_URL}/metas/${id}/aportacion`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
     if (!res.ok) {
@@ -275,7 +329,7 @@ export const metasAPI = {
   eliminarAporte: async (id, aporteId, usuarioId) => {
     const res = await fetch(`${API_URL}/metas/${id}/aporte/${aporteId}`, {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getHeaders(),
       body: JSON.stringify({ usuarioId }),
     });
     if (!res.ok) {
@@ -290,13 +344,15 @@ export const metasAPI = {
 export const ahorroCompartidoAPI = {
   obtener: async (filtros = {}) => {
     const params = new URLSearchParams(filtros);
-    const res = await fetch(`${API_URL}/ahorro-compartido?${params}`);
+    const res = await fetch(`${API_URL}/ahorro-compartido?${params}`, {
+      headers: getHeaders()
+    });
     return res.json();
   },
   crear: async (data) => {
     const res = await fetch(`${API_URL}/ahorro-compartido`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
     return res.json();
@@ -304,17 +360,22 @@ export const ahorroCompartidoAPI = {
   actualizar: async (id, data) => {
     const res = await fetch(`${API_URL}/ahorro-compartido/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
     return res.json();
   },
   eliminar: async (id) => {
-    const res = await fetch(`${API_URL}/ahorro-compartido/${id}`, { method: 'DELETE' });
+    const res = await fetch(`${API_URL}/ahorro-compartido/${id}`, { 
+      method: 'DELETE',
+      headers: getHeaders()
+    });
     return res.json();
   },
   obtenerDetalles: async (id) => {
-    const res = await fetch(`${API_URL}/ahorro-compartido/${id}/detalles`);
+    const res = await fetch(`${API_URL}/ahorro-compartido/${id}/detalles`, {
+      headers: getHeaders()
+    });
     if (!res.ok) {
       const error = await res.json();
       throw new Error(error.error || `Error ${res.status}`);
@@ -324,7 +385,7 @@ export const ahorroCompartidoAPI = {
   agregarAportacion: async (id, data) => {
     const res = await fetch(`${API_URL}/ahorro-compartido/${id}/aportacion`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
     if (!res.ok) {
@@ -336,7 +397,7 @@ export const ahorroCompartidoAPI = {
   eliminarAporte: async (id, aporteId, usuarioId) => {
     const res = await fetch(`${API_URL}/ahorro-compartido/${id}/aporte/${aporteId}`, {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getHeaders(),
       body: JSON.stringify({ usuarioId }),
     });
     if (!res.ok) {

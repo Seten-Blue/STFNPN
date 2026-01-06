@@ -34,7 +34,7 @@ const SeccionPresupuestos = ({ presupuestos, onCrear, onActualizar, onEliminar, 
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Presupuestos</h2>
+          <h2 className="text-2xl font-bold text-gray-800">📊 Presupuestos</h2>
           <p className="text-gray-500">Define límites de gasto y metas de ahorro</p>
         </div>
         <button

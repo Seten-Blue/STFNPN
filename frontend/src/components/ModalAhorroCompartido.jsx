@@ -141,7 +141,7 @@ function ModalAhorroCompartido({ visible, onCerrar, cuentas, usuarios, onCrear }
         {/* Header */}
         <div className="sticky top-0 bg-gradient-to-r from-teal-500 to-cyan-500 p-6 flex items-center justify-between text-white">
           <div>
-            <h2 className="text-2xl font-bold">🏦 Ahorro Compartido</h2>
+            <h2 className="text-2xl font-bold">💹 Ahorro Compartido</h2>
             <p className="text-sm opacity-90">Fondo común para ahorros conjuntos</p>
           </div>
           <button onClick={onCerrar} className="p-2 hover:bg-white/20 rounded-lg transition">

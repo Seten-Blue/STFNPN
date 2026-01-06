@@ -78,7 +78,10 @@ function SeccionAhorrosCompartidos() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-800">🏦 Ahorros Compartidos</h2>
+        <div className="flex items-center gap-1">
+          <span className="text-3xl">💹</span>
+          <h2 className="text-2xl font-bold text-gray-800">Ahorros Compartidos</h2>
+        </div>
       </div>
 
       {ahorros.length === 0 ? (

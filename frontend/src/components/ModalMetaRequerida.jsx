@@ -116,7 +116,7 @@ function ModalMetaRequerida({ visible, onCerrar, usuarios, onCrear }) {
         {/* Header */}
         <div className="sticky top-0 bg-gradient-to-r from-purple-500 to-indigo-500 p-6 flex items-center justify-between text-white">
           <div>
-            <h2 className="text-2xl font-bold">🎯 Meta Requerida</h2>
+            <h2 className="text-2xl font-bold">🏆 Meta Requerida</h2>
             <p className="text-sm opacity-90">Define tu objetivo de ahorro</p>
           </div>
           <button onClick={onCerrar} className="p-2 hover:bg-white/20 rounded-lg transition">

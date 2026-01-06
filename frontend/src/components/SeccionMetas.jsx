@@ -76,7 +76,7 @@ function SeccionMetas() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-800">🎯 Mis Metas</h2>
+        <h2 className="text-2xl font-bold text-gray-800">🏆 Mis Metas</h2>
       </div>
 
       {metas.length === 0 ? (

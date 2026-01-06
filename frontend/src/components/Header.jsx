@@ -1,26 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const Header = ({ onMenuClick, onNuevoClick, onGastoCompartidoClick, onIngresoCompartidoClick, onMetaRequeridaClick, onAhorroCompartidoClick }) => {
-  const { usuario, usuarios, cambiarUsuario, cerrarSesion, cargarUsuarios } = useAuth();
+  const { usuario, cerrarSesion } = useAuth();
   const [mostrarDropdown, setMostrarDropdown] = useState(false);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (usuario) {
-      cargarUsuarios();
-    }
-  }, [usuario]);
 
   const handleCerrarSesion = async () => {
     await cerrarSesion();
     navigate('/login');
-  };
-
-  const handleCambiarUsuario = (usuarioId) => {
-    cambiarUsuario(usuarioId);
-    setMostrarDropdown(false);
   };
 
   if (!usuario) {
@@ -117,52 +106,18 @@ const Header = ({ onMenuClick, onNuevoClick, onGastoCompartidoClick, onIngresoCo
 
             {mostrarDropdown && (
               <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-slate-200 py-2">
-                <p className="px-4 py-2 text-xs font-semibold text-slate-600 uppercase">
-                  Cambiar Usuario
-                </p>
-                
-                {usuarios.length > 0 ? (
-                  <>
-                    {usuarios.map(u => (
-                      <button
-                        key={u._id}
-                        onClick={() => handleCambiarUsuario(u._id)}
-                        className={`w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors flex items-center gap-3 ${
-                          usuario._id === u._id ? 'bg-teal-50' : ''
-                        }`}
-                      >
-                        <div className="w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                          {u.avatar}
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-slate-800">{u.nombre}</p>
-                          <p className="text-xs text-slate-500">{u.email}</p>
-                        </div>
-                        {usuario._id === u._id && (
-                          <svg className="w-5 h-5 text-teal-600" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        )}
-                      </button>
-                    ))}
-                    
-                    <div className="border-t border-slate-200 mt-2 pt-2">
-                      <button
-                        onClick={() => {
-                          setMostrarDropdown(false);
-                          navigate('/registro');
-                        }}
-                        className="w-full text-left px-4 py-2 hover:bg-slate-50 transition-colors text-sm text-teal-600 font-medium"
-                      >
-                        + Agregar nuevo usuario
-                      </button>
+                <div className="px-4 py-3 border-b border-slate-200">
+                  <p className="text-xs font-semibold text-slate-600 uppercase mb-2">Usuario actual</p>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                      {usuario.avatar}
                     </div>
-                  </>
-                ) : (
-                  <p className="px-4 py-3 text-sm text-slate-600">
-                    No hay otros usuarios
-                  </p>
-                )}
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-slate-800">{usuario.nombre}</p>
+                      <p className="text-xs text-slate-500">{usuario.email}</p>
+                    </div>
+                  </div>
+                </div>
 
                 <div className="border-t border-slate-200 mt-2 pt-2">
                   <button
