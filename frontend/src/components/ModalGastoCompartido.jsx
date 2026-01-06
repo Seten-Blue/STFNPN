@@ -189,7 +189,7 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
         hora: formData.hora,
         cuentaOrigen: formData.cuentaOrigen,
         anotaciones: `GASTO COMPARTIDO: ${formData.concepto}`,
-        usuario: usuarioId,
+        // El usuario ahora viene del token autenticado, no del body
         esUrgente: formData.esUrgente,
         esProgramada: formData.esProgramada && !formData.diferirCuotas,
         fechaProgramada: formData.esProgramada && !formData.diferirCuotas ? formData.fechaProgramada : null,
@@ -201,7 +201,6 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
       console.log('📤 Enviando gasto compartido:', {
         tipo: transaccion.tipo,
         cantidad: transaccion.cantidad,
-        usuarioCreador: transaccion.usuario,
         participantesEnviados: transaccion.participantes,
         anotaciones: transaccion.anotaciones.substring(0, 40) + '...'
       });

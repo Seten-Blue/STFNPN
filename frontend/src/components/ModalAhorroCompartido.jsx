@@ -97,7 +97,7 @@ function ModalAhorroCompartido({ visible, onCerrar, cuentas, usuarios, onCrear }
         participantes: participantesSeleccionados,  // Array de IDs de participantes
         estado: formData.estado,
         motivo: formData.motivo,
-        usuario: usuarioIdNormalizado,
+        // El usuario ahora viene del token autenticado, no del body
       };
 
       if (ahorroCompartidoAPI && ahorroCompartidoAPI.crear) {

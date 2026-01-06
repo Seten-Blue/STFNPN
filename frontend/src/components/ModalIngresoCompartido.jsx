@@ -176,7 +176,7 @@ function ModalIngresoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear 
         hora: formData.hora,
         cuentaDestino: formData.cuentaDestino,
         anotaciones: `INGRESO COMPARTIDO: ${formData.concepto}`,
-        usuario: usuarioId,
+        // El usuario ahora viene del token autenticado, no del body
         esProgramada: formData.esProgramada && !formData.diferirCuotas,
         fechaProgramada: formData.esProgramada && !formData.diferirCuotas ? formData.fechaProgramada : null,
         diferirCuotas: formData.diferirCuotas,
@@ -187,7 +187,6 @@ function ModalIngresoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear 
       console.log('📤 Enviando ingreso compartido:', {
         tipo: transaccion.tipo,
         cantidad: transaccion.cantidad,
-        usuarioCreador: transaccion.usuario,
         participantesEnviados: transaccion.participantes,
         anotaciones: transaccion.anotaciones.substring(0, 40) + '...'
       });

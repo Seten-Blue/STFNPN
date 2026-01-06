@@ -69,7 +69,7 @@ function ModalMetaRequerida({ visible, onCerrar, usuarios, onCrear }) {
         estado: 'activa',
         progreso: 0,
         motivo: formData.motivo,
-        usuario: usuarioIdNormalizado,
+        // El usuario ahora viene del token autenticado, no del body
       };
 
       if (metasAPI && metasAPI.crear) {
