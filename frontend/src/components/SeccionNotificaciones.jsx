@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNotificaciones } from '../context/NotificacionesContext';
+import { useNotificaciones, notificacionesEmitter } from '../context/NotificacionesContext';
 import { notificacionesAPI, emailAPI } from '../services/api';
 
 function SeccionNotificaciones() {
@@ -10,6 +10,10 @@ function SeccionNotificaciones() {
   const [loading, setLoading] = useState(true);
   const [mostrarModal, setMostrarModal] = useState(false);
   const [filtroTipo, setFiltroTipo] = useState('todas');
+  const [paginaActual, setPaginaActual] = useState(1);
+  const notificacionesPorPagina = 10;
+  
+  console.log('🎯 [SeccionNotificaciones] Componente montado/renderizado. Usuario:', usuario?.nombre);
   const [configEmail, setConfigEmail] = useState({
     mostrar: false,
     emailPrueba: usuario?.email || '',
@@ -27,34 +31,61 @@ function SeccionNotificaciones() {
     enviarEmail: false
   });
 
-  useEffect(() => {
-    if (usuario) {
-      cargarNotificaciones();
-    }
-  }, [usuario, filtroTipo]);
-
-  const cargarNotificaciones = async () => {
+  // Definir cargarNotificaciones con useCallback para que sea estable
+  const cargarNotificaciones = useCallback(async () => {
     setLoading(true);
     try {
       const filtros = {};
       if (filtroTipo !== 'todas') {
         filtros.tipo = filtroTipo;
       }
+      console.log('📡 [SeccionNotificaciones] Pidiendo notificaciones con filtros:', filtros);
       const data = await notificacionesAPI.obtener(filtros);
+      console.log('📨 [SeccionNotificaciones] Respuesta recibida:', data);
       setNotificaciones(Array.isArray(data) ? data : []);
+      console.log(`✅ [SeccionNotificaciones] ${Array.isArray(data) ? data.length : 0} notificaciones cargadas`);
     } catch (error) {
       console.error('Error al cargar notificaciones:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [filtroTipo]);
+
+  useEffect(() => {
+    if (usuario) {
+      cargarNotificaciones();
+    }
+  }, [usuario, filtroTipo, cargarNotificaciones]);
+
+  // Escuchar el evento de nuevas notificaciones
+  useEffect(() => {
+    console.log('👂 Escuchando eventos de notificaciones en SeccionNotificaciones...');
+    const unsubscribe = notificacionesEmitter.on((evento) => {
+      console.log('📡 Evento recibido en SeccionNotificaciones:', evento);
+      if (evento.tipo === 'nuevasNotificaciones') {
+        console.log(`🔄 Refrescando notificaciones (${evento.cantidad} nuevas)...`);
+        cargarNotificaciones();
+      }
+    });
+
+    return () => {
+      console.log('👂 Dejando de escuchar eventos de notificaciones');
+      unsubscribe();
+    };
+  }, [cargarNotificaciones]);
 
   const handleCrearNotificacion = async (e) => {
     e.preventDefault();
     try {
       const fechaCompleta = new Date(`${formNotificacion.fechaRecordatorio}T${formNotificacion.horaRecordatorio}`);
       
-      await notificacionesAPI.crear({
+      console.log('📝 [handleCrearNotificacion] Creando notificación:', {
+        titulo: formNotificacion.titulo,
+        tipo: formNotificacion.tipo,
+        fechaRecordatorio: fechaCompleta.toISOString()
+      });
+      
+      const respuesta = await notificacionesAPI.crear({
         titulo: formNotificacion.titulo,
         mensaje: formNotificacion.mensaje,
         tipo: formNotificacion.tipo,
@@ -62,6 +93,8 @@ function SeccionNotificaciones() {
         urgente: formNotificacion.urgente,
         enviarEmail: formNotificacion.urgente && formNotificacion.enviarEmail
       });
+
+      console.log('✅ [handleCrearNotificacion] Respuesta del servidor:', respuesta);
 
       setMostrarModal(false);
       setFormNotificacion({
@@ -73,10 +106,15 @@ function SeccionNotificaciones() {
         urgente: false,
         enviarEmail: false
       });
+      
+      console.log('🔄 [handleCrearNotificacion] Recargando notificaciones...');
       cargarNotificaciones();
       cargarConteo();
+      
+      alert('✅ Notificación creada exitosamente');
     } catch (error) {
-      console.error('Error al crear notificación:', error);
+      console.error('❌ [handleCrearNotificacion] Error:', error);
+      alert('Error al crear notificación: ' + error.message);
     }
   };
 

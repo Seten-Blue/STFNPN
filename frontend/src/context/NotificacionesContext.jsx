@@ -4,6 +4,26 @@ import { notificacionesAPI } from '../services/api';
 
 const NotificacionesContext = createContext();
 
+// Event emitter para notificaciones
+class NotificacionesEmitter {
+  constructor() {
+    this.listeners = [];
+  }
+
+  on(callback) {
+    this.listeners.push(callback);
+    return () => {
+      this.listeners = this.listeners.filter(l => l !== callback);
+    };
+  }
+
+  emit(data) {
+    this.listeners.forEach(callback => callback(data));
+  }
+}
+
+export const notificacionesEmitter = new NotificacionesEmitter();
+
 export const useNotificaciones = () => {
   const context = useContext(NotificacionesContext);
   if (!context) {
@@ -71,6 +91,10 @@ export const NotificacionesProvider = ({ children }) => {
       if (noLeidas > prevConteo) {
         console.log(`🔔 ${noLeidas - prevConteo} nueva(s) notificación(es) detectada(s), reproduciendo sonido`);
         reproducirSonido();
+        
+        // Emitir evento para que SeccionNotificaciones se refresque
+        console.log('📡 Emitiendo evento de nuevas notificaciones...');
+        notificacionesEmitter.emit({ tipo: 'nuevasNotificaciones', cantidad: noLeidas - prevConteo });
       }
 
       setUltimaVerificacion(new Date());
