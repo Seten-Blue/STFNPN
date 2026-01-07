@@ -74,26 +74,15 @@ export const NotificacionesProvider = ({ children }) => {
       });
 
       const noLeidas = Array.isArray(respuesta) ? respuesta.length : 0;
-      const prevConteo = conteoRef.current; // Usar ref en lugar de state para evitar ciclo
-
-      console.log('📊 Conteo de notificaciones:', { 
-        noLeidas, 
-        prevConteo, 
-        cambio: noLeidas - prevConteo,
-        notificaciones: respuesta.map(n => ({ id: n._id, titulo: n.titulo, leida: n.leida }))
-      });
+      const prevConteo = conteoRef.current;
 
       setConteoNoLeidas(noLeidas);
-      conteoRef.current = noLeidas; // Actualizar ref
+      conteoRef.current = noLeidas;
 
-      // Si hay nuevas notificaciones (noLeidas > prevConteo), reproducir sonido
-      // Esto cubre cualquier tipo de notificación
+      // Si hay nuevas notificaciones, reproducir sonido y emitir evento
       if (noLeidas > prevConteo) {
-        console.log(`🔔 ${noLeidas - prevConteo} nueva(s) notificación(es) detectada(s), reproduciendo sonido`);
+        console.log(`🔔 ${noLeidas - prevConteo} nueva(s) notificación(es)`);
         reproducirSonido();
-        
-        // Emitir evento para que SeccionNotificaciones se refresque
-        console.log('📡 Emitiendo evento de nuevas notificaciones...');
         notificacionesEmitter.emit({ tipo: 'nuevasNotificaciones', cantidad: noLeidas - prevConteo });
       }
 
@@ -112,17 +101,15 @@ export const NotificacionesProvider = ({ children }) => {
     }
   }, [usuario]);
 
-  // Polling cada 5 segundos (más frecuente para actualización rápida)
+  // Polling cada 30 segundos (reducido para mejor rendimiento)
   useEffect(() => {
     if (!usuario) return;
 
-    console.log('🔄 Iniciando polling de notificaciones (cada 5 segundos)');
     const intervalo = setInterval(() => {
       cargarConteo();
-    }, 5000);
+    }, 30000);
 
     return () => {
-      console.log('🛑 Deteniendo polling de notificaciones');
       clearInterval(intervalo);
     };
   }, [usuario, cargarConteo]);

@@ -3,6 +3,7 @@ import { metasAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { formatearMoneda } from '../utils/constantes';
 import ModalDetallesMeta from './ModalDetallesMeta';
+import ModalMetaPersonal from './ModalMetaPersonal';
 
 function SeccionMetas() {
   const { usuario } = useAuth();
@@ -10,6 +11,7 @@ function SeccionMetas() {
   const [loading, setLoading] = useState(true);
   const [aportacionModal, setAportacionModal] = useState({ visible: false, metaId: null, monto: '' });
   const [detallesModal, setDetallesModal] = useState({ visible: false, metaId: null });
+  const [modalMetaPersonal, setModalMetaPersonal] = useState(false);
 
   useEffect(() => {
     if (usuario) {
@@ -77,6 +79,13 @@ function SeccionMetas() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-gray-800">🏆 Mis Metas</h2>
+        <button
+          onClick={() => setModalMetaPersonal(true)}
+          className="px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-lg hover:shadow-lg font-medium transition flex items-center gap-2"
+        >
+          <span>➕</span>
+          <span>Nueva Meta Personal</span>
+        </button>
       </div>
 
       {metas.length === 0 ? (
@@ -271,6 +280,13 @@ function SeccionMetas() {
         visible={detallesModal.visible}
         onClose={() => setDetallesModal({ visible: false, metaId: null })}
         onAporteEliminado={() => cargarMetas()}
+      />
+
+      {/* Modal de Meta Personal */}
+      <ModalMetaPersonal
+        visible={modalMetaPersonal}
+        onCerrar={() => setModalMetaPersonal(false)}
+        onCrear={() => cargarMetas()}
       />
     </div>
   );

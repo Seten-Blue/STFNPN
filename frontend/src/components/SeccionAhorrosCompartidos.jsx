@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { ahorroCompartidoAPI } from '../services/api';
+import { ahorroCompartidoAPI, cuentasAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { formatearMoneda } from '../utils/constantes';
 import ModalDetallesAhorro from './ModalDetallesAhorro';
+import ModalAhorroPersonal from './ModalAhorroPersonal';
 
 function SeccionAhorrosCompartidos() {
   const { usuario } = useAuth();
   const [ahorros, setAhorros] = useState([]);
+  const [cuentas, setCuentas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [aportacionModal, setAportacionModal] = useState({
     visible: false,
@@ -14,12 +16,24 @@ function SeccionAhorrosCompartidos() {
     monto: ''
   });
   const [detallesModal, setDetallesModal] = useState({ visible: false, ahorroId: null });
+  const [modalAhorroPersonal, setModalAhorroPersonal] = useState(false);
 
   useEffect(() => {
     if (usuario) {
       cargarAhorros();
+      cargarCuentas();
     }
   }, [usuario]);
+
+  const cargarCuentas = async () => {
+    try {
+      const data = await cuentasAPI.obtener({ usuarioId: usuario._id || usuario.id });
+      setCuentas(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error al cargar cuentas:', error);
+      setCuentas([]);
+    }
+  };
 
   const cargarAhorros = async () => {
     setLoading(true);
@@ -82,6 +96,13 @@ function SeccionAhorrosCompartidos() {
           <span className="text-3xl">💹</span>
           <h2 className="text-2xl font-bold text-gray-800">Ahorros Compartidos</h2>
         </div>
+        <button
+          onClick={() => setModalAhorroPersonal(true)}
+          className="px-4 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-lg hover:shadow-lg font-medium transition flex items-center gap-2"
+        >
+          <span>➕</span>
+          <span>Nuevo Ahorro Personal</span>
+        </button>
       </div>
 
       {ahorros.length === 0 ? (
@@ -258,6 +279,14 @@ function SeccionAhorrosCompartidos() {
         visible={detallesModal.visible}
         onClose={() => setDetallesModal({ visible: false, ahorroId: null })}
         onAporteEliminado={() => cargarAhorros()}
+      />
+
+      {/* Modal de Ahorro Personal */}
+      <ModalAhorroPersonal
+        visible={modalAhorroPersonal}
+        onCerrar={() => setModalAhorroPersonal(false)}
+        cuentas={cuentas}
+        onCrear={() => cargarAhorros()}
       />
     </div>
   );

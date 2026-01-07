@@ -1,11 +1,13 @@
-import { useState } from 'react';
-import { transaccionesAPI } from '../services/api';
+import { useState, useEffect } from 'react';
+import { transaccionesAPI, fusionCuentasAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useNotificaciones } from '../context/NotificacionesContext';
 
 function ModalIngresoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear }) {
   const { usuario } = useAuth();
   const { cargarConteo } = useNotificaciones();
+  const [usuariosFusionados, setUsuariosFusionados] = useState([]);
+  const [loadingFusionados, setLoadingFusionados] = useState(false);
   const [formData, setFormData] = useState({
     concepto: '',
     monto: '',
@@ -23,7 +25,26 @@ function ModalIngresoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear 
     miPago: '',
   });
 
-  const participantesDisponibles = usuario ? [usuario, ...usuarios.filter(u => {
+  // Cargar usuarios fusionados cuando el modal se abre
+  useEffect(() => {
+    const cargarUsuariosFusionados = async () => {
+      if (!visible) return;
+      setLoadingFusionados(true);
+      try {
+        const fusionados = await fusionCuentasAPI.obtenerUsuariosFusionados();
+        setUsuariosFusionados(fusionados.map(f => f.usuario));
+      } catch (err) {
+        console.error('Error al cargar usuarios fusionados:', err);
+        setUsuariosFusionados(usuarios);
+      } finally {
+        setLoadingFusionados(false);
+      }
+    };
+    cargarUsuariosFusionados();
+  }, [visible, usuarios]);
+
+  // Usar solo usuarios fusionados, más el usuario actual
+  const participantesDisponibles = usuario ? [usuario, ...usuariosFusionados.filter(u => {
     // Normalizar IDs a string para comparación correcta
     const uId = typeof u._id === 'string' ? u._id : u._id?.toString?.() || u.id;
     const usuarioIdStr = typeof usuario._id === 'string' ? usuario._id : usuario._id?.toString?.();
@@ -439,8 +460,22 @@ function ModalIngresoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear 
 
           {/* Participantes */}
           <div>
-            <label className="block text-sm font-bold text-slate-800 mb-2">👥 Participantes</label>
-            <div className="space-y-2 bg-slate-50 p-3 rounded-lg max-h-48 overflow-y-auto">
+            <label className="block text-sm font-bold text-slate-800 mb-2">👥 Participantes (solo usuarios fusionados)</label>
+            {loadingFusionados ? (
+              <div className="text-center py-4 bg-slate-50 rounded-lg">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-500 mx-auto"></div>
+                <p className="text-sm text-slate-500 mt-2">Cargando usuarios...</p>
+              </div>
+            ) : usuariosFusionados.length === 0 ? (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+                <span className="text-3xl">🔗</span>
+                <p className="text-sm text-yellow-700 mt-2 font-medium">No tienes usuarios fusionados</p>
+                <p className="text-xs text-yellow-600 mt-1">
+                  Ve a "Fusión de Cuentas" para conectar con otros usuarios y poder crear ingresos compartidos
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2 bg-slate-50 p-3 rounded-lg max-h-48 overflow-y-auto">
               {participantesDisponibles.map(p => {
                 // Normalizar ID a string para consistencia
                 const pId = normalizarId(p._id || p.id);
@@ -467,8 +502,9 @@ function ModalIngresoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear 
                 </div>
                 );
               })}
-            </div>
-            {formData.tipoDistribucion === 'personalizada' && (
+              </div>
+            )}
+            {formData.tipoDistribucion === 'personalizada' && usuariosFusionados.length > 0 && (
               <p className="text-xs text-slate-600 mt-2">
                 Total asignado: ${calcularTotalParticipantes().toFixed(2)} / ${formData.monto || 0}
               </p>

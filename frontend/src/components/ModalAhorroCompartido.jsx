@@ -1,9 +1,11 @@
-import { useState } from 'react';
-import { ahorroCompartidoAPI } from '../services/api';
+import { useState, useEffect } from 'react';
+import { ahorroCompartidoAPI, fusionCuentasAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 function ModalAhorroCompartido({ visible, onCerrar, cuentas, usuarios, onCrear }) {
   const { usuario } = useAuth();
+  const [usuariosFusionados, setUsuariosFusionados] = useState([]);
+  const [loadingFusionados, setLoadingFusionados] = useState(false);
   const [formData, setFormData] = useState({
     nombre: '',
     descripcion: '',
@@ -24,10 +26,28 @@ function ModalAhorroCompartido({ visible, onCerrar, cuentas, usuarios, onCrear }
     return String(id);
   };
 
+  // Cargar usuarios fusionados cuando el modal se abre
+  useEffect(() => {
+    const cargarUsuariosFusionados = async () => {
+      if (!visible) return;
+      setLoadingFusionados(true);
+      try {
+        const fusionados = await fusionCuentasAPI.obtenerUsuariosFusionados();
+        setUsuariosFusionados(fusionados.map(f => f.usuario));
+      } catch (err) {
+        console.error('Error al cargar usuarios fusionados:', err);
+        setUsuariosFusionados(usuarios);
+      } finally {
+        setLoadingFusionados(false);
+      }
+    };
+    cargarUsuariosFusionados();
+  }, [visible, usuarios]);
+
   const usuarioIdNormalizado = normalizarId(usuario._id || usuario.id);
   const participantesDisponibles = [
     usuario,
-    ...usuarios.filter(u => {
+    ...usuariosFusionados.filter(u => {
       const uId = normalizarId(u._id || u.id);
       return uId !== usuarioIdNormalizado;
     })
@@ -240,25 +260,40 @@ function ModalAhorroCompartido({ visible, onCerrar, cuentas, usuarios, onCrear }
 
           {/* Participantes */}
           <div>
-            <label className="block text-sm font-bold text-slate-800 mb-2">👥 Participantes</label>
-            <div className="space-y-2 bg-slate-50 p-3 rounded-lg max-h-48 overflow-y-auto">
-              {participantesDisponibles.map(p => {
-                const pId = normalizarId(p._id || p.id);
-                return (
-                  <div key={pId} className="flex items-center justify-between p-2 bg-white rounded hover:bg-slate-100">
-                    <label className="flex items-center flex-1">
-                      <input
-                        type="checkbox"
-                        checked={pId in formData.participantes}
-                        onChange={() => toggleParticipante(pId)}
-                        className="w-4 h-4 text-teal-500"
-                      />
-                      <span className="ml-2 text-slate-700 text-sm">{p.nombre}</span>
-                    </label>
-                  </div>
-                );
-              })}
-            </div>
+            <label className="block text-sm font-bold text-slate-800 mb-2">👥 Participantes (solo usuarios fusionados)</label>
+            {loadingFusionados ? (
+              <div className="text-center py-4 bg-slate-50 rounded-lg">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-teal-500 mx-auto"></div>
+                <p className="text-sm text-slate-500 mt-2">Cargando usuarios...</p>
+              </div>
+            ) : usuariosFusionados.length === 0 ? (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+                <span className="text-3xl">🔗</span>
+                <p className="text-sm text-yellow-700 mt-2 font-medium">No tienes usuarios fusionados</p>
+                <p className="text-xs text-yellow-600 mt-1">
+                  Ve a "Fusión de Cuentas" para conectar con otros usuarios y poder crear fondos compartidos
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2 bg-slate-50 p-3 rounded-lg max-h-48 overflow-y-auto">
+                {participantesDisponibles.map(p => {
+                  const pId = normalizarId(p._id || p.id);
+                  return (
+                    <div key={pId} className="flex items-center justify-between p-2 bg-white rounded hover:bg-slate-100">
+                      <label className="flex items-center flex-1">
+                        <input
+                          type="checkbox"
+                          checked={pId in formData.participantes}
+                          onChange={() => toggleParticipante(pId)}
+                          className="w-4 h-4 text-teal-500"
+                        />
+                        <span className="ml-2 text-slate-700 text-sm">{p.nombre}</span>
+                      </label>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Estado */}

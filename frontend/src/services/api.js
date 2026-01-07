@@ -427,3 +427,103 @@ export const transaccionesProgramadasAPI = {
     return res.json();
   },
 };
+
+// Fusión de Cuentas
+export const fusionCuentasAPI = {
+  // Obtener todas mis fusiones
+  obtenerMisFusiones: async () => {
+    const res = await fetch(`${API_URL}/fusion-cuentas`, {
+      headers: getHeaders()
+    });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.mensaje || `Error ${res.status}`);
+    }
+    return res.json();
+  },
+  // Obtener usuarios fusionados (para selección de participantes)
+  obtenerUsuariosFusionados: async () => {
+    const res = await fetch(`${API_URL}/fusion-cuentas/usuarios-fusionados`, {
+      headers: getHeaders()
+    });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.mensaje || `Error ${res.status}`);
+    }
+    return res.json();
+  },
+  // Buscar usuarios para fusionar
+  buscarUsuarios: async (busqueda = '') => {
+    const params = new URLSearchParams({ busqueda });
+    const res = await fetch(`${API_URL}/fusion-cuentas/buscar-usuarios?${params}`, {
+      headers: getHeaders()
+    });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.mensaje || `Error ${res.status}`);
+    }
+    return res.json();
+  },
+  // Verificar si tengo fusión con usuario
+  verificarFusion: async (otroUsuarioId) => {
+    const res = await fetch(`${API_URL}/fusion-cuentas/verificar/${otroUsuarioId}`, {
+      headers: getHeaders()
+    });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.mensaje || `Error ${res.status}`);
+    }
+    return res.json();
+  },
+  // Enviar solicitud de fusión
+  enviarSolicitud: async (data) => {
+    const res = await fetch(`${API_URL}/fusion-cuentas/solicitud`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.mensaje || `Error ${res.status}`);
+    }
+    return res.json();
+  },
+  // Responder solicitud (aceptar/rechazar)
+  responderSolicitud: async (fusionId, aceptar, notas = '') => {
+    const res = await fetch(`${API_URL}/fusion-cuentas/solicitud/${fusionId}/responder`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify({ aceptar, notas }),
+    });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.mensaje || `Error ${res.status}`);
+    }
+    return res.json();
+  },
+  // Cancelar fusión
+  cancelarFusion: async (fusionId) => {
+    const res = await fetch(`${API_URL}/fusion-cuentas/${fusionId}`, {
+      method: 'DELETE',
+      headers: getHeaders(),
+    });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.mensaje || `Error ${res.status}`);
+    }
+    return res.json();
+  },
+  // Actualizar permisos
+  actualizarPermisos: async (fusionId, permisos) => {
+    const res = await fetch(`${API_URL}/fusion-cuentas/${fusionId}/permisos`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify({ permisos }),
+    });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.mensaje || `Error ${res.status}`);
+    }
+    return res.json();
+  },
+};
