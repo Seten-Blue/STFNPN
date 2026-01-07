@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { transaccionesAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useNotificaciones } from '../context/NotificacionesContext';
 
 function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear }) {
   const { usuario } = useAuth();
+  const { cargarConteo } = useNotificaciones();
   const [formData, setFormData] = useState({
     concepto: '',
     monto: '',
@@ -207,15 +209,22 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
 
       const respuesta = await transaccionesAPI.crear(transaccion);
       
-      // Mostrar resumen de lo que se creó
+      console.log('✅ Respuesta del servidor:', respuesta);
+      
+      // Actualizar conteo de notificaciones inmediatamente
+      console.log('🔔 Actualizando conteo de notificaciones...');
+      cargarConteo();
+      
+      // Mostrar resumen detallado
       if (respuesta && respuesta.resumen) {
-        const { transacciones: trans } = respuesta.resumen;
+        const { transacciones: trans, notificaciones } = respuesta;
         const detalleTransacciones = trans.map(t => 
           `✓ ${t.usuario}: $${t.cantidad.toFixed(2)} (Cuenta: ${t.cuenta})`
         ).join('\n');
         
-        alert(`✅ Gasto compartido creado exitosamente!\n\nTransacciones creadas:\n${detalleTransacciones}`);
-        console.log('📋 Resumen de transacciones creadas:', respuesta.resumen);
+        const notifInfo = notificaciones ? `\n\n📬 ${notificaciones.length} notificaciones enviadas` : '';
+        alert(`✅ Gasto compartido creado exitosamente!\n\n📊 Transacciones:\n${detalleTransacciones}${notifInfo}`);
+        console.log('📋 Resumen completo:', respuesta);
       } else {
         alert('✅ Gasto compartido creado exitosamente');
       }
@@ -223,7 +232,6 @@ function ModalGastoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear })
       onCrear?.();
       resetForm();
       onCerrar();
-      alert('Gasto compartido creado exitosamente');
     } catch (error) {
       console.error('Error al crear gasto compartido:', error);
       alert('Error al crear gasto compartido: ' + error.message);

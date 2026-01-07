@@ -221,11 +221,10 @@ export const notificacionesAPI = {
     });
     return res.json();
   },
-  marcarTodasLeidas: async (usuarioId) => {
+  marcarTodasLeidas: async () => {
     const res = await fetch(`${API_URL}/notificaciones/marcar-todas-leidas`, {
       method: 'PUT',
-      headers: getHeaders(),
-      body: JSON.stringify({ usuarioId }),
+      headers: getHeaders()
     });
     return res.json();
   },

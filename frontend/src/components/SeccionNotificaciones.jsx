@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useNotificaciones } from '../context/NotificacionesContext';
 import { notificacionesAPI, emailAPI } from '../services/api';
 
 function SeccionNotificaciones() {
   const { usuario } = useAuth();
+  const { cargarConteo } = useNotificaciones();
   const [notificaciones, setNotificaciones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mostrarModal, setMostrarModal] = useState(false);
@@ -34,7 +36,7 @@ function SeccionNotificaciones() {
   const cargarNotificaciones = async () => {
     setLoading(true);
     try {
-      const filtros = { usuarioId: usuario._id || usuario.id };
+      const filtros = {};
       if (filtroTipo !== 'todas') {
         filtros.tipo = filtroTipo;
       }
@@ -53,7 +55,6 @@ function SeccionNotificaciones() {
       const fechaCompleta = new Date(`${formNotificacion.fechaRecordatorio}T${formNotificacion.horaRecordatorio}`);
       
       await notificacionesAPI.crear({
-        usuario: usuario._id || usuario.id,
         titulo: formNotificacion.titulo,
         mensaje: formNotificacion.mensaje,
         tipo: formNotificacion.tipo,
@@ -73,6 +74,7 @@ function SeccionNotificaciones() {
         enviarEmail: false
       });
       cargarNotificaciones();
+      cargarConteo();
     } catch (error) {
       console.error('Error al crear notificación:', error);
     }
@@ -82,6 +84,7 @@ function SeccionNotificaciones() {
     try {
       await notificacionesAPI.marcarLeida(id);
       cargarNotificaciones();
+      cargarConteo();
     } catch (error) {
       console.error('Error al marcar como leída:', error);
     }
@@ -92,6 +95,7 @@ function SeccionNotificaciones() {
       try {
         await notificacionesAPI.eliminar(id);
         cargarNotificaciones();
+        cargarConteo();
       } catch (error) {
         console.error('Error al eliminar:', error);
       }
@@ -120,8 +124,9 @@ function SeccionNotificaciones() {
 
   const handleMarcarTodasLeidas = async () => {
     try {
-      await notificacionesAPI.marcarTodasLeidas(usuario._id || usuario.id);
+      await notificacionesAPI.marcarTodasLeidas();
       cargarNotificaciones();
+      cargarConteo();
     } catch (error) {
       console.error('Error al marcar todas como leídas:', error);
     }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { NotificacionesProvider } from './context/NotificacionesContext';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -46,6 +47,12 @@ function AppContent() {
   const [cuentas, setCuentas] = useState([]);
   const [prestamos, setPrestamos] = useState([]);
   const [presupuestos, setPresupuestos] = useState([]);
+
+  // Manejar click en notificaciones
+  const handleNotificacionesClick = () => {
+    setSeccionActiva('notificaciones');
+    setSidebarVisible(false);
+  };
 
   // Cargar datos
   useEffect(() => {
@@ -353,6 +360,7 @@ function AppContent() {
         onIngresoCompartidoClick={() => setModalIngresoCompartidoVisible(true)}
         onMetaRequeridaClick={() => setModalMetaRequiridaVisible(true)}
         onAhorroCompartidoClick={() => setModalAhorroCompartidoVisible(true)}
+        onNotificacionesClick={handleNotificacionesClick}
       />
 
       <div className="flex">
@@ -416,12 +424,14 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/registro" element={<Login />} />
-          <Route path="/" element={<AppContent />} />
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
+        <NotificacionesProvider>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/registro" element={<Login />} />
+            <Route path="/" element={<AppContent />} />
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </NotificacionesProvider>
       </AuthProvider>
     </Router>
   );

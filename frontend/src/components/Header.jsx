@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useNotificaciones } from '../context/NotificacionesContext';
 import { useNavigate } from 'react-router-dom';
 
-const Header = ({ onMenuClick, onNuevoClick, onGastoCompartidoClick, onIngresoCompartidoClick, onMetaRequeridaClick, onAhorroCompartidoClick }) => {
+const Header = ({ onMenuClick, onNuevoClick, onGastoCompartidoClick, onIngresoCompartidoClick, onMetaRequeridaClick, onAhorroCompartidoClick, onNotificacionesClick }) => {
   const { usuario, cerrarSesion } = useAuth();
+  const { conteoNoLeidas } = useNotificaciones();
   const [mostrarDropdown, setMostrarDropdown] = useState(false);
   const navigate = useNavigate();
 
@@ -54,6 +56,22 @@ const Header = ({ onMenuClick, onNuevoClick, onGastoCompartidoClick, onIngresoCo
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
             <span className="hidden sm:inline">Nuevo</span>
+          </button>
+
+          {/* Botón de notificaciones */}
+          <button
+            onClick={onNotificacionesClick}
+            className="relative p-2 hover:bg-gray-100 rounded-lg transition"
+            title="Notificaciones"
+          >
+            <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+            {conteoNoLeidas > 0 && (
+              <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+                {conteoNoLeidas > 99 ? '99+' : conteoNoLeidas}
+              </span>
+            )}
           </button>
 
           {/* Botones de modales compartidos */}
