@@ -41,24 +41,26 @@ const Sidebar = ({ seccionActiva, onCambiarSeccion, visible, onCerrar }) => {
           </div>
         </div>
 
-        <nav className="p-4 space-y-1">
-          {menuItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => {
-                onCambiarSeccion(item.id);
-                onCerrar();
-              }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition font-medium ${
-                seccionActiva === item.id
-                  ? 'bg-slate-100 text-slate-700 font-semibold'
-                  : 'text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              <span className="text-xl">{item.icono}</span>
-              <span>{item.nombre}</span>
-            </button>
-          ))}
+        <nav className="p-4 space-y-1 h-full overflow-y-auto flex flex-col">
+          <div className="space-y-1">
+            {menuItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => {
+                  onCambiarSeccion(item.id);
+                  onCerrar();
+                }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition font-medium text-left ${
+                  seccionActiva === item.id
+                    ? 'bg-blue-100 text-blue-700 font-semibold'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <span className="text-xl flex-shrink-0 w-6 text-center">{item.icono}</span>
+                <span className="flex-1">{item.nombre}</span>
+              </button>
+            ))}
+          </div>
         </nav>
 
       </aside>

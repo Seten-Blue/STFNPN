@@ -43,6 +43,7 @@ function SeccionNotificaciones() {
       const data = await notificacionesAPI.obtener(filtros);
       console.log('📨 [SeccionNotificaciones] Respuesta recibida:', data);
       setNotificaciones(Array.isArray(data) ? data : []);
+      setPaginaActual(1);  // Resetear a primera página
       console.log(`✅ [SeccionNotificaciones] ${Array.isArray(data) ? data.length : 0} notificaciones cargadas`);
     } catch (error) {
       console.error('Error al cargar notificaciones:', error);
@@ -345,86 +346,118 @@ function SeccionNotificaciones() {
             <p className="mt-2 text-slate-500">No hay notificaciones</p>
           </div>
         ) : (
-          <div className="divide-y divide-slate-100">
-            {notificaciones.map(notif => {
-              const tipoInfo = getTipoInfo(notif.tipo);
-              const fechaRecordatorio = new Date(notif.fechaRecordatorio);
-              const esPasada = fechaRecordatorio < new Date();
-              
-              return (
-                <div 
-                  key={notif._id} 
-                  className={`p-4 hover:bg-slate-50 transition ${notif.leida ? 'opacity-60' : ''}`}
-                >
-                  <div className="flex items-start gap-4">
-                    {/* Icono */}
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      notif.urgente ? 'bg-red-100' : 'bg-slate-100'
-                    }`}>
-                      <span className="text-xl">{notif.urgente ? '🚨' : tipoInfo.icon}</span>
-                    </div>
-                    
-                    {/* Contenido */}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h4 className={`font-semibold ${notif.leida ? 'text-slate-500' : 'text-slate-800'}`}>
-                          {notif.titulo}
-                        </h4>
-                        <span className={`px-2 py-0.5 rounded-full text-xs ${tipoInfo.color}`}>
-                          {tipoInfo.label}
-                        </span>
-                        {notif.urgente && (
-                          <span className="px-2 py-0.5 rounded-full text-xs bg-red-100 text-red-800">
-                            URGENTE
-                          </span>
-                        )}
-                        {notif.enviarEmail && (
-                          <span className="px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-800">
-                            📧 {notif.emailEnviado ? 'Enviado' : 'Pendiente'}
-                          </span>
-                        )}
+          <>
+            <div className="divide-y divide-slate-100">
+              {notificaciones
+                .slice((paginaActual - 1) * notificacionesPorPagina, paginaActual * notificacionesPorPagina)
+                .map(notif => {
+                  const tipoInfo = getTipoInfo(notif.tipo);
+                  const fechaRecordatorio = new Date(notif.fechaRecordatorio);
+                  const esPasada = fechaRecordatorio < new Date();
+                  
+                  return (
+                    <div 
+                      key={notif._id} 
+                      className={`p-4 hover:bg-slate-50 transition ${notif.leida ? 'opacity-60' : ''}`}
+                    >
+                      <div className="flex items-start gap-4">
+                        {/* Icono */}
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                          notif.urgente ? 'bg-red-100' : 'bg-slate-100'
+                        }`}>
+                          <span className="text-xl">{notif.urgente ? '🚨' : tipoInfo.icon}</span>
+                        </div>
+                        
+                        {/* Contenido */}
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className={`font-semibold ${notif.leida ? 'text-slate-500' : 'text-slate-800'}`}>
+                              {notif.titulo}
+                            </h4>
+                            <span className={`px-2 py-0.5 rounded-full text-xs ${tipoInfo.color}`}>
+                              {tipoInfo.label}
+                            </span>
+                            {notif.urgente && (
+                              <span className="px-2 py-0.5 rounded-full text-xs bg-red-100 text-red-800">
+                                URGENTE
+                              </span>
+                            )}
+                            {notif.enviarEmail && (
+                              <span className="px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-800">
+                                📧 {notif.emailEnviado ? 'Enviado' : 'Pendiente'}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-slate-600 text-sm mb-2">{notif.mensaje}</p>
+                          <div className="flex items-center gap-4 text-xs text-slate-500">
+                            <span className={esPasada && !notif.leida ? 'text-red-600 font-medium' : ''}>
+                              📅 {fechaRecordatorio.toLocaleDateString('es-ES', {
+                                weekday: 'short',
+                                day: 'numeric',
+                                month: 'short',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </span>
+                            {notif.leida && (
+                              <span className="text-green-600">✓ Leída</span>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* Acciones */}
+                        <div className="flex gap-2">
+                          {!notif.leida && (
+                            <button
+                              onClick={() => handleMarcarLeida(notif._id)}
+                              className="p-2 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition"
+                              title="Marcar como leída"
+                            >
+                              ✓
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleEliminar(notif._id)}
+                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                            title="Eliminar"
+                          >
+                            🗑️
+                          </button>
+                        </div>
                       </div>
-                      <p className="text-slate-600 text-sm mb-2">{notif.mensaje}</p>
-                      <div className="flex items-center gap-4 text-xs text-slate-500">
-                        <span className={esPasada && !notif.leida ? 'text-red-600 font-medium' : ''}>
-                          📅 {fechaRecordatorio.toLocaleDateString('es-ES', {
-                            weekday: 'short',
-                            day: 'numeric',
-                            month: 'short',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </span>
-                        {notif.leida && (
-                          <span className="text-green-600">✓ Leída</span>
-                        )}
-                      </div>
                     </div>
-                    
-                    {/* Acciones */}
-                    <div className="flex gap-2">
-                      {!notif.leida && (
-                        <button
-                          onClick={() => handleMarcarLeida(notif._id)}
-                          className="p-2 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition"
-                          title="Marcar como leída"
-                        >
-                          ✓
-                        </button>
-                      )}
-                      <button
-                        onClick={() => handleEliminar(notif._id)}
-                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                        title="Eliminar"
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  </div>
+                  );
+                })}
+            </div>
+            
+            {/* Paginación */}
+            {notificaciones.length > notificacionesPorPagina && (
+              <div className="flex items-center justify-between p-4 bg-slate-50 border-t border-slate-200">
+                <div className="text-sm text-slate-600">
+                  Mostrando {(paginaActual - 1) * notificacionesPorPagina + 1}-{Math.min(paginaActual * notificacionesPorPagina, notificaciones.length)} de {notificaciones.length}
                 </div>
-              );
-            })}
-          </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setPaginaActual(Math.max(1, paginaActual - 1))}
+                    disabled={paginaActual === 1}
+                    className="px-3 py-1.5 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    ← Anterior
+                  </button>
+                  <span className="px-3 py-1.5 text-sm font-medium text-slate-800">
+                    Página {paginaActual} de {Math.ceil(notificaciones.length / notificacionesPorPagina)}
+                  </span>
+                  <button
+                    onClick={() => setPaginaActual(Math.min(Math.ceil(notificaciones.length / notificacionesPorPagina), paginaActual + 1))}
+                    disabled={paginaActual === Math.ceil(notificaciones.length / notificacionesPorPagina)}
+                    className="px-3 py-1.5 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    Siguiente →
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
