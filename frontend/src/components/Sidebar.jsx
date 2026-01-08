@@ -67,12 +67,6 @@ const Sidebar = ({ seccionActiva, onCambiarSeccion, visible, onCerrar }) => {
 
       {/* Sidebar - Versión Desktop */}
       <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:bg-white lg:shadow-lg lg:h-screen lg:fixed lg:left-0 lg:top-0 lg:pt-16 lg:z-40">
-        {/* Logo */}
-        <div className="flex flex-col items-center justify-center p-4 border-b border-gray-200">
-          <img src="/logo.png" alt="Logo" className="h-20 w-20 mb-2" />
-          <h2 className="text-center text-sm font-bold text-gray-800">Gestor Financiero</h2>
-        </div>
-
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto scrollbar-hide flex flex-col">
           <div className="space-y-1">
             {menuItems.map((item) => (
