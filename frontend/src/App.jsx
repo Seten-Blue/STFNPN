@@ -213,7 +213,6 @@ function AppContent() {
           <>
             <FiltrosPeriodo periodo={periodo} fecha={fecha} onPeriodoChange={setPeriodo} onFechaChange={setFecha} />
             <Dashboard transacciones={transacciones} cuentas={cuentas} prestamos={prestamos} presupuestos={presupuestos} />
-            <ListaTransacciones transacciones={transacciones} onEliminar={handleEliminarTransaccion} />
           </>
         );
 
