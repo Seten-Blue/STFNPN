@@ -527,3 +527,80 @@ export const fusionCuentasAPI = {
     return res.json();
   },
 };
+// Anotaciones
+export const anotacionesAPI = {
+  obtener: async (filtros = {}) => {
+    const params = new URLSearchParams(filtros);
+    const res = await fetch(`${API_URL}/anotaciones?${params}`, {
+      headers: getHeaders()
+    });
+    return res.json();
+  },
+  obtenerPorId: async (id) => {
+    const res = await fetch(`${API_URL}/anotaciones/${id}`, {
+      headers: getHeaders()
+    });
+    return res.json();
+  },
+  crear: async (data) => {
+    const res = await fetch(`${API_URL}/anotaciones`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      throw new Error(json.error || `Error ${res.status}`);
+    }
+    return json;
+  },
+  actualizar: async (id, data) => {
+    const res = await fetch(`${API_URL}/anotaciones/${id}`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      throw new Error(json.error || `Error ${res.status}`);
+    }
+    return json;
+  },
+  marcarCompletada: async (id) => {
+    const res = await fetch(`${API_URL}/anotaciones/${id}/completada`, {
+      method: 'PATCH',
+      headers: getHeaders(),
+    });
+    return res.json();
+  },
+  marcarRecordatorioEnviado: async (id) => {
+    const res = await fetch(`${API_URL}/anotaciones/${id}/recordatorio-enviado`, {
+      method: 'PATCH',
+      headers: getHeaders(),
+    });
+    return res.json();
+  },
+  obtenerRecordatoriosPendientes: async () => {
+    const res = await fetch(`${API_URL}/anotaciones/recordatorios/pendientes`, {
+      headers: getHeaders()
+    });
+    return res.json();
+  },
+  obtenerEstadisticas: async () => {
+    const res = await fetch(`${API_URL}/anotaciones/estadisticas/resumen`, {
+      headers: getHeaders()
+    });
+    return res.json();
+  },
+  eliminar: async (id) => {
+    const res = await fetch(`${API_URL}/anotaciones/${id}`, {
+      method: 'DELETE',
+      headers: getHeaders()
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      throw new Error(json.error || `Error ${res.status}`);
+    }
+    return json;
+  },
+};

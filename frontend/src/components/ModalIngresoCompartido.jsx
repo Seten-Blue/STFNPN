@@ -41,7 +41,7 @@ function ModalIngresoCompartido({ visible, onCerrar, cuentas, usuarios, onCrear 
       }
     };
     cargarUsuariosFusionados();
-  }, [visible, usuarios]);
+  }, [visible]);
 
   // Usar solo usuarios fusionados, más el usuario actual
   const participantesDisponibles = usuario ? [usuario, ...usuariosFusionados.filter(u => {

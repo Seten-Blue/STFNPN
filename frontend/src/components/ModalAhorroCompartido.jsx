@@ -42,7 +42,7 @@ function ModalAhorroCompartido({ visible, onCerrar, cuentas, usuarios, onCrear }
       }
     };
     cargarUsuariosFusionados();
-  }, [visible, usuarios]);
+  }, [visible]);
 
   const usuarioIdNormalizado = normalizarId(usuario._id || usuario.id);
   const participantesDisponibles = [

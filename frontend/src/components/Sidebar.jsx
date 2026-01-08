@@ -9,6 +9,7 @@ const menuItems = [
   { id: 'metas', nombre: 'Metas', icono: '🎯' },
   { id: 'ahorroscompartidos', nombre: 'Ahorros Compartidos', icono: '🏦' },
   { id: 'fusion', nombre: 'Fusión Cuentas', icono: '🔄' },
+  { id: 'anotaciones', nombre: 'Anotaciones', icono: '📝' },
   { id: 'notificaciones', nombre: 'Notificaciones', icono: '🔔' },
   { id: 'configuracion', nombre: 'Configuración', icono: '⚙️' },
 ];
@@ -41,7 +42,7 @@ const Sidebar = ({ seccionActiva, onCambiarSeccion, visible, onCerrar }) => {
           </div>
         </div>
 
-        <nav className="p-4 space-y-1 h-full overflow-y-auto flex flex-col">
+        <nav className="p-4 space-y-1 h-full overflow-y-auto scrollbar-hide flex flex-col">
           <div className="space-y-1">
             {menuItems.map((item) => (
               <button

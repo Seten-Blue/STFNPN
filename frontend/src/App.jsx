@@ -16,6 +16,7 @@ import SeccionFusion from './components/SeccionFusion';
 import SeccionNotificaciones from './components/SeccionNotificaciones';
 import SeccionMetas from './components/SeccionMetas';
 import SeccionAhorrosCompartidos from './components/SeccionAhorrosCompartidos';
+import SeccionAnotaciones from './components/SeccionAnotaciones';
 import ModalGastoCompartido from './components/ModalGastoCompartido';
 import ModalIngresoCompartido from './components/ModalIngresoCompartido';
 import ModalMetaRequerida from './components/ModalMetaRequerida';
@@ -75,12 +76,12 @@ function AppContent() {
       const filtros = {
         periodo,
         fecha,
-        usuarioId: usuario._id || usuario.id,  // Asegurar que se usa _id
+        usuarioId: usuario._id || usuario.id,
       };
 
       const [trans, ctas, prest, presup] = await Promise.all([
         transaccionesAPI.obtener(filtros),
-        cuentasAPI.obtener({}), // El backend ahora obtiene usuarioId del token
+        cuentasAPI.obtener({}),
         prestamosAPI.obtener({ usuarioId: usuario._id || usuario.id }),
         presupuestosAPI.estado({ usuarioId: usuario._id || usuario.id }),
       ]);
@@ -88,7 +89,6 @@ function AppContent() {
       setTransacciones(Array.isArray(trans) ? trans : []);
       setCuentas(Array.isArray(ctas) ? ctas : []);
       
-      // Establecer primera cuenta como activa si existe
       if (Array.isArray(ctas) && ctas.length > 0 && !cuentaActiva) {
         setCuentaActiva(ctas[0]._id);
       }
@@ -102,12 +102,11 @@ function AppContent() {
     }
   };
 
-  // Handlers de transacciones
   const handleCrearTransaccion = async (data) => {
     try {
       const dataConUsuario = {
         ...data,
-        usuario: usuario._id || usuario.id  // Asegurar que se usa _id
+        usuario: usuario._id || usuario.id
       };
       await transaccionesAPI.crear(dataConUsuario);
       cargarDatos();
@@ -126,10 +125,8 @@ function AppContent() {
     }
   };
 
-  // Handlers de cuentas
   const handleCrearCuenta = async (data) => {
     try {
-      // No necesario enviar usuarioId, el backend lo obtiene del token
       await cuentasAPI.crear(data);
       cargarDatos();
     } catch (error) {
@@ -157,21 +154,10 @@ function AppContent() {
 
   const handleCrearPrestamo = async (data) => {
     try {
-      const dataConUsuario = {
-        ...data,
-        usuario: usuario._id || usuario.id,
-        sujeto: 'Sujeto 1'
-      };
-      console.log('📤 Creando préstamo:', dataConUsuario);
-      const resultado = await prestamosAPI.crear(dataConUsuario);
-      if (resultado.error) {
-        alert('Error al crear préstamo: ' + resultado.error);
-      } else {
-        cargarDatos();
-      }
+      await prestamosAPI.crear(data);
+      cargarDatos();
     } catch (error) {
-      console.error('Error al crear préstamo:', error);
-      alert('Error al crear préstamo: ' + error.message);
+      alert('Error al crear préstamo');
     }
   };
 
@@ -184,15 +170,6 @@ function AppContent() {
     }
   };
 
-  const handleRegistrarPago = async (id, cuotas) => {
-    try {
-      await prestamosAPI.registrarPago(id, cuotas);
-      cargarDatos();
-    } catch (error) {
-      alert('Error al registrar pago');
-    }
-  };
-
   const handleEliminarPrestamo = async (id) => {
     try {
       await prestamosAPI.eliminar(id);
@@ -202,17 +179,21 @@ function AppContent() {
     }
   };
 
-  // Handlers de presupuestos
   const handleCrearPresupuesto = async (data) => {
     try {
-      const dataConUsuario = {
-        ...data,
-        usuario: usuario.id
-      };
-      await presupuestosAPI.crear(dataConUsuario);
+      await presupuestosAPI.crear(data);
       cargarDatos();
     } catch (error) {
       alert('Error al crear presupuesto');
+    }
+  };
+
+  const handleActualizarPresupuesto = async (id, data) => {
+    try {
+      await presupuestosAPI.actualizar(id, data);
+      cargarDatos();
+    } catch (error) {
+      alert('Error al actualizar presupuesto');
     }
   };
 
@@ -226,75 +207,47 @@ function AppContent() {
   };
 
   const renderSeccion = () => {
-    if (loading) {
-      return (
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-500">Cargando...</p>
-          </div>
-        </div>
-      );
-    }
-
     switch (seccionActiva) {
       case 'dashboard':
         return (
           <>
-            <FiltrosPeriodo
-              periodo={periodo}
-              setPeriodo={setPeriodo}
-              fecha={fecha}
-              setFecha={setFecha}
-            />
-            <Dashboard
-              transacciones={transacciones}
-              cuentas={cuentas}
-              presupuestos={presupuestos}
-              periodo={periodo}
-              cuentaActiva={cuentaActiva}
-            />
+            <FiltrosPeriodo periodo={periodo} fecha={fecha} onPeriodoChange={setPeriodo} onFechaChange={setFecha} />
+            <Dashboard transacciones={transacciones} cuentas={cuentas} prestamos={prestamos} presupuestos={presupuestos} />
+            <ListaTransacciones transacciones={transacciones} onEliminar={handleEliminarTransaccion} />
           </>
         );
 
       case 'transacciones':
         return (
           <>
-            <FiltrosPeriodo
-              periodo={periodo}
-              setPeriodo={setPeriodo}
-              fecha={fecha}
-              setFecha={setFecha}
-            />
-            <ListaTransacciones
-              transacciones={transacciones}
-              onEditar={(t) => console.log('Editar:', t)}
-              onEliminar={handleEliminarTransaccion}
-            />
+            <FiltrosPeriodo periodo={periodo} fecha={fecha} onPeriodoChange={setPeriodo} onFechaChange={setFecha} />
+            <button 
+              onClick={() => setModalNuevoVisible(true)}
+              className="mb-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+            >
+              + Nueva Transacción
+            </button>
+            <ListaTransacciones transacciones={transacciones} onEliminar={handleEliminarTransaccion} />
           </>
         );
 
       case 'cuentas':
         return (
-          <SeccionCuentas
+          <SeccionCuentas 
             cuentas={cuentas}
             onCrear={handleCrearCuenta}
             onActualizar={handleActualizarCuenta}
             onEliminar={handleEliminarCuenta}
-            cuentaActiva={cuentaActiva}
           />
         );
 
       case 'prestamos':
         return (
-          <SeccionPrestamos
+          <SeccionPrestamos 
             prestamos={prestamos}
-            cuentas={cuentas}
             onCrear={handleCrearPrestamo}
             onActualizar={handleActualizarPrestamo}
-            onRegistrarPago={handleRegistrarPago}
             onEliminar={handleEliminarPrestamo}
-            cuentaActiva={cuentaActiva}
           />
         );
 
@@ -314,6 +267,9 @@ function AppContent() {
 
       case 'ahorroscompartidos':
         return <SeccionAhorrosCompartidos />;
+
+      case 'anotaciones':
+        return <SeccionAnotaciones />;
 
       case 'fusion':
         return <SeccionFusion />;
@@ -335,7 +291,6 @@ function AppContent() {
     }
   };
 
-  // Validaciones después de todos los hooks
   if (authLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-[#f3f4f6]">
@@ -348,33 +303,41 @@ function AppContent() {
   }
 
   if (!usuario || !token) {
-    return <Login />;
+    return <Navigate to="/login" />;
   }
 
   return (
-    <div className="min-h-screen bg-[#f3f4f6]">
-      <Header
-        onMenuClick={() => setSidebarVisible(true)}
-        onNuevoClick={() => setModalNuevoVisible(true)}
-        onGastoCompartidoClick={() => setModalGastoCompartidoVisible(true)}
-        onIngresoCompartidoClick={() => setModalIngresoCompartidoVisible(true)}
-        onMetaRequeridaClick={() => setModalMetaRequiridaVisible(true)}
-        onAhorroCompartidoClick={() => setModalAhorroCompartidoVisible(true)}
-        onNotificacionesClick={handleNotificacionesClick}
+    <div className="flex h-screen bg-[#f3f4f6]">
+      <Sidebar 
+        seccionActiva={seccionActiva}
+        onCambiarSeccion={setSeccionActiva}
+        visible={sidebarVisible}
+        onCerrar={() => setSidebarVisible(false)}
       />
-
-      <div className="flex">
-        <Sidebar
-          seccionActiva={seccionActiva}
-          onCambiarSeccion={setSeccionActiva}
-          visible={sidebarVisible}
-          onCerrar={() => setSidebarVisible(false)}
+      
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header 
+          onMenuClick={() => setSidebarVisible(!sidebarVisible)}
+          onNotificacionesClick={handleNotificacionesClick}
+          onGastoClick={() => setModalNuevoVisible(true)}
+          onGastoCompartidoClick={() => setModalGastoCompartidoVisible(true)}
+          onIngresoCompartidoClick={() => setModalIngresoCompartidoVisible(true)}
+          onMetaRequiridaClick={() => setModalMetaRequiridaVisible(true)}
+          onAhorroCompartidoClick={() => setModalAhorroCompartidoVisible(true)}
+          usuario={usuario}
         />
 
-        <main className="flex-1 p-4 lg:p-6 lg:ml-0">
-          <div className="max-w-6xl mx-auto">
-            {renderSeccion()}
-          </div>
+        <main className="flex-1 overflow-y-auto p-6">
+          {loading ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-4"></div>
+                <p className="text-slate-600">Cargando...</p>
+              </div>
+            </div>
+          ) : (
+            renderSeccion()
+          )}
         </main>
       </div>
 
@@ -422,14 +385,13 @@ function AppContent() {
 
 function App() {
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
         <NotificacionesProvider>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/registro" element={<Login />} />
-            <Route path="/" element={<AppContent />} />
-            <Route path="*" element={<Navigate to="/" />} />
+            <Route path="/*" element={<AppContent />} />
           </Routes>
         </NotificacionesProvider>
       </AuthProvider>

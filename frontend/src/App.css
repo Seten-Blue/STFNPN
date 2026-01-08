@@ -1,5 +1,15 @@
 /* Estilos específicos de la app */
 
+/* Ocultar scrollbar pero mantener scroll funcional */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;             /* Chrome, Safari and Opera */
+}
+
 /* Animaciones personalizadas */
 @keyframes fadeIn {
   from {
