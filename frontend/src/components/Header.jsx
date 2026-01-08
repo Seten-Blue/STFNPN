@@ -27,18 +27,18 @@ const Header = ({ onMenuClick, onNuevoClick, onGastoCompartidoClick, onIngresoCo
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
-      <div className="px-3 py-1 flex items-center gap-1">
+      <div className="px-0 py-0 flex items-center gap-0">
         <button
           onClick={onMenuClick}
-          className="p-1 hover:bg-gray-100 rounded-lg transition lg:hidden"
+          className="p-0 hover:bg-gray-100 rounded-lg transition"
         >
           <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
-        <div className="flex items-center gap-1">
-          <img src="/logo.png" alt="Logo" className="h-10 w-10" />
-          <span className="hidden sm:inline text-xs font-bold text-gray-800">Gestor Financiero</span>
+        <div className="flex items-center gap-0">
+          <img src="/logo.png" alt="Logo" className="h-12 w-12" />
+          <span className="hidden sm:inline text-sm font-bold text-gray-800 ml-1">Gestor Financiero</span>
         </div>
 
         <div className="flex items-center gap-1 ml-auto">
