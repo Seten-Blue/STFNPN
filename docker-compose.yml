@@ -3,28 +3,48 @@ services:
   mongo:
     image: mongo:latest
     container_name: mongo-sistemafinanciero
+    restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin123
       MONGO_INITDB_DATABASE: sistemafinanciero
     ports:
       - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+      - mongo-config:/data/configdb
     networks:
       - sistema-financiero-net
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/sistemafinanciero -u admin -p admin123 --authenticationDatabase admin || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
 
   mongo-express:
     image: mongo-express
     container_name: mongo-express
+    restart: unless-stopped
     environment:
       ME_CONFIG_MONGODB_ADMINUSERNAME: admin
       ME_CONFIG_MONGODB_ADMINPASSWORD: admin123
       ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_MONGODB_AUTH_DATABASE: admin
     ports:
       - "8081:8081"
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
     networks:
       - sistema-financiero-net
+
+volumes:
+  mongo-data:
+    driver: local
+  mongo-config:
+    driver: local
 
 networks:
   sistema-financiero-net:

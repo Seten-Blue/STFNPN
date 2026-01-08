@@ -1,0 +1,295 @@
+import React, { useState, useEffect } from 'react';
+import { metasAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import { formatearMoneda } from '../utils/constantes';
+import ModalDetallesMeta from './ModalDetallesMeta';
+import ModalMetaPersonal from './ModalMetaPersonal';
+
+function SeccionMetas() {
+  const { usuario } = useAuth();
+  const [metas, setMetas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [aportacionModal, setAportacionModal] = useState({ visible: false, metaId: null, monto: '' });
+  const [detallesModal, setDetallesModal] = useState({ visible: false, metaId: null });
+  const [modalMetaPersonal, setModalMetaPersonal] = useState(false);
+
+  useEffect(() => {
+    if (usuario) {
+      cargarMetas();
+    }
+  }, [usuario]);
+
+  const cargarMetas = async () => {
+    setLoading(true);
+    try {
+      // Obtener todas las metas del usuario (como creador)
+      const data = await metasAPI.obtener({ usuarioId: usuario._id || usuario.id });
+      setMetas(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error al cargar metas:', error);
+      setMetas([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAgregarAportacion = async (metaId) => {
+    try {
+      const monto = parseFloat(aportacionModal.monto);
+      console.log('📊 Intentando agregar aportación:', { metaId, monto, usuarioId: usuario._id || usuario.id });
+      
+      if (!monto || isNaN(monto) || monto <= 0) {
+        alert('Ingresa un monto válido');
+        return;
+      }
+
+      const resultado = await metasAPI.agregarAportacion(metaId, {
+        usuarioId: usuario._id || usuario.id,
+        monto: monto
+      });
+      
+      console.log('✅ Aportación exitosa:', resultado);
+      cargarMetas();
+      setAportacionModal({ visible: false, metaId: null, monto: '' });
+      alert('✅ Aportación registrada correctamente');
+    } catch (error) {
+      console.error('❌ Error al agregar aportación:', error);
+      alert('Error al agregar aportación: ' + (error.message || error));
+    }
+  };
+
+  const handleEliminar = async (metaId) => {
+    if (window.confirm('¿Estás seguro de eliminar esta meta?')) {
+      try {
+        await metasAPI.eliminar(metaId);
+        cargarMetas();
+        alert('✅ Meta eliminada');
+      } catch (error) {
+        console.error('Error al eliminar meta:', error);
+        alert('Error al eliminar meta');
+      }
+    }
+  };
+
+  if (loading) {
+    return <div className="text-center py-8">Cargando metas...</div>;
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-gray-800">🏆 Mis Metas</h2>
+        <button
+          onClick={() => setModalMetaPersonal(true)}
+          className="px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-lg hover:shadow-lg font-medium transition flex items-center gap-2"
+        >
+          <span>➕</span>
+          <span>Nueva Meta Personal</span>
+        </button>
+      </div>
+
+      {metas.length === 0 ? (
+        <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-100 text-center">
+          <p className="text-gray-500 text-lg">No tienes metas creadas aún</p>
+          <p className="text-gray-400 text-sm mt-2">Crea una meta usando el botón "Meta" en el header</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {metas.map(meta => (
+            <div key={meta._id} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-gray-800">{meta.nombre}</h3>
+                  <p className="text-sm text-gray-500">{meta.descripcion}</p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleEliminar(meta._id)}
+                    className="p-2 hover:bg-red-100 text-red-600 rounded-lg transition"
+                    title="Eliminar"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              </div>
+
+              {/* Información de la Meta */}
+              <div className="space-y-3 mb-4">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Objetivo</span>
+                  <span className="font-bold text-gray-800">{formatearMoneda(meta.montoObjetivo)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Acumulado</span>
+                  <span className="font-bold text-green-600">{formatearMoneda(meta.montoActual || 0)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Progreso</span>
+                  <span className="font-bold text-purple-600">{(meta.progreso || 0).toFixed(1)}%</span>
+                </div>
+              </div>
+
+              {/* Barra de Progreso */}
+              <div className="mb-4">
+                <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                  <div
+                    className="bg-gradient-to-r from-purple-500 to-indigo-500 h-full transition-all duration-500"
+                    style={{ width: `${Math.min(meta.progreso || 0, 100)}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Participantes */}
+              {meta.participantes && (
+                <div className="mb-4 bg-purple-50 p-3 rounded-lg border border-purple-100">
+                  <h4 className="text-sm font-bold text-purple-700 mb-2">
+                    👥 Participantes ({Array.isArray(meta.participantes) ? meta.participantes.length : Object.keys(meta.participantes).length})
+                  </h4>
+                  <div className="space-y-2 text-sm">
+                    {Array.isArray(meta.participantes) ? (
+                      // Si es array (con objeto {usuarioId, aportacion})
+                      meta.participantes.map((p, idx) => (
+                        <div key={idx} className="flex justify-between items-center p-2 bg-white rounded border border-purple-100">
+                          <span className="text-gray-700">{p.nombre || `Participante ${idx + 1}`}</span>
+                          <span className="font-bold text-purple-600">{formatearMoneda(p.aportacion || 0)}</span>
+                        </div>
+                      ))
+                    ) : (
+                      // Si es objeto Map {usuarioId: monto}
+                      Object.entries(meta.participantes).map(([usuarioId, monto], idx) => (
+                        <div key={idx} className="flex justify-between items-center p-2 bg-white rounded border border-purple-100">
+                          <span className="text-gray-700">Participante {idx + 1}</span>
+                          <span className="font-bold text-purple-600">{formatearMoneda(monto || 0)}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Estado y Fecha */}
+              <div className="space-y-3 pt-4 border-t border-gray-100">
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-2">
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                      meta.estado === 'activa' ? 'bg-green-100 text-green-800' :
+                      meta.estado === 'pausada' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-blue-100 text-blue-800'
+                    }`}>
+                      {meta.estado || 'activa'}
+                    </span>
+                    {meta.prioridad && (
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                        meta.prioridad === 'alta' ? 'bg-red-100 text-red-800' :
+                        meta.prioridad === 'media' ? 'bg-orange-100 text-orange-800' :
+                        'bg-blue-100 text-blue-800'
+                      }`}>
+                        {meta.prioridad}
+                      </span>
+                    )}
+                  </div>
+                  {meta.fechaLimite && (
+                    <span className="text-xs text-gray-500">
+                      📅 {new Date(meta.fechaLimite).toLocaleDateString('es-ES')}
+                    </span>
+                  )}
+                </div>
+
+                {/* Botones de Aportación y Detalles */}
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setAportacionModal({ visible: true, metaId: meta._id, monto: '' })}
+                    className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold py-2 px-4 rounded-lg transition"
+                  >
+                    💰 Aporte
+                  </button>
+                  <button
+                    onClick={() => setDetallesModal({ visible: true, metaId: meta._id })}
+                    className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-2 px-4 rounded-lg transition"
+                  >
+                    📋 Detalles
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Modal de Aportación */}
+      {aportacionModal.visible && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-6 text-white rounded-t-2xl">
+              <h3 className="text-2xl font-bold">💰 Hacer Aportación</h3>
+              <p className="text-purple-100 text-sm mt-1">Contribuye a tu meta compartida</p>
+            </div>
+
+            {/* Contenido */}
+            <div className="p-6 space-y-6">
+              <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                <p className="text-sm text-purple-600 font-medium">Meta: {
+                  metas.find(m => m._id === aportacionModal.metaId)?.nombre || 'Cargando...'
+                }</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-800 mb-2">Monto a Aportar *</label>
+                <div className="relative">
+                  <span className="absolute left-4 top-3 text-gray-500 font-bold">$</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={aportacionModal.monto}
+                    onChange={(e) => setAportacionModal({
+                      ...aportacionModal,
+                      monto: e.target.value
+                    })}
+                    placeholder="0.00"
+                    className="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-gray-800 font-semibold"
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-2">Ingresa el monto que deseas contribuir</p>
+              </div>
+
+              {/* Botones */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => setAportacionModal({ ...aportacionModal, visible: false })}
+                  className="flex-1 px-4 py-3 bg-gray-200 text-gray-800 font-bold rounded-lg hover:bg-gray-300 transition"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => handleAgregarAportacion(aportacionModal.metaId)}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold rounded-lg hover:from-purple-700 hover:to-indigo-700 transition"
+                >
+                  Confirmar Aporte
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Detalles */}
+      <ModalDetallesMeta
+        metaId={detallesModal.metaId}
+        visible={detallesModal.visible}
+        onClose={() => setDetallesModal({ visible: false, metaId: null })}
+        onAporteEliminado={() => cargarMetas()}
+      />
+
+      {/* Modal de Meta Personal */}
+      <ModalMetaPersonal
+        visible={modalMetaPersonal}
+        onCerrar={() => setModalMetaPersonal(false)}
+        onCrear={() => cargarMetas()}
+      />
+    </div>
+  );
+}
+
+export default SeccionMetas;
