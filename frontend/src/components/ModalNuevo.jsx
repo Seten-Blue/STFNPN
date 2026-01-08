@@ -173,7 +173,7 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
                   ? tipo === 'gasto' ? 'text-slate-700 border-b-2 border-slate-700' 
                   : tipo === 'ingreso' ? 'text-teal-600 border-b-2 border-teal-600'
                   : 'text-slate-600 border-b-2 border-slate-600'
-                  : 'text-gray-500 hover:text-gray-700'
+                  : 'text-gray-700 hover:text-gray-800'
               }`}
             >
               {tipo.charAt(0).toUpperCase() + tipo.slice(1)}
@@ -382,7 +382,7 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
                       <span className="text-lg">🚨</span>
                       <div>
                         <span className="text-sm font-medium text-slate-800">Urgente</span>
-                        <p className="text-xs text-slate-500">Prioridad alta</p>
+                        <p className="text-xs text-slate-800">Prioridad alta</p>
                       </div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
@@ -404,7 +404,7 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
                         <span className="text-lg">📧</span>
                         <div>
                           <span className="text-sm font-medium text-slate-800">Enviar Email</span>
-                          <p className="text-xs text-slate-500">Notificación por correo</p>
+                          <p className="text-xs text-slate-800">Notificación por correo</p>
                         </div>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">

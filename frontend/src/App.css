@@ -1,5 +1,10 @@
 /* Estilos específicos de la app */
 
+/* Mejorar contraste global de texto */
+body {
+  color: #1f2937; /* gray-800 por defecto */
+}
+
 /* Ocultar scrollbar pero mantener scroll funcional */
 .scrollbar-hide {
   -ms-overflow-style: none;  /* IE and Edge */

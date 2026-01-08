@@ -6,9 +6,9 @@ const TarjetaResumen = ({ titulo, valor, icono, color, subtitulo }) => {
     <div className={`bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition`}>
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm text-gray-500 mb-1">{titulo}</p>
+          <p className="text-sm text-gray-700 mb-1">{titulo}</p>
           <p className={`text-2xl font-bold ${color}`}>{formatearMoneda(valor)}</p>
-          {subtitulo && <p className="text-xs text-gray-400 mt-1">{subtitulo}</p>}
+          {subtitulo && <p className="text-xs text-gray-700 mt-1">{subtitulo}</p>}
         </div>
         <span className="text-3xl">{icono}</span>
       </div>
@@ -115,7 +115,7 @@ const Dashboard = ({ transacciones, cuentas, presupuestos, periodo, cuentaActiva
         <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
           <h3 className="font-bold text-gray-800 mb-4">Cuentas</h3>
           {cuentas.length === 0 ? (
-            <p className="text-gray-500 text-sm">No hay cuentas registradas</p>
+            <p className="text-gray-700 text-sm">No hay cuentas registradas</p>
           ) : (
             <div className="space-y-3">
               {cuentas.map((cuenta) => (
@@ -129,7 +129,7 @@ const Dashboard = ({ transacciones, cuentas, presupuestos, periodo, cuentaActiva
                     </div>
                     <div>
                       <p className="font-medium text-gray-800">{cuenta.nombre}</p>
-                      <p className="text-xs text-gray-500">{cuenta.entidad || cuenta.tipo}</p>
+                      <p className="text-xs text-gray-700">{cuenta.entidad || cuenta.tipo}</p>
                     </div>
                   </div>
                   <span className={`font-bold ${cuenta.saldo >= 0 ? 'text-green-600' : 'text-red-600'}`}>
@@ -146,14 +146,14 @@ const Dashboard = ({ transacciones, cuentas, presupuestos, periodo, cuentaActiva
       <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
         <h3 className="font-bold text-gray-800 mb-4">Top Gastos por Categoría</h3>
         {categoriasOrdenadas.length === 0 ? (
-          <p className="text-gray-500 text-sm">No hay gastos registrados</p>
+          <p className="text-gray-700 text-sm">No hay gastos registrados</p>
         ) : (
           <div className="space-y-3">
             {categoriasOrdenadas.map(([categoria, valor]) => (
               <div key={categoria}>
                 <div className="flex justify-between text-sm mb-1">
                   <span className="text-gray-700">{categoria}</span>
-                  <span className="text-gray-600 font-medium">{formatearMoneda(valor)}</span>
+                  <span className="text-gray-800 font-medium">{formatearMoneda(valor)}</span>
                 </div>
                 <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                   <div

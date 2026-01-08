@@ -163,17 +163,17 @@ function ModalDetallesMeta({ metaId, visible, onClose, onAporteEliminado }) {
             <div>
               <p className="text-xs text-gray-600 font-semibold uppercase">Participantes</p>
               <p className="text-2xl font-bold text-gray-800 mt-1">{numParticipantes}</p>
-              <p className="text-xs text-gray-500 mt-1">colaborando</p>
+              <p className="text-xs text-gray-700 mt-1">colaborando</p>
             </div>
             <div>
               <p className="text-xs text-gray-600 font-semibold uppercase">Aporte Promedio</p>
               <p className="text-2xl font-bold text-gray-800 mt-1">{formatearMoneda(aporteProm)}</p>
-              <p className="text-xs text-gray-500 mt-1">por participante</p>
+              <p className="text-xs text-gray-700 mt-1">por participante</p>
             </div>
             <div>
               <p className="text-xs text-gray-600 font-semibold uppercase">Total Aportes</p>
               <p className="text-2xl font-bold text-gray-800 mt-1">{meta.aportes.length}</p>
-              <p className="text-xs text-gray-500 mt-1">movimientos</p>
+              <p className="text-xs text-gray-700 mt-1">movimientos</p>
             </div>
           </div>
 

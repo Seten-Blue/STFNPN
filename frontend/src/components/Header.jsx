@@ -125,14 +125,14 @@ const Header = ({ onMenuClick, onNuevoClick, onGastoCompartidoClick, onIngresoCo
             {mostrarDropdown && (
               <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-slate-200 py-2">
                 <div className="px-4 py-3 border-b border-slate-200">
-                  <p className="text-xs font-semibold text-slate-600 uppercase mb-2">Usuario actual</p>
+                  <p className="text-xs font-semibold text-slate-800 uppercase mb-2">Usuario actual</p>
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
                       {usuario.avatar}
                     </div>
                     <div className="flex-1">
                       <p className="text-sm font-medium text-slate-800">{usuario.nombre}</p>
-                      <p className="text-xs text-slate-500">{usuario.email}</p>
+                      <p className="text-xs text-slate-800">{usuario.email}</p>
                     </div>
                   </div>
                 </div>

@@ -57,7 +57,7 @@ const SeccionCuentas = ({ cuentas, onCrear, onActualizar, onEliminar, cuentaActi
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">Cuentas</h2>
-          <p className="text-gray-500">Administra tus cuentas y ve dónde está tu dinero</p>
+          <p className="text-gray-800">Administra tus cuentas y ve dónde está tu dinero</p>
         </div>
         <button
           onClick={() => setMostrarModal(true)}
@@ -72,9 +72,9 @@ const SeccionCuentas = ({ cuentas, onCrear, onActualizar, onEliminar, cuentaActi
 
       {/* Saldo total */}
       <div className="bg-gradient-to-r from-slate-700 to-slate-600 rounded-xl p-6 text-white">
-        <p className="text-slate-200 mb-1">Saldo Total</p>
+        <p className="text-white mb-1">Saldo Total</p>
         <p className="text-4xl font-bold">{formatearMoneda(saldoTotal)}</p>
-        <p className="text-slate-300 text-sm mt-2">{cuentas.length} cuenta(s) activa(s)</p>
+        <p className="text-white text-sm mt-2">{cuentas.length} cuenta(s) activa(s)</p>
       </div>
 
       {/* Lista de cuentas */}
@@ -96,7 +96,7 @@ const SeccionCuentas = ({ cuentas, onCrear, onActualizar, onEliminar, cuentaActi
                   </div>
                   <div>
                     <p className="font-bold text-gray-800">{cuenta.nombre}</p>
-                    <p className="text-xs text-gray-500">{cuenta.entidad || tipoInfo?.nombre}</p>
+                    <p className="text-xs text-gray-800">{cuenta.entidad || tipoInfo?.nombre}</p>
                   </div>
                 </div>
                 <div className="flex gap-1">
@@ -112,7 +112,7 @@ const SeccionCuentas = ({ cuentas, onCrear, onActualizar, onEliminar, cuentaActi
                     onClick={() => {
                       if (window.confirm('¿Eliminar esta cuenta?')) onEliminar(cuenta._id);
                     }}
-                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
+                    className="p-2 text-gray-700 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -131,8 +131,8 @@ const SeccionCuentas = ({ cuentas, onCrear, onActualizar, onEliminar, cuentaActi
       {cuentas.length === 0 && (
         <div className="bg-white rounded-xl p-8 text-center shadow-sm border border-gray-100">
           <span className="text-5xl mb-4 block">🏦</span>
-          <p className="text-gray-500">No hay cuentas registradas</p>
-          <p className="text-gray-400 text-sm mt-1">Agrega tu primera cuenta para empezar</p>
+          <p className="text-gray-800">No hay cuentas registradas</p>
+          <p className="text-gray-700 text-sm mt-1">Agrega tu primera cuenta para empezar</p>
         </div>
       )}
 

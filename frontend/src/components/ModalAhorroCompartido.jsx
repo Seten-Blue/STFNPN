@@ -162,7 +162,7 @@ function ModalAhorroCompartido({ visible, onCerrar, cuentas, usuarios, onCrear }
         <div className="sticky top-0 bg-gradient-to-r from-teal-500 to-cyan-500 p-6 flex items-center justify-between text-white">
           <div>
             <h2 className="text-2xl font-bold">💹 Ahorro Compartido</h2>
-            <p className="text-sm opacity-90">Fondo común para ahorros conjuntos</p>
+            <p className="text-sm opacity-100">Fondo común para ahorros conjuntos</p>
           </div>
           <button onClick={onCerrar} className="p-2 hover:bg-white/20 rounded-lg transition">
             ✕
@@ -264,7 +264,7 @@ function ModalAhorroCompartido({ visible, onCerrar, cuentas, usuarios, onCrear }
             {loadingFusionados ? (
               <div className="text-center py-4 bg-slate-50 rounded-lg">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-teal-500 mx-auto"></div>
-                <p className="text-sm text-slate-500 mt-2">Cargando usuarios...</p>
+                <p className="text-sm text-slate-800 mt-2">Cargando usuarios...</p>
               </div>
             ) : usuariosFusionados.length === 0 ? (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">

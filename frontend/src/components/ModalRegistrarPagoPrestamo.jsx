@@ -118,7 +118,7 @@ function ModalRegistrarPagoPrestamo({ visible, onClose, prestamo, onRegistrar })
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-gray-900 font-bold text-lg"
               required
             />
-            <p className="text-xs text-gray-500 mt-1">Monto real que pagas en esta cuota</p>
+            <p className="text-xs text-gray-700 mt-1">Monto real que pagas en esta cuota</p>
           </div>
 
           {/* Fecha de Pago */}
@@ -150,7 +150,7 @@ function ModalRegistrarPagoPrestamo({ visible, onClose, prestamo, onRegistrar })
               placeholder={`Ej: ${valorBase}`}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-gray-900"
             />
-            <p className="text-xs text-gray-500 mt-1">Si cambió por inflación, actualiza el valor aquí</p>
+            <p className="text-xs text-gray-700 mt-1">Si cambió por inflación, actualiza el valor aquí</p>
           </div>
 
           {/* Ajuste por Inflación (Opcional) */}
@@ -167,7 +167,7 @@ function ModalRegistrarPagoPrestamo({ visible, onClose, prestamo, onRegistrar })
               placeholder="Ej: 5.50"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-gray-900"
             />
-            <p className="text-xs text-gray-500 mt-1">Incremento por inflación u otro motivo</p>
+            <p className="text-xs text-gray-700 mt-1">Incremento por inflación u otro motivo</p>
           </div>
 
           {/* Días de Atraso (Opcional) */}
@@ -183,7 +183,7 @@ function ModalRegistrarPagoPrestamo({ visible, onClose, prestamo, onRegistrar })
               placeholder="0"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-gray-900"
             />
-            <p className="text-xs text-gray-500 mt-1">Si pagaste tarde, indica cuántos días</p>
+            <p className="text-xs text-gray-700 mt-1">Si pagaste tarde, indica cuántos días</p>
             {formData.diasAtraso > 0 && (
               <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
                 ⚠️ Pago con {formData.diasAtraso} días de atraso

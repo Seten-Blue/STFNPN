@@ -233,7 +233,7 @@ function SeccionNotificaciones() {
       {configEmail.mostrar && (
         <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-6">
           <h3 className="font-semibold text-slate-800 mb-3">⚙️ Configuración de Email</h3>
-          <p className="text-sm text-slate-600 mb-4">
+          <p className="text-sm text-slate-800 mb-4">
             Para enviar emails, necesitas tener configuradas las variables de entorno en el servidor backend.
           </p>
           <div className="flex gap-2 mb-2">
@@ -339,11 +339,11 @@ function SeccionNotificaciones() {
       {/* Lista de Notificaciones */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-slate-500">Cargando...</div>
+          <div className="p-8 text-center text-slate-800">Cargando...</div>
         ) : notificaciones.length === 0 ? (
           <div className="p-8 text-center">
             <span className="text-4xl">📭</span>
-            <p className="mt-2 text-slate-500">No hay notificaciones</p>
+            <p className="mt-2 text-slate-800">No hay notificaciones</p>
           </div>
         ) : (
           <>
@@ -371,7 +371,7 @@ function SeccionNotificaciones() {
                         {/* Contenido */}
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <h4 className={`font-semibold ${notif.leida ? 'text-slate-500' : 'text-slate-800'}`}>
+                            <h4 className={`font-semibold ${notif.leida ? 'text-slate-700' : 'text-slate-800'}`}>
                               {notif.titulo}
                             </h4>
                             <span className={`px-2 py-0.5 rounded-full text-xs ${tipoInfo.color}`}>
@@ -388,8 +388,8 @@ function SeccionNotificaciones() {
                               </span>
                             )}
                           </div>
-                          <p className="text-slate-600 text-sm mb-2">{notif.mensaje}</p>
-                          <div className="flex items-center gap-4 text-xs text-slate-500">
+                          <p className="text-slate-800 text-sm mb-2">{notif.mensaje}</p>
+                          <div className="flex items-center gap-4 text-xs text-slate-800">
                             <span className={esPasada && !notif.leida ? 'text-red-600 font-medium' : ''}>
                               📅 {fechaRecordatorio.toLocaleDateString('es-ES', {
                                 weekday: 'short',
@@ -410,7 +410,7 @@ function SeccionNotificaciones() {
                           {!notif.leida && (
                             <button
                               onClick={() => handleMarcarLeida(notif._id)}
-                              className="p-2 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition"
+                              className="p-2 text-slate-700 hover:text-green-600 hover:bg-green-50 rounded-lg transition"
                               title="Marcar como leída"
                             >
                               ✓

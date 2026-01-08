@@ -25,8 +25,8 @@ const ListaTransacciones = ({ transacciones, onEditar, onEliminar }) => {
     return (
       <div className="bg-white rounded-xl p-8 text-center shadow-sm border border-gray-100">
         <span className="text-5xl mb-4 block">📭</span>
-        <p className="text-gray-500">No hay transacciones registradas</p>
-        <p className="text-gray-400 text-sm mt-1">Agrega tu primer ingreso o gasto</p>
+        <p className="text-gray-800">No hay transacciones registradas</p>
+        <p className="text-gray-700 text-sm mt-1">Agrega tu primer ingreso o gasto</p>
       </div>
     );
   }
@@ -36,7 +36,7 @@ const ListaTransacciones = ({ transacciones, onEditar, onEliminar }) => {
       {Object.entries(transaccionesAgrupadas).map(([fecha, items]) => (
         <div key={fecha} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="bg-gray-50 px-4 py-2 border-b border-gray-100">
-            <p className="text-sm font-medium text-gray-600">
+            <p className="text-sm font-medium text-gray-800">
               {formatearFecha(fecha)}
             </p>
           </div>
@@ -54,11 +54,11 @@ const ListaTransacciones = ({ transacciones, onEditar, onEliminar }) => {
                     <p className="font-medium text-gray-800">
                       {t.tipo === 'transferencia' ? 'Transferencia' : t.categoria}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-800">
                       {t.hora} {t.esGrupal && <span className="text-blue-500">• {t.grupo}</span>}
                     </p>
                     {t.anotaciones && (
-                      <p className="text-xs text-gray-400 mt-0.5">{t.anotaciones}</p>
+                      <p className="text-xs text-gray-700 mt-0.5">{t.anotaciones}</p>
                     )}
                   </div>
                 </div>
@@ -71,7 +71,7 @@ const ListaTransacciones = ({ transacciones, onEditar, onEliminar }) => {
                   <div className="flex gap-1">
                     <button
                       onClick={() => onEditar(t)}
-                      className="p-2 text-gray-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition"
+                      className="p-2 text-gray-700 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />

@@ -28,7 +28,7 @@ const GastoCard = ({ nombre, valor, fecha, categoria, descripcion, grupo, tipo }
           <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded">{categoria}</span>
           {grupo && <span className="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded">{grupo}</span>}
         </div>
-        {descripcion && <p className="text-gray-500 text-sm mb-2">{descripcion}</p>}
+        {descripcion && <p className="text-gray-700 text-sm mb-2">{descripcion}</p>}
         <div className="flex gap-2 mt-2">
           <button className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded hover:bg-yellow-200 text-xs font-medium transition">Editar</button>
           <button className="bg-red-100 text-red-700 px-3 py-1 rounded hover:bg-red-200 text-xs font-medium transition">Eliminar</button>

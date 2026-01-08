@@ -54,7 +54,7 @@ const Sidebar = ({ seccionActiva, onCambiarSeccion, visible, onCerrar }) => {
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition font-medium text-left ${
                   seccionActiva === item.id
                     ? 'bg-blue-100 text-blue-700 font-semibold'
-                    : 'text-gray-600 hover:bg-gray-100'
+                    : 'text-gray-800 hover:bg-gray-100'
                 }`}
               >
                 <span className="text-xl flex-shrink-0 w-6 text-center">{item.icono}</span>
