@@ -1,6 +1,6 @@
 .seccion-anotaciones {
-  padding: 2rem;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 0;
+  background: transparent;
   min-height: 100vh;
 }
 
@@ -8,17 +8,19 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
-  background: white;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.5rem;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .header-anotaciones h2 {
   margin: 0;
-  color: #333;
-  font-size: 1.8rem;
+  color: #1f2937;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
 }
 
 .btn-nueva-anotacion {
@@ -41,28 +43,30 @@
 /* Estadísticas */
 .estadisticas-anotaciones {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1rem;
   margin-bottom: 2rem;
 }
 
 .stat-card {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 12px;
+  background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+  padding: 1.2rem;
+  border-radius: 10px;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
   transition: all 0.3s ease;
 }
 
 .stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  border-color: #d1d5db;
 }
 
 .stat-card.alert {
-  border-top: 3px solid #ff6b6b;
-  background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%);
+  border: 1px solid #fee2e2;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
 }
 
 .stat-label {
@@ -85,7 +89,8 @@
   background: white;
   padding: 2rem;
   border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
   margin-bottom: 2rem;
 }
 
@@ -206,7 +211,8 @@
   color: white;
   padding: 0.4rem 0.8rem;
   border-radius: 20px;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .btn-remover-etiqueta {
@@ -214,83 +220,48 @@
   border: none;
   color: white;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 1.1rem;
   padding: 0;
+  margin: 0;
   line-height: 1;
 }
 
 .input-etiqueta {
   flex: 1;
   border: none;
-  outline: none;
+  background: none;
+  padding: 0.4rem;
   font-size: 1rem;
   min-width: 100px;
-  font-family: inherit;
 }
 
-.input-etiqueta::placeholder {
-  color: #999;
-}
-
-/* Botones del formulario */
-.form-actions {
-  display: flex;
-  gap: 1rem;
-  margin-top: 2rem;
-}
-
-.btn-guardar,
-.btn-cancelar {
-  flex: 1;
-  padding: 0.8rem 1.5rem;
-  border: none;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-guardar {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-
-.btn-guardar:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-}
-
-.btn-cancelar {
-  background: #f0f0f0;
-  color: #333;
-}
-
-.btn-cancelar:hover {
-  background: #e0e0e0;
+.input-etiqueta:focus {
+  outline: none;
 }
 
 /* Filtros */
 .filtros-anotaciones {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
   margin-bottom: 2rem;
+  padding: 1rem;
   background: white;
-  padding: 1.5rem;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .filtro {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
 }
 
 .filtro label {
-  font-weight: 600;
   color: #333;
-  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
 }
 
 .filtro select,
@@ -330,130 +301,173 @@
 /* Lista de anotaciones */
 .lista-anotaciones {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.5rem;
+  padding: 0 0.5rem;
 }
 
 .loading,
 .sin-anotaciones {
   grid-column: 1 / -1;
   text-align: center;
-  padding: 2rem;
-  color: #999;
+  padding: 3rem 2rem;
+  color: #9ca3af;
   font-size: 1.1rem;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
 }
 
-/* Card de anotación */
+/* Card de anotación - Diseño Moderno */
 .anotacion-card {
   background: white;
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.anotacion-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--card-color, #667eea);
+  transition: height 0.3s ease;
 }
 
 .anotacion-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+  border-color: #d1d5db;
+}
+
+.anotacion-card:hover::before {
+  height: 4px;
 }
 
 .anotacion-card.completada {
-  opacity: 0.7;
-  background: #f8f8f8;
+  opacity: 0.75;
+  background: #f9fafb;
+}
+
+.anotacion-card.completada::before {
+  background: #10b981;
 }
 
 .anotacion-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 1rem;
-  gap: 1rem;
+  margin-bottom: 0.8rem;
+  gap: 0.8rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid #f3f4f6;
 }
 
 .anotacion-titulo {
   display: flex;
   align-items: center;
-  gap: 0.8rem;
+  gap: 0.6rem;
   flex: 1;
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
 .checkbox-anotacion {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   cursor: pointer;
   flex-shrink: 0;
+  accent-color: #667eea;
 }
 
 .anotacion-titulo h3 {
   margin: 0;
-  font-size: 1.1rem;
-  color: #333;
+  font-size: 1.05rem;
+  color: #1f2937;
   word-break: break-word;
   text-decoration: var(--text-decoration, none);
+  font-weight: 600;
+  flex: 1;
+  min-width: 0;
 }
 
 .anotacion-card.completada h3 {
   --text-decoration: line-through;
-  color: #999;
+  color: #9ca3af;
 }
 
 .prioridad-badge {
   display: inline-block;
-  padding: 0.2rem 0.8rem;
-  border-radius: 12px;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
   color: white;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 600;
   text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+
+.recordatorio-badge {
+  display: inline-block;
+  padding: 0.2rem 0.4rem;
+  border-radius: 6px;
+  background-color: #fbbf24;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 600;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
 .anotacion-acciones {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.4rem;
+  flex-shrink: 0;
 }
 
 .btn-editar,
 .btn-eliminar {
   background: none;
   border: none;
-  font-size: 1.2rem;
   cursor: pointer;
+  font-size: 1rem;
   padding: 0.4rem;
+  border-radius: 6px;
   transition: all 0.2s ease;
+  color: #6b7280;
 }
 
 .btn-editar:hover {
-  transform: scale(1.2);
+  background: #fef3c7;
+  color: #d97706;
 }
 
 .btn-eliminar:hover {
-  transform: scale(1.2);
-  filter: hue-rotate(10deg);
+  background: #fee2e2;
+  color: #dc2626;
 }
 
 .anotacion-contenido {
-  color: #555;
-  margin-bottom: 1rem;
-  line-height: 1.5;
+  color: #4b5563;
+  line-height: 1.6;
+  margin: 1rem 0;
+  flex: 1;
   word-break: break-word;
-  max-height: 100px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.anotacion-card.completada .anotacion-contenido {
-  color: #999;
+  white-space: pre-wrap;
 }
 
 .anotacion-footer {
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-  margin-top: auto;
   padding-top: 1rem;
   border-top: 1px solid #f0f0f0;
 }
@@ -463,6 +477,7 @@
   align-items: center;
   gap: 0.8rem;
   flex-wrap: wrap;
+  margin-bottom: 0.5rem;
 }
 
 .categoria-tag {
@@ -501,22 +516,12 @@
 }
 
 .fecha-creacion {
-  color: #999;
+  color: #9ca3af;
   font-size: 0.8rem;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .seccion-anotaciones {
-    padding: 1rem;
-  }
-
-  .header-anotaciones {
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
-  }
-
   .header-anotaciones h2 {
     font-size: 1.5rem;
   }
@@ -567,5 +572,14 @@
   .btn-nueva-anotacion {
     padding: 0.7rem 1rem;
     font-size: 0.95rem;
+  }
+
+  .lista-anotaciones {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .anotacion-card {
+    padding: 1rem;
   }
 }

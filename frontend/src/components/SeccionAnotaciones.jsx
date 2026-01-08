@@ -456,6 +456,9 @@ function SeccionAnotaciones() {
                     className="checkbox-anotacion"
                   />
                   <h3>{anotacion.titulo}</h3>
+                  {anotacion.tieneRecordatorio && (
+                    <span className="recordatorio-badge" title="Tiene recordatorio">🔔</span>
+                  )}
                   <span className="prioridad-badge" style={{ backgroundColor: coloresPrioridad[anotacion.prioridad] }}>
                     {anotacion.prioridad}
                   </span>
@@ -493,12 +496,6 @@ function SeccionAnotaciones() {
                     </div>
                   )}
                 </div>
-
-                {anotacion.tieneRecordatorio && (
-                  <div className="recordatorio-info">
-                    🔔 {new Date(anotacion.fechaRecordatorio).toLocaleDateString()} {anotacion.horaRecordatorio}
-                  </div>
-                )}
 
                 <small className="fecha-creacion">
                   {new Date(anotacion.fechaCreacion).toLocaleDateString()} {new Date(anotacion.fechaCreacion).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

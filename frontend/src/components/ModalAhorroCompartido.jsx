@@ -157,7 +157,7 @@ function ModalAhorroCompartido({ visible, onCerrar, cuentas, usuarios, onCrear }
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl">
+      <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl">
         {/* Header */}
         <div className="sticky top-0 bg-gradient-to-r from-teal-500 to-cyan-500 p-6 flex items-center justify-between text-white">
           <div>
