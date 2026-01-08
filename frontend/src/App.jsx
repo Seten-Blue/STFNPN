@@ -315,7 +315,7 @@ function AppContent() {
         onCerrar={() => setSidebarVisible(false)}
       />
       
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden lg:ml-64">
         <Header 
           onMenuClick={() => setSidebarVisible(!sidebarVisible)}
           onNotificacionesClick={handleNotificacionesClick}

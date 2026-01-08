@@ -25,13 +25,13 @@ const Sidebar = ({ seccionActiva, onCambiarSeccion, visible, onCerrar }) => {
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - Versión Móvil */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 lg:transform-none ${
-          visible ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        className={`fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-lg transform transition-transform duration-300 lg:hidden ${
+          visible ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="p-4 border-b border-gray-200 lg:hidden">
+        <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <span className="text-xl font-bold text-gray-800">💰 FinanzasApp</span>
             <button onClick={onCerrar} className="p-2 hover:bg-gray-100 rounded-lg">
@@ -42,7 +42,7 @@ const Sidebar = ({ seccionActiva, onCambiarSeccion, visible, onCerrar }) => {
           </div>
         </div>
 
-        <nav className="p-4 space-y-1 h-full overflow-y-auto scrollbar-hide flex flex-col">
+        <nav className="p-4 space-y-1 h-[calc(100vh-80px)] overflow-y-auto scrollbar-hide flex flex-col">
           <div className="space-y-1">
             {menuItems.map((item) => (
               <button
@@ -63,7 +63,28 @@ const Sidebar = ({ seccionActiva, onCambiarSeccion, visible, onCerrar }) => {
             ))}
           </div>
         </nav>
+      </aside>
 
+      {/* Sidebar - Versión Desktop */}
+      <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:bg-white lg:shadow-lg lg:h-screen lg:fixed lg:left-0 lg:top-0 lg:pt-16 lg:z-40">
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto scrollbar-hide flex flex-col">
+          <div className="space-y-1">
+            {menuItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => onCambiarSeccion(item.id)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition font-medium text-left ${
+                  seccionActiva === item.id
+                    ? 'bg-blue-100 text-blue-700 font-semibold'
+                    : 'text-gray-800 hover:bg-gray-100'
+                }`}
+              >
+                <span className="text-xl flex-shrink-0 w-6 text-center">{item.icono}</span>
+                <span className="flex-1">{item.nombre}</span>
+              </button>
+            ))}
+          </div>
+        </nav>
       </aside>
     </>
   );
