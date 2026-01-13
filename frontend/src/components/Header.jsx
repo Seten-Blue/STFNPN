@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNotificaciones } from '../context/NotificacionesContext';
 import { useNavigate } from 'react-router-dom';
 
-const Header = ({ onMenuClick, onNuevoClick, onGastoCompartidoClick, onIngresoCompartidoClick, onMetaRequeridaClick, onAhorroCompartidoClick, onNotificacionesClick }) => {
+const Header = ({ onMenuClick, onNuevoClick, onGastoCompartidoClick, onIngresoCompartidoClick, onMetaRequeridaClick, onAhorroCompartidoClick, onNotificacionesClick, menuModulosVisible }) => {
   const { usuario, cerrarSesion } = useAuth();
   const { conteoNoLeidas } = useNotificaciones();
   const [mostrarDropdown, setMostrarDropdown] = useState(false);
@@ -27,18 +27,19 @@ const Header = ({ onMenuClick, onNuevoClick, onGastoCompartidoClick, onIngresoCo
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
-      <div className="px-0 py-0 flex items-center gap-0">
+      <div className="px-4 py-3 flex items-center gap-3">
         <button
           onClick={onMenuClick}
-          className="p-0 hover:bg-gray-100 rounded-lg transition"
+          className="p-2 hover:bg-gray-100 rounded-lg transition"
+          title="Ver módulos"
         >
-          <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          <svg className={`w-6 h-6 transition-transform ${menuModulosVisible ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
           </svg>
         </button>
-        <div className="flex items-center gap-0">
+        <div className="flex items-center gap-2">
           <img src="/logo.png" alt="Logo" className="h-12 w-12" />
-          <span className="hidden sm:inline text-sm font-bold text-gray-800 ml-1">Gestor Financiero</span>
+          <span className="hidden sm:inline text-sm font-bold text-gray-800">Gestor Financiero</span>
         </div>
 
         <div className="flex items-center gap-1 ml-auto">

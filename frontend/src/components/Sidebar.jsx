@@ -66,9 +66,7 @@ const Sidebar = ({ seccionActiva, onCambiarSeccion, visible, onCerrar }) => {
       </aside>
 
       {/* Sidebar - Versión Desktop */}
-      <aside className={`hidden lg:flex lg:flex-col lg:w-64 lg:bg-white lg:shadow-lg lg:h-screen ${
-        visible ? 'flex' : 'hidden'
-      }`}>
+      <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:bg-white lg:shadow-lg lg:h-screen lg:fixed lg:left-0 lg:top-0 lg:z-40">
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto scrollbar-hide flex flex-col">
           <div className="space-y-1">
             {menuItems.map((item) => (

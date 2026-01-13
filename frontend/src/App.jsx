@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { NotificacionesProvider } from './context/NotificacionesContext';
 import Header from './components/Header';
-import Sidebar from './components/Sidebar';
+import MenuModulos from './components/MenuModulos';
 import Dashboard from './components/Dashboard';
 import ListaTransacciones from './components/ListaTransacciones';
 import FiltrosPeriodo from './components/FiltrosPeriodo';
@@ -28,7 +28,7 @@ import './App.css';
 function AppContent() {
   const { usuario, token, loading: authLoading, cargarUsuarios, usuarios: usuariosDelContexto } = useAuth();
   const [seccionActiva, setSeccionActiva] = useState('dashboard');
-  const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [menuModulosVisible, setMenuModulosVisible] = useState(false);
   const [modalNuevoVisible, setModalNuevoVisible] = useState(false);
   const [modalGastoCompartidoVisible, setModalGastoCompartidoVisible] = useState(false);
   const [modalIngresoCompartidoVisible, setModalIngresoCompartidoVisible] = useState(false);
@@ -307,23 +307,26 @@ function AppContent() {
 
   return (
     <div className="flex h-screen bg-[#f3f4f6]">
-      <Sidebar 
-        seccionActiva={seccionActiva}
-        onCambiarSeccion={setSeccionActiva}
-        visible={sidebarVisible}
-        onCerrar={() => setSidebarVisible(false)}
-      />
-      
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header 
-          onMenuClick={() => setSidebarVisible(!sidebarVisible)}
+          onMenuClick={() => setMenuModulosVisible(!menuModulosVisible)}
           onNotificacionesClick={handleNotificacionesClick}
           onGastoClick={() => setModalNuevoVisible(true)}
           onGastoCompartidoClick={() => setModalGastoCompartidoVisible(true)}
           onIngresoCompartidoClick={() => setModalIngresoCompartidoVisible(true)}
           onMetaRequiridaClick={() => setModalMetaRequiridaVisible(true)}
           onAhorroCompartidoClick={() => setModalAhorroCompartidoVisible(true)}
+          menuModulosVisible={menuModulosVisible}
           usuario={usuario}
+        />
+
+        <MenuModulos 
+          visible={menuModulosVisible}
+          onCambiarSeccion={(seccion) => {
+            setSeccionActiva(seccion);
+            setMenuModulosVisible(false);
+          }}
+          onCerrar={() => setMenuModulosVisible(false)}
         />
 
         <main className="flex-1 overflow-y-auto p-6">
