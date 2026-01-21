@@ -2,6 +2,40 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { transaccionesAPI, cuentasAPI, prestamosAPI, presupuestosAPI, metasAPI, ahorroCompartidoAPI } from '../services/api';
 
+// Mapeo de sentimientos a imágenes
+const sentimientoImagen = {
+  feliz: '/Feliz.png',
+  triste: '/triste.png',
+  sorpresa: '/sorpresa.png',
+  sorprendido: '/sorpresa.png',
+  enojado: '/enojado.png',
+  relajado: '/explica en relajado.png',
+  explicando: '/explica en relajado.png',
+};
+
+// Palabras clave para detectar sentimientos (con mayor especificidad)
+const palabrasSentimiento = {
+  feliz: ['excelente', 'genial', 'bien', 'muy bien', 'perfecto', 'fantástico', 'fantastico', 'estupendo', 'maravilloso', 'buen', 'bueno', 'positivo', 'mejora', 'crecimiento'],
+  triste: ['mal', 'problema', 'crítico', 'critico', 'preocupante', 'negativo', 'pérdida', 'perdida', 'deuda', 'deficiente', 'bajo', 'malo', 'riesgo', 'alerta', 'adverso'],
+  sorpresa: ['interesante', 'notable', 'importante', 'significativo', 'cambio', 'incremento', 'aumento', 'destacable', 'relevante', 'sorprendente'],
+  enojado: ['problema serio', 'crítica', 'critica', 'error', 'incorrecto', 'fallida', 'fracaso', 'grave', 'urgente'],
+  relajado: ['analizar', 'revisar', 'considerar', 'recomiendo', 'sugerencia', 'consejo', 'explicar', 'detalles', 'información', 'datos', 'análisis'],
+};
+
+const detectarSentimiento = (texto) => {
+  const textoLower = texto.toLowerCase();
+  
+  // Detectar sentimiento basado en palabras clave
+  for (const [sentimiento, palabras] of Object.entries(palabrasSentimiento)) {
+    if (palabras.some(palabra => textoLower.includes(palabra))) {
+      return sentimiento;
+    }
+  }
+  
+  // Por defecto, mostrar relajado si no detecta nada específico
+  return 'relajado';
+};
+
 const AsistenteFinanciero = () => {
   const { usuario } = useAuth();
   const [mensajes, setMensajes] = useState([]);
@@ -184,14 +218,16 @@ Puedes preguntarme cosas como:
 • "Analiza mi presupuesto"
 • "Dame consejos para ahorrar"
 
-¿En qué puedo ayudarte? 💰`
+¿En qué puedo ayudarte? 💰`,
+        sentimiento: 'relajado'
       }]);
 
     } catch (error) {
       console.error('Error al cargar datos financieros:', error);
       setMensajes([{
         role: 'assistant',
-        content: '❌ Hubo un error al cargar tus datos financieros. Por favor, recarga la página.'
+        content: '❌ Hubo un error al cargar tus datos financieros. Por favor, recarga la página.',
+        sentimiento: 'triste'
       }]);
     } finally {
       setCargandoDatos(false);
@@ -259,17 +295,20 @@ Responde a la pregunta del usuario basándote ÚNICAMENTE en los datos proporcio
         ? data.content.filter(block => block.type === 'text').map(block => block.text).join('\n')
         : 'No se recibió respuesta de la IA.';
 
-      // Agregar respuesta de la IA
+      // Detectar sentimiento y agregar respuesta de la IA
+      const sentimiento = detectarSentimiento(respuestaIA);
       setMensajes(prev => [...prev, {
         role: 'assistant',
-        content: respuestaIA
+        content: respuestaIA,
+        sentimiento: sentimiento
       }]);
 
     } catch (error) {
       console.error('Error al comunicarse con la IA:', error);
       setMensajes(prev => [...prev, {
         role: 'assistant',
-        content: '❌ Lo siento, hubo un error al procesar tu pregunta. Por favor, intenta de nuevo.'
+        content: '❌ Lo siento, hubo un error al procesar tu pregunta. Por favor, intenta de nuevo.',
+        sentimiento: 'triste'
       }]);
     } finally {
       setCargando(false);
@@ -334,8 +373,17 @@ Responde a la pregunta del usuario basándote ÚNICAMENTE en los datos proporcio
         {mensajes.map((mensaje, index) => (
           <div
             key={index}
-            className={`flex ${mensaje.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-4`}
+            className={`flex ${mensaje.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-4 items-end gap-3`}
           >
+            {/* Imagen del asistente (lado izquierdo) */}
+            {mensaje.role === 'assistant' && mensaje.sentimiento && (
+              <img
+                src={sentimientoImagen[mensaje.sentimiento] || sentimientoImagen.relajado}
+                alt={mensaje.sentimiento}
+                className="w-14 h-14 object-contain flex-shrink-0"
+              />
+            )}
+            
             <div
               className={`max-w-[70%] px-5 py-3 rounded-2xl transition ${
                 mensaje.role === 'user'
