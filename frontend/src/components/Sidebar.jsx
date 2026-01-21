@@ -12,6 +12,7 @@ const menuItems = [
   { id: 'anotaciones', nombre: 'Anotaciones', icono: '📝' },
   { id: 'notificaciones', nombre: 'Notificaciones', icono: '🔔' },
   { id: 'configuracion', nombre: 'Configuración', icono: '⚙️' },
+  { id: 'asistente-ia', nombre: 'Asistente IA', icono: '🤖' },
 ];
 
 const Sidebar = ({ seccionActiva, onCambiarSeccion, visible, onCerrar }) => {

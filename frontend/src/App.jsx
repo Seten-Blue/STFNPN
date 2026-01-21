@@ -24,6 +24,7 @@ import ModalAhorroCompartido from './components/ModalAhorroCompartido';
 import Login from './pages/Login';
 import { transaccionesAPI, cuentasAPI, prestamosAPI, presupuestosAPI } from './services/api';
 import './App.css';
+import AsistenteFinanciero from './components/AsistenteFinanciero';
 
 function AppContent() {
   const { usuario, token, loading: authLoading, cargarUsuarios, usuarios: usuariosDelContexto } = useAuth();
@@ -217,18 +218,25 @@ function AppContent() {
         );
 
       case 'transacciones':
-        return (
-          <>
-            <FiltrosPeriodo periodo={periodo} fecha={fecha} onPeriodoChange={setPeriodo} onFechaChange={setFecha} />
-            <button 
-              onClick={() => setModalNuevoVisible(true)}
-              className="mb-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
-            >
-              + Nueva Transacción
-            </button>
-            <ListaTransacciones transacciones={transacciones} onEliminar={handleEliminarTransaccion} />
-          </>
-        );
+  return (
+    <>
+      <FiltrosPeriodo periodo={periodo} fecha={fecha} onPeriodoChange={setPeriodo} onFechaChange={setFecha} />
+      <button 
+        onClick={() => {
+          console.log('🔴 BOTÓN CLICKEADO');
+          console.log('modalNuevoVisible antes:', modalNuevoVisible);
+          console.log('Cuentas:', cuentas);
+          console.log('CuentaActiva:', cuentaActiva);
+          setModalNuevoVisible(true);
+          console.log('setModalNuevoVisible(true) ejecutado');
+        }}
+        className="mb-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+      >
+        + Nueva Transacción
+      </button>
+      <ListaTransacciones transacciones={transacciones} onEliminar={handleEliminarTransaccion} />
+    </>
+  );
 
       case 'cuentas':
         return (
@@ -239,6 +247,7 @@ function AppContent() {
             onEliminar={handleEliminarCuenta}
           />
         );
+        
 
       case 'prestamos':
         return (
@@ -284,6 +293,9 @@ function AppContent() {
 
       case 'notificaciones':
         return <SeccionNotificaciones />;
+        
+      case 'asistente-ia':
+      return <AsistenteFinanciero />;
 
       default:
         return null;
@@ -310,6 +322,7 @@ function AppContent() {
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header 
           onMenuClick={() => setMenuModulosVisible(!menuModulosVisible)}
+          onNuevoClick={() => setModalNuevoVisible(true)}
           onNotificacionesClick={handleNotificacionesClick}
           onGastoClick={() => setModalNuevoVisible(true)}
           onGastoCompartidoClick={() => setModalGastoCompartidoVisible(true)}

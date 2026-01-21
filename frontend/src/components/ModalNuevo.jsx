@@ -149,6 +149,8 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
 
   if (!visible) return null;
 
+  console.log('ModalNuevo renderizado:', { visible, cuentas, cuentaActiva });
+
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
@@ -220,7 +222,7 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
                   required
                 >
                   <option value="">Seleccionar cuenta</option>
-                  {cuentas.map((c) => (
+                  {cuentas && Array.isArray(cuentas) && cuentas.map((c) => (
                     <option key={c._id} value={c._id}>{c.nombre}</option>
                   ))}
                 </select>
@@ -235,7 +237,7 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
                   required
                 >
                   <option value="">Seleccionar cuenta</option>
-                  {cuentas.map((c) => (
+                  {cuentas && Array.isArray(cuentas) && cuentas.map((c) => (
                     <option key={c._id} value={c._id}>{c.nombre}</option>
                   ))}
                 </select>
@@ -254,7 +256,7 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
                 className="w-full px-3 py-2 border border-gray-400 rounded-lg text-gray-900 bg-white placeholder-gray-500 focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
               >
                 <option value="">Seleccionar cuenta</option>
-                {cuentas.map((c) => (
+                {cuentas && Array.isArray(cuentas) && cuentas.map((c) => (
                   <option key={c._id} value={c._id}>{c.nombre}</option>
                 ))}
               </select>

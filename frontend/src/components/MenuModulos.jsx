@@ -12,6 +12,7 @@ const menuItems = [
   { id: 'anotaciones', nombre: 'Anotaciones', icono: '📝', descripcion: 'Notas y recordatorios' },
   { id: 'notificaciones', nombre: 'Notificaciones', icono: '🔔', descripcion: 'Alertas' },
   { id: 'configuracion', nombre: 'Configuración', icono: '⚙️', descripcion: 'Ajustes' },
+  { id: 'asistente-ia', nombre: 'Asistente IA', icono: '🤖', descripcion: 'Asistente inteligente' },
 ];
 
 const MenuModulos = ({ visible, onCambiarSeccion, onCerrar }) => {
@@ -24,6 +25,8 @@ const MenuModulos = ({ visible, onCambiarSeccion, onCerrar }) => {
         className="fixed inset-0 bg-black/30 z-30 lg:hidden"
         onClick={onCerrar}
       />
+
+      
 
       {/* Menú desplegable */}
       <div className="fixed top-16 left-0 right-0 z-40 bg-white shadow-lg border-b border-gray-200">
