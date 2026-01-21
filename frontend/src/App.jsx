@@ -212,7 +212,7 @@ function AppContent() {
       case 'dashboard':
         return (
           <>
-            <FiltrosPeriodo periodo={periodo} fecha={fecha} onPeriodoChange={setPeriodo} onFechaChange={setFecha} />
+            <FiltrosPeriodo periodo={periodo} fecha={fecha} setPeriodo={setPeriodo} setFecha={setFecha} />
             <Dashboard transacciones={transacciones} cuentas={cuentas} prestamos={prestamos} presupuestos={presupuestos} />
           </>
         );
@@ -220,7 +220,7 @@ function AppContent() {
       case 'transacciones':
   return (
     <>
-      <FiltrosPeriodo periodo={periodo} fecha={fecha} onPeriodoChange={setPeriodo} onFechaChange={setFecha} />
+      <FiltrosPeriodo periodo={periodo} fecha={fecha} setPeriodo={setPeriodo} setFecha={setFecha} />
       <button 
         onClick={() => {
           console.log('🔴 BOTÓN CLICKEADO');
@@ -293,7 +293,7 @@ function AppContent() {
 
       case 'notificaciones':
         return <SeccionNotificaciones />;
-        
+
       case 'asistente-ia':
       return <AsistenteFinanciero />;
 
