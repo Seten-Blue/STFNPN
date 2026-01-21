@@ -351,11 +351,11 @@ Responde a la pregunta del usuario basándote ÚNICAMENTE en los datos proporcio
           <div className="flex items-center gap-3">
             <img 
               src="/Feliz.png" 
-              alt="Asistente IA"
+              alt="Marcelo"
               className="w-14 h-14 object-contain"
             />
             <div>
-              <h1 className="text-lg font-semibold text-gray-900">Asistente IA</h1>
+              <h1 className="text-lg font-semibold text-gray-900">Marcelo</h1>
               <p className="text-xs text-gray-500">Análisis financiero inteligente</p>
             </div>
           </div>
