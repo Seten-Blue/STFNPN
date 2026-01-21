@@ -195,14 +195,14 @@ const ModalNuevo = ({ visible, onCerrar, cuentas, onGuardar, cuentaActiva }) => 
                     key={cat.nombre}
                     type="button"
                     onClick={() => setFormData(prev => ({ ...prev, categoria: cat.nombre, colorIcono: cat.color }))}
-                    className={`p-3 rounded-xl border-2 transition flex flex-col items-center ${
+                    className={`p-3 rounded-xl border-2 transition flex flex-col items-center font-medium ${
                       formData.categoria === cat.nombre
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                        ? 'border-indigo-500 bg-indigo-50 text-indigo-900 shadow-md'
+                        : 'border-gray-200 hover:border-indigo-300 text-gray-600'
                     }`}
                   >
                     <span className="text-2xl">{cat.icono}</span>
-                    <span className="text-xs mt-1 text-gray-600">{cat.nombre}</span>
+                    <span className="text-xs mt-1">{cat.nombre}</span>
                   </button>
                 ))}
               </div>
