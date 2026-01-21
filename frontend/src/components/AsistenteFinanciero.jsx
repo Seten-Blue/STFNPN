@@ -326,7 +326,8 @@ Responde a la pregunta del usuario basándote ÚNICAMENTE en los datos proporcio
     if (datosFinancieros) {
       setMensajes([{
         role: 'assistant',
-        content: `Chat reiniciado. ¿En qué más puedo ayudarte con tus finanzas? 💰`
+        content: `Chat reiniciado. ¿En qué más puedo ayudarte con tus finanzas? 💰`,
+        sentimiento: 'relajado'
       }]);
     }
   };
@@ -348,9 +349,11 @@ Responde a la pregunta del usuario basándote ÚNICAMENTE en los datos proporcio
       <div className="border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
-              <span className="text-lg">✨</span>
-            </div>
+            <img 
+              src="/Feliz.png" 
+              alt="Asistente IA"
+              className="w-14 h-14 object-contain"
+            />
             <div>
               <h1 className="text-lg font-semibold text-gray-900">Asistente IA</h1>
               <p className="text-xs text-gray-500">Análisis financiero inteligente</p>
