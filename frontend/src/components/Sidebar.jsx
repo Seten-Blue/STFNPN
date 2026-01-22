@@ -12,6 +12,7 @@ const menuItems = [
   { id: 'anotaciones', nombre: 'Anotaciones', icono: '📝' },
   { id: 'notificaciones', nombre: 'Notificaciones', icono: '🔔' },
   { id: 'configuracion', nombre: 'Configuración', icono: '⚙️' },
+  { id: 'asistente-ia', nombre: 'Asistente IA', icono: '🤖' },
 ];
 
 const Sidebar = ({ seccionActiva, onCambiarSeccion, visible, onCerrar }) => {
@@ -66,7 +67,7 @@ const Sidebar = ({ seccionActiva, onCambiarSeccion, visible, onCerrar }) => {
       </aside>
 
       {/* Sidebar - Versión Desktop */}
-      <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:bg-white lg:shadow-lg lg:h-screen lg:fixed lg:left-0 lg:top-0 lg:pt-16 lg:z-40">
+      <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:bg-white lg:shadow-lg lg:h-screen lg:fixed lg:left-0 lg:top-0 lg:z-40">
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto scrollbar-hide flex flex-col">
           <div className="space-y-1">
             {menuItems.map((item) => (

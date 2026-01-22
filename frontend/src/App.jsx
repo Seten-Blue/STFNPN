@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { NotificacionesProvider } from './context/NotificacionesContext';
 import Header from './components/Header';
-import Sidebar from './components/Sidebar';
+import MenuModulos from './components/MenuModulos';
 import Dashboard from './components/Dashboard';
 import ListaTransacciones from './components/ListaTransacciones';
 import FiltrosPeriodo from './components/FiltrosPeriodo';
@@ -24,11 +24,12 @@ import ModalAhorroCompartido from './components/ModalAhorroCompartido';
 import Login from './pages/Login';
 import { transaccionesAPI, cuentasAPI, prestamosAPI, presupuestosAPI } from './services/api';
 import './App.css';
+import AsistenteFinanciero from './components/AsistenteFinanciero';
 
 function AppContent() {
   const { usuario, token, loading: authLoading, cargarUsuarios, usuarios: usuariosDelContexto } = useAuth();
   const [seccionActiva, setSeccionActiva] = useState('dashboard');
-  const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [menuModulosVisible, setMenuModulosVisible] = useState(false);
   const [modalNuevoVisible, setModalNuevoVisible] = useState(false);
   const [modalGastoCompartidoVisible, setModalGastoCompartidoVisible] = useState(false);
   const [modalIngresoCompartidoVisible, setModalIngresoCompartidoVisible] = useState(false);
@@ -211,24 +212,31 @@ function AppContent() {
       case 'dashboard':
         return (
           <>
-            <FiltrosPeriodo periodo={periodo} fecha={fecha} onPeriodoChange={setPeriodo} onFechaChange={setFecha} />
+            <FiltrosPeriodo periodo={periodo} fecha={fecha} setPeriodo={setPeriodo} setFecha={setFecha} />
             <Dashboard transacciones={transacciones} cuentas={cuentas} prestamos={prestamos} presupuestos={presupuestos} />
           </>
         );
 
       case 'transacciones':
-        return (
-          <>
-            <FiltrosPeriodo periodo={periodo} fecha={fecha} onPeriodoChange={setPeriodo} onFechaChange={setFecha} />
-            <button 
-              onClick={() => setModalNuevoVisible(true)}
-              className="mb-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
-            >
-              + Nueva Transacción
-            </button>
-            <ListaTransacciones transacciones={transacciones} onEliminar={handleEliminarTransaccion} />
-          </>
-        );
+  return (
+    <>
+      <FiltrosPeriodo periodo={periodo} fecha={fecha} setPeriodo={setPeriodo} setFecha={setFecha} />
+      <button 
+        onClick={() => {
+          console.log('🔴 BOTÓN CLICKEADO');
+          console.log('modalNuevoVisible antes:', modalNuevoVisible);
+          console.log('Cuentas:', cuentas);
+          console.log('CuentaActiva:', cuentaActiva);
+          setModalNuevoVisible(true);
+          console.log('setModalNuevoVisible(true) ejecutado');
+        }}
+        className="mb-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+      >
+        + Nueva Transacción
+      </button>
+      <ListaTransacciones transacciones={transacciones} onEliminar={handleEliminarTransaccion} />
+    </>
+  );
 
       case 'cuentas':
         return (
@@ -239,6 +247,7 @@ function AppContent() {
             onEliminar={handleEliminarCuenta}
           />
         );
+        
 
       case 'prestamos':
         return (
@@ -285,6 +294,9 @@ function AppContent() {
       case 'notificaciones':
         return <SeccionNotificaciones />;
 
+      case 'asistente-ia':
+      return <AsistenteFinanciero />;
+
       default:
         return null;
     }
@@ -307,23 +319,27 @@ function AppContent() {
 
   return (
     <div className="flex h-screen bg-[#f3f4f6]">
-      <Sidebar 
-        seccionActiva={seccionActiva}
-        onCambiarSeccion={setSeccionActiva}
-        visible={sidebarVisible}
-        onCerrar={() => setSidebarVisible(false)}
-      />
-      
-      <div className="flex-1 flex flex-col overflow-hidden lg:ml-64">
+      <div className="flex-1 flex flex-col overflow-hidden">
         <Header 
-          onMenuClick={() => setSidebarVisible(!sidebarVisible)}
+          onMenuClick={() => setMenuModulosVisible(!menuModulosVisible)}
+          onNuevoClick={() => setModalNuevoVisible(true)}
           onNotificacionesClick={handleNotificacionesClick}
           onGastoClick={() => setModalNuevoVisible(true)}
           onGastoCompartidoClick={() => setModalGastoCompartidoVisible(true)}
           onIngresoCompartidoClick={() => setModalIngresoCompartidoVisible(true)}
           onMetaRequiridaClick={() => setModalMetaRequiridaVisible(true)}
           onAhorroCompartidoClick={() => setModalAhorroCompartidoVisible(true)}
+          menuModulosVisible={menuModulosVisible}
           usuario={usuario}
+        />
+
+        <MenuModulos 
+          visible={menuModulosVisible}
+          onCambiarSeccion={(seccion) => {
+            setSeccionActiva(seccion);
+            setMenuModulosVisible(false);
+          }}
+          onCerrar={() => setMenuModulosVisible(false)}
         />
 
         <main className="flex-1 overflow-y-auto p-6">

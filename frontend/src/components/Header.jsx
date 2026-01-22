@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNotificaciones } from '../context/NotificacionesContext';
 import { useNavigate } from 'react-router-dom';
 
-const Header = ({ onMenuClick, onNuevoClick, onGastoCompartidoClick, onIngresoCompartidoClick, onMetaRequeridaClick, onAhorroCompartidoClick, onNotificacionesClick }) => {
+const Header = ({ onMenuClick, onNuevoClick, onGastoCompartidoClick, onIngresoCompartidoClick, onMetaRequeridaClick, onAhorroCompartidoClick, onNotificacionesClick, menuModulosVisible }) => {
   const { usuario, cerrarSesion } = useAuth();
   const { conteoNoLeidas } = useNotificaciones();
   const [mostrarDropdown, setMostrarDropdown] = useState(false);
@@ -19,10 +19,6 @@ const Header = ({ onMenuClick, onNuevoClick, onGastoCompartidoClick, onIngresoCo
       <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">💰</span>
-              <h1 className="text-xl font-bold text-gray-800">Gestor financiero</h1>
-            </div>
           </div>
         </div>
       </header>
@@ -31,26 +27,25 @@ const Header = ({ onMenuClick, onNuevoClick, onGastoCompartidoClick, onIngresoCo
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onMenuClick}
-            className="p-2 hover:bg-gray-100 rounded-lg transition lg:hidden"
-          >
-            <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">💰</span>
-            <h1 className="text-xl font-bold text-gray-800">Gestor financiero</h1>
-          </div>
+      <div className="px-4 py-3 flex items-center gap-3">
+        <button
+          onClick={onMenuClick}
+          className="p-2 hover:bg-gray-100 rounded-lg transition"
+          title="Ver módulos"
+        >
+          <svg className={`w-6 h-6 transition-transform ${menuModulosVisible ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
+        </button>
+        <div className="flex items-center gap-2">
+          <img src="/logo.png" alt="Logo" className="h-12 w-12" />
+          <span className="hidden sm:inline text-sm font-bold text-gray-800">Gestor Financiero</span>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1 ml-auto">
           <button
             onClick={onNuevoClick}
-            className="flex items-center gap-2 bg-slate-700 text-white px-4 py-2 rounded-lg hover:bg-slate-800 transition font-medium"
+            className="flex items-center gap-1 bg-slate-700 text-white px-3 py-1 rounded-lg hover:bg-slate-800 transition font-medium text-sm"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -61,7 +56,7 @@ const Header = ({ onMenuClick, onNuevoClick, onGastoCompartidoClick, onIngresoCo
           {/* Botón de notificaciones */}
           <button
             onClick={onNotificacionesClick}
-            className="relative p-2 hover:bg-gray-100 rounded-lg transition"
+            className="relative p-1 hover:bg-gray-100 rounded-lg transition"
             title="Notificaciones"
           >
             <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -75,7 +70,7 @@ const Header = ({ onMenuClick, onNuevoClick, onGastoCompartidoClick, onIngresoCo
           </button>
 
           {/* Botones de modales compartidos */}
-          <div className="hidden md:flex gap-2">
+          <div className="hidden md:flex gap-1">
             <button
               onClick={onGastoCompartidoClick}
               className="px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition font-medium text-sm"
